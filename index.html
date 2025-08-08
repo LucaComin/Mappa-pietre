@@ -110,6 +110,23 @@
                         <span class="btn-icon">←</span>
                         <span class="btn-text">Precedente</span>
                     </button>
+                    
+                    <!-- Controlli Video -->
+                    <div class="video-controls">
+                        <button id="play-pause-btn" class="video-btn play-btn" aria-label="Riproduci automaticamente" title="Play/Pause">
+                            ▶️
+                        </button>
+                        <button id="stop-btn" class="video-btn stop-btn" aria-label="Ferma riproduzione" title="Stop">
+                            ⏹️
+                        </button>
+                        <select id="speed-select" class="speed-select" aria-label="Velocità di riproduzione">
+                            <option value="0.5">0.5x</option>
+                            <option value="1" selected>1x</option>
+                            <option value="1.5">1.5x</option>
+                            <option value="2">2x</option>
+                        </select>
+                    </div>
+                    
                     <button id="next-button" class="nav-btn next-btn" aria-label="Immagine successiva">
                         <span class="btn-text">Successiva</span>
                         <span class="btn-icon">→</span>
