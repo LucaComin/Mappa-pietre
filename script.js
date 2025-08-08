@@ -8,7 +8,7 @@ let currentImageMarkers = L.markerClusterGroup(); // Gruppo di marcatori per le 
 
 // Configurazione del Google Sheet
 // *** SOSTITUISCI QUESTI VALORI CON I TUOI ***
-const GOOGLE_SHEET_ID = 'YOUR_GOOGLE_SHEET_ID'; // L'ID del tuo foglio di calcolo
+const GOOGLE_SHEET_ID = '1N9I1LpY7hSuyPY85CkH4EitsPcU1Oll-KjJBbFFwHn0'; // L'ID del tuo foglio di calcolo
 const GOOGLE_SHEET_GID = '0'; // Il GID del foglio specifico (solitamente 0 per il primo foglio)
 
 const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&gid=${GOOGLE_SHEET_GID}`;
