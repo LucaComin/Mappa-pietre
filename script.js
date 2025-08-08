@@ -8,16 +8,91 @@ let currentImageMarkers = L.markerClusterGroup(); // Gruppo di marcatori per le 
 
 // Configurazione del Google Sheet
 // *** SOSTITUISCI QUESTI VALORI CON I TUOI ***
-const GOOGLE_SHEET_ID = '1N9I1LpY7hSuyPY85CkH4EitsPcU1Oll-KjJBbFFwHn0'; // L'ID del tuo foglio di calcolo
+const GOOGLE_SHEET_ID = '1N9I1LpY7hSuyPY85CkH4EitsPcU1Oll-KjJBbFFwHn0 '; // L'ID del tuo foglio di calcolo
 const GOOGLE_SHEET_GID = '0'; // Il GID del foglio specifico (solitamente 0 per il primo foglio)
 
 const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&gid=${GOOGLE_SHEET_GID}`;
 
-// Colori predefiniti per le pietre
+// Colori predefiniti per le pietre con palette moderna
 const STONE_COLORS = [
-    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-    '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+    '#2563eb', '#dc2626', '#059669', '#d97706', '#7c3aed',
+    '#db2777', '#0891b2', '#65a30d', '#c2410c', '#4338ca'
 ];
+
+// Inizializzazione dell'applicazione
+document.addEventListener('DOMContentLoaded', function() {
+    showLoadingOverlay();
+    initMap();
+    loadData();
+    setupEventListeners();
+    
+    // Nascondi loading overlay dopo l'inizializzazione
+    setTimeout(() => {
+        hideLoadingOverlay();
+    }, 1500);
+});
+
+// Funzioni per il loading overlay
+function showLoadingOverlay() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        overlay.classList.remove('hidden');
+    }
+}
+
+function hideLoadingOverlay() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+    }
+}
+
+// Setup degli event listeners
+function setupEventListeners() {
+    // Event listener per il pannello storia
+    const closeHistoryBtn = document.getElementById('close-history');
+    if (closeHistoryBtn) {
+        closeHistoryBtn.addEventListener('click', closeHistoryPanel);
+    }
+    
+    // Event listener per il fullscreen
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const closeFullscreenBtn = document.getElementById('close-fullscreen');
+    const fullscreenModal = document.getElementById('fullscreen-modal');
+    
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', openFullscreen);
+    }
+    
+    if (closeFullscreenBtn) {
+        closeFullscreenBtn.addEventListener('click', closeFullscreen);
+    }
+    
+    if (fullscreenModal) {
+        fullscreenModal.addEventListener('click', function(e) {
+            if (e.target === fullscreenModal) {
+                closeFullscreen();
+            }
+        });
+    }
+    
+    // Event listener per i controlli
+    const imageDisplaySelect = document.getElementById('image-display-select');
+    if (imageDisplaySelect) {
+        imageDisplaySelect.addEventListener('change', function() {
+            const selectedStone = document.getElementById('stone-select').value;
+            displayStonesOnMap(selectedStone);
+        });
+    }
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeHistoryPanel();
+            closeFullscreen();
+        }
+    });
+}
 
 // Funzione per inizializzare la mappa
 function initMap() {
@@ -147,6 +222,22 @@ function loadSampleData() {
                 dateObj: new Date('2024-02-20T11:20:00Z'),
                 imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=300&fit=crop'
             }
+        ],
+        'Pietra_Verde': [
+            {
+                lat: 40.8518,
+                lon: 14.2681,
+                timestamp: '2024-01-25T08:00:00Z',
+                dateObj: new Date('2024-01-25T08:00:00Z'),
+                imageUrl: 'https://images.unsplash.com/photo-1544552866-d3ed42536cfd?w=300&h=300&fit=crop'
+            },
+            {
+                lat: 40.8618,
+                lon: 14.2781,
+                timestamp: '2024-02-25T12:15:00Z',
+                dateObj: new Date('2024-02-25T12:15:00Z'),
+                imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop'
+            }
         ]
     };
 
@@ -163,7 +254,7 @@ function populateStoneSelect() {
     for (const stoneName in allStonesData) {
         const option = document.createElement('option');
         option.value = stoneName;
-        option.textContent = stoneName;
+        option.textContent = stoneName.replace(/_/g, ' ');
         select.appendChild(option);
     }
 
@@ -192,14 +283,15 @@ function displayStonesOnMap(filterStoneName = 'all') {
                 const latlngs = positions.map(pos => [pos.lat, pos.lon]);
                 const polyline = L.polyline(latlngs, { 
                     color: stoneColor, 
-                    weight: 3,
-                    opacity: 0.7
+                    weight: 4,
+                    opacity: 0.8,
+                    dashArray: '10, 5'
                 }).addTo(currentPolylines);
                 
                 // Aggiungi l'ultima posizione come marcatore principale
                 const lastPosition = positions[positions.length - 1];
                 const marker = L.marker([lastPosition.lat, lastPosition.lon], {
-                    icon: createCustomIcon(stoneColor)
+                    icon: createCustomIcon(stoneColor, true)
                 }).addTo(currentMarkers);
                 
                 // Formatta la data per il popup
@@ -208,19 +300,30 @@ function displayStonesOnMap(filterStoneName = 'all') {
                     hour: '2-digit', minute: '2-digit'
                 });
 
-                // Contenuto del popup
-                let popupContent = `<div style="text-align: center;">`;
-                popupContent += `<h3 style="margin: 0 0 10px 0; color: ${stoneColor};">${stoneName}</h3>`;
-                popupContent += `<p style="margin: 5px 0;"><strong>Ultima posizione:</strong><br>${formattedDate}</p>`;
+                // Contenuto del popup migliorato
+                let popupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
+                popupContent += `<h3 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${stoneName.replace(/_/g, ' ')}</h3>`;
+                popupContent += `<p style="margin: 5px 0; color: #64748b;"><strong>Ultima posizione:</strong><br>${formattedDate}</p>`;
                 
                 if (lastPosition.imageUrl) {
-                    popupContent += `<img src="${lastPosition.imageUrl}" style="max-width:200px; max-height:150px; border-radius: 5px; margin: 10px 0;">`;
+                    popupContent += `<img src="${lastPosition.imageUrl}" style="max-width:200px; max-height:150px; border-radius: 8px; margin: 10px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">`;
                 }
                 
-                popupContent += `<br><button onclick="showStoneHistory('${stoneName}')" style="background: ${stoneColor}; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 10px;">Vedi la storia</button>`;
+                popupContent += `<br><button onclick="showStoneHistory('${stoneName}')" style="
+                    background: linear-gradient(135deg, ${stoneColor} 0%, ${adjustColor(stoneColor, -20)} 100%); 
+                    color: white; 
+                    border: none; 
+                    padding: 10px 20px; 
+                    border-radius: 8px; 
+                    cursor: pointer; 
+                    margin-top: 10px;
+                    font-weight: 500;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">📖 Vedi la storia</button>`;
                 popupContent += `</div>`;
 
-                marker.bindPopup(popupContent, { maxWidth: 250 });
+                marker.bindPopup(popupContent, { maxWidth: 280, className: 'custom-popup' });
 
                 // Aggiungi le coordinate ai bounds per il fit della mappa
                 bounds.push([lastPosition.lat, lastPosition.lon]);
@@ -261,17 +364,18 @@ function addSingleImageMarker(position, stoneName, stoneColor, index) {
     const imageIcon = L.divIcon({
         className: 'custom-image-marker',
         html: `<div style="
-            width: 50px; 
-            height: 50px; 
+            width: 60px; 
+            height: 60px; 
             border-radius: 50%; 
-            border: 3px solid ${stoneColor}; 
+            border: 4px solid ${stoneColor}; 
             background-image: url('${position.imageUrl}'); 
             background-size: cover; 
             background-position: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        "></div>`,
-        iconSize: [50, 50],
-        iconAnchor: [25, 25]
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        " onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></div>`,
+        iconSize: [60, 60],
+        iconAnchor: [30, 30]
     });
 
     const imageMarker = L.marker([position.lat, position.lon], { icon: imageIcon });
@@ -282,37 +386,57 @@ function addSingleImageMarker(position, stoneName, stoneColor, index) {
     });
 
     imageMarker.bindPopup(`
-        <div style="text-align: center;">
-            <h4 style="margin: 0 0 10px 0; color: ${stoneColor};">${stoneName}</h4>
-            <img src="${position.imageUrl}" style="max-width: 200px; max-height: 150px; border-radius: 5px;">
-            <p style="margin: 10px 0 5px 0; font-size: 0.9em;">${formattedDate}</p>
+        <div style="text-align: center; font-family: 'Inter', sans-serif;">
+            <h4 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${stoneName.replace(/_/g, ' ')}</h4>
+            <img src="${position.imageUrl}" style="max-width: 200px; max-height: 150px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <p style="margin: 10px 0 5px 0; font-size: 0.9em; color: #64748b;">${formattedDate}</p>
         </div>
-    `, { maxWidth: 250 });
+    `, { maxWidth: 250, className: 'custom-popup' });
 
     currentImageMarkers.addLayer(imageMarker);
 }
 
 // Funzione per creare icone personalizzate
-function createCustomIcon(color) {
+function createCustomIcon(color, isMain = false) {
+    const size = isMain ? 30 : 20;
+    const borderWidth = isMain ? 4 : 3;
+    
     return L.divIcon({
         className: 'custom-marker',
         html: `<div style="
-            width: 20px; 
-            height: 20px; 
+            width: ${size}px; 
+            height: ${size}px; 
             border-radius: 50%; 
-            background-color: ${color}; 
-            border: 3px solid white; 
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        "></div>`,
-        iconSize: [20, 20],
-        iconAnchor: [10, 10]
+            background: linear-gradient(135deg, ${color} 0%, ${adjustColor(color, -20)} 100%); 
+            border: ${borderWidth}px solid white; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: relative;
+        ">
+            ${isMain ? '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 12px; font-weight: bold;">📍</div>' : ''}
+        </div>`,
+        iconSize: [size, size],
+        iconAnchor: [size/2, size/2]
     });
+}
+
+// Funzione helper per regolare il colore
+function adjustColor(color, amount) {
+    const usePound = color[0] === '#';
+    const col = usePound ? color.slice(1) : color;
+    const num = parseInt(col, 16);
+    let r = (num >> 16) + amount;
+    let g = (num >> 8 & 0x00FF) + amount;
+    let b = (num & 0x0000FF) + amount;
+    r = r > 255 ? 255 : r < 0 ? 0 : r;
+    g = g > 255 ? 255 : g < 0 ? 0 : g;
+    b = b > 255 ? 255 : b < 0 ? 0 : b;
+    return (usePound ? '#' : '') + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
 }
 
 // Funzione per mostrare il pannello della storia
 function showStoneHistory(stoneName) {
     document.getElementById('history-panel').classList.remove('hidden');
-    document.getElementById('history-title').textContent = `Storia di ${stoneName}`;
+    document.getElementById('history-title').textContent = `Storia di ${stoneName.replace(/_/g, ' ')}`;
 
     // Inizializza la mini-mappa se non è già stata inizializzata
     if (!miniMap) {
@@ -335,6 +459,11 @@ function showStoneHistory(stoneName) {
     } else {
         populateHistoryPanel(stoneName);
     }
+}
+
+// Funzione per chiudere il pannello storia
+function closeHistoryPanel() {
+    document.getElementById('history-panel').classList.add('hidden');
 }
 
 // Variabili per il pannello storia
@@ -389,6 +518,18 @@ function updateHistoryPanel() {
         hour: '2-digit', minute: '2-digit'
     });
     document.getElementById('history-image-caption').textContent = formattedDate;
+    
+    // Aggiorna il contatore immagini
+    const imageCounter = document.getElementById('image-counter');
+    if (imageCounter) {
+        imageCounter.textContent = `${currentHistoryIndex + 1} di ${currentStoneHistory.length}`;
+    }
+    
+    // Aggiorna la data corrente nella timeline
+    const timelineCurrent = document.getElementById('timeline-current-date');
+    if (timelineCurrent) {
+        timelineCurrent.textContent = formattedDate;
+    }
 
     // Aggiorna lo stato dei pulsanti
     document.getElementById('prev-button').disabled = currentHistoryIndex === 0;
@@ -415,18 +556,23 @@ function updateMiniMap() {
 
     // Disegna la polilinea del percorso
     const latlngs = currentStoneHistory.map(pos => [pos.lat, pos.lon]);
-    miniMapPolyline = L.polyline(latlngs, { color: '#007cba', weight: 3 }).addTo(miniMap);
+    miniMapPolyline = L.polyline(latlngs, { 
+        color: '#2563eb', 
+        weight: 3,
+        opacity: 0.8,
+        dashArray: '5, 5'
+    }).addTo(miniMap);
 
     // Aggiungi tutti i marcatori
     currentStoneHistory.forEach((pos, index) => {
         const isActive = index === currentHistoryIndex;
         const marker = L.circleMarker([pos.lat, pos.lon], {
-            radius: isActive ? 8 : 5,
-            fillColor: isActive ? '#ff4444' : '#007cba',
+            radius: isActive ? 10 : 6,
+            fillColor: isActive ? '#f59e0b' : '#2563eb',
             color: '#ffffff',
             weight: 2,
             opacity: 1,
-            fillOpacity: 0.8
+            fillOpacity: 0.9
         });
         
         marker.addTo(miniMapMarkers);
@@ -448,40 +594,30 @@ function updateMiniMap() {
 
 // Funzione per popolare la timeline
 function populateTimeline() {
-    const timelineDiv = document.getElementById('timeline');
-    timelineDiv.innerHTML = '';
+    const timeline = document.getElementById('timeline');
+    timeline.innerHTML = ''; // Pulisci la timeline esistente
 
     currentStoneHistory.forEach((pos, index) => {
         const point = document.createElement('div');
-        point.classList.add('timeline-point');
+        point.className = 'timeline-point';
+        point.style.left = `${(index / (currentStoneHistory.length - 1)) * 100}%`;
         
-        // Posiziona i punti in modo proporzionale
-        const leftPercent = currentStoneHistory.length === 1 ? 50 : (index / (currentStoneHistory.length - 1)) * 100;
-        point.style.left = `${leftPercent}%`;
-        
-        // Tooltip con la data
-        const formattedDate = pos.dateObj.toLocaleDateString('it-IT', {
-            year: 'numeric', month: 'short', day: 'numeric'
-        });
-        point.title = formattedDate;
-        point.dataset.index = index;
-        
-        // Click handler
-        point.onclick = () => {
+        point.addEventListener('click', () => {
             currentHistoryIndex = index;
             updateHistoryPanel();
-        };
+        });
         
-        timelineDiv.appendChild(point);
+        timeline.appendChild(point);
     });
     
     updateTimelineActivePoint();
 }
 
-// Funzione per aggiornare il punto attivo nella timeline
+// Funzione per aggiornare il punto attivo della timeline
 function updateTimelineActivePoint() {
-    document.querySelectorAll('.timeline-point').forEach((point, index) => {
-        if (parseInt(point.dataset.index) === currentHistoryIndex) {
+    const points = document.querySelectorAll('.timeline-point');
+    points.forEach((point, index) => {
+        if (index === currentHistoryIndex) {
             point.classList.add('active');
         } else {
             point.classList.remove('active');
@@ -489,30 +625,37 @@ function updateTimelineActivePoint() {
     });
 }
 
-// Event listeners
-document.addEventListener('DOMContentLoaded', () => {
-    initMap();
-    loadData();
+// Funzioni per il fullscreen
+function openFullscreen() {
+    const historyImage = document.getElementById('history-image');
+    const fullscreenImage = document.getElementById('fullscreen-image');
+    const fullscreenModal = document.getElementById('fullscreen-modal');
     
-    // Event listener per il pulsante di chiusura del pannello storia
-    document.getElementById('close-history').addEventListener('click', () => {
-        document.getElementById('history-panel').classList.add('hidden');
-    });
+    if (historyImage.src && fullscreenImage && fullscreenModal) {
+        fullscreenImage.src = historyImage.src;
+        fullscreenModal.classList.remove('hidden');
+    }
+}
 
-    // Event listener per il cambio della modalità di visualizzazione immagini
-    document.getElementById('image-display-select').addEventListener('change', () => {
-        const selectedStone = document.getElementById('stone-select').value;
-        displayStonesOnMap(selectedStone);
-    });
+function closeFullscreen() {
+    const fullscreenModal = document.getElementById('fullscreen-modal');
+    if (fullscreenModal) {
+        fullscreenModal.classList.add('hidden');
+    }
+}
 
-    // Event listener per chiudere il pannello storia con ESC
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
-            document.getElementById('history-panel').classList.add('hidden');
-        }
-    });
-});
-
-// Funzione globale per essere chiamata dai popup
-window.showStoneHistory = showStoneHistory;
-
+// CSS personalizzato per i popup
+const style = document.createElement('style');
+style.textContent = `
+    .custom-popup .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        border: none;
+    }
+    .custom-popup .leaflet-popup-tip {
+        background: white;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+`;
+document.head.appendChild(style);
