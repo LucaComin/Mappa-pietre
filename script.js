@@ -476,6 +476,13 @@ let miniMapPolyline;
 function populateHistoryPanel(stoneName) {
     currentStoneHistory = allStonesData[stoneName];
     currentHistoryIndex = 0; // Inizia sempre dalla prima posizione (la più vecchia)
+    
+    // Inizializza le variabili di riproduzione se non esistono
+    if (typeof isPlaying === 'undefined') {
+        isPlaying = false;
+        playbackTimer = null;
+        playbackSpeed = 1;
+    }
 
     updateHistoryPanel();
     populateTimeline();
@@ -659,3 +666,65 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Funzioni per la riproduzione automatica
+function startPlayback() {
+    if (currentStoneHistory.length <= 1) return;
+    
+    isPlaying = true;
+    updatePlayPauseButton();
+    
+    const interval = 2000 / playbackSpeed; // 2 secondi base diviso per la velocità
+    
+    playbackTimer = setInterval(() => {
+        if (currentHistoryIndex < currentStoneHistory.length - 1) {
+            currentHistoryIndex++;
+            updateHistoryPanel();
+        } else {
+            // Fine della riproduzione, torna all'inizio
+            currentHistoryIndex = 0;
+            updateHistoryPanel();
+        }
+    }, interval);
+}
+
+function pausePlayback() {
+    isPlaying = false;
+    updatePlayPauseButton();
+    
+    if (playbackTimer) {
+        clearInterval(playbackTimer);
+        playbackTimer = null;
+    }
+}
+
+function stopPlayback() {
+    pausePlayback();
+    currentHistoryIndex = 0;
+    updateHistoryPanel();
+}
+
+function updatePlayPauseButton() {
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    if (playPauseBtn) {
+        if (isPlaying) {
+            playPauseBtn.innerHTML = '⏸️';
+            playPauseBtn.setAttribute('aria-label', 'Pausa riproduzione automatica');
+            playPauseBtn.setAttribute('title', 'Pause');
+            playPauseBtn.classList.add('playing');
+        } else {
+            playPauseBtn.innerHTML = '▶️';
+            playPauseBtn.setAttribute('aria-label', 'Riproduci automaticamente');
+            playPauseBtn.setAttribute('title', 'Play');
+            playPauseBtn.classList.remove('playing');
+        }
+    }
+}
+
+// Modifica la funzione closeHistoryPanel per fermare la riproduzione
+function closeHistoryPanel() {
+    if (typeof pausePlayback === 'function') {
+        pausePlayback(); // Ferma la riproduzione quando si chiude il pannello
+    }
+    document.getElementById('history-panel').classList.add('hidden');
+}
