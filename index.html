@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mappa Interattiva delle Pietre</title>
+
+    <!-- Leaflet core -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+    <!-- MarkerCluster plugin -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <!-- Intestazione e controlli -->
+        <header>
+            <h1>Mappa delle Pietre</h1>
+            <div class="controls">
+                <label for="stone-select">Seleziona una pietra:</label>
+                <select id="stone-select">
+                    <option value="all">Mostra tutte</option>
+                </select>
+                <label for="image-display-select">Mostra immagini:</label>
+                <select id="image-display-select">
+                    <option value="last">Ultima</option>
+                    <option value="none">Nessuna</option>
+                    <option value="all">Tutte</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- Contenitore principale per la mappa -->
+        <main id="map"></main>
+    </div>
+
+    <!-- Pannello della Storia (inizialmente nascosto) -->
+    <div id="history-panel" class="hidden">
+        <button id="close-history" class="close-button">&times;</button>
+        <h2 id="history-title">Storia di...</h2>
+        
+        <div class="history-content">
+            <!-- Galleria Immagini -->
+            <div class="image-gallery">
+                <img id="history-image" src="" alt="Immagine della pietra"/>
+                <p id="history-image-caption">Data e ora</p>
+                <div class="navigation-buttons">
+                    <button id="prev-button">Indietro</button>
+                    <button id="next-button">Avanti</button>
+                </div>
+            </div>
+
+            <!-- Mini Mappa -->
+            <div id="mini-map"></div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-container">
+            <div id="timeline"></div>
+        </div>
+    </div>
+
+
+    <!-- Leaflet core -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- MarkerCluster plugin -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+    <!-- App JS -->
+    <script src="script.js"></script>
+</body>
+</html>
+
