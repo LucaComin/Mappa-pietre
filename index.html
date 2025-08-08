@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mappa Interattiva delle Pietre</title>
+    <meta name="description" content="Esplora la storia e i movimenti delle pietre attraverso una mappa interattiva moderna e coinvolgente">
+    
+    <!-- Preconnect per performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com">
 
     <!-- Leaflet core -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -15,58 +21,138 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
 </head>
 <body>
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Caricamento mappa...</p>
+        </div>
+    </div>
 
     <div class="container">
-        <!-- Intestazione e controlli -->
+        <!-- Intestazione e controlli migliorati -->
         <header>
-            <h1>Mappa delle Pietre</h1>
+            <div class="header-content">
+                <h1>
+                    <span class="header-icon">🗺️</span>
+                    Mappa delle Pietre
+                </h1>
+                <p class="header-subtitle">Esplora la storia attraverso il tempo</p>
+            </div>
+            
             <div class="controls">
-                <label for="stone-select">Seleziona una pietra:</label>
-                <select id="stone-select">
-                    <option value="all">Mostra tutte</option>
-                </select>
-                <label for="image-display-select">Mostra immagini:</label>
-                <select id="image-display-select">
-                    <option value="last">Ultima</option>
-                    <option value="none">Nessuna</option>
-                    <option value="all">Tutte</option>
-                </select>
+                <div class="control-group">
+                    <label for="stone-select">
+                        <span class="control-icon">🪨</span>
+                        Seleziona una pietra:
+                    </label>
+                    <div class="custom-select">
+                        <select id="stone-select" aria-label="Seleziona una pietra da visualizzare">
+                            <option value="all">Mostra tutte</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="image-display-select">
+                        <span class="control-icon">📸</span>
+                        Mostra immagini:
+                    </label>
+                    <div class="custom-select">
+                        <select id="image-display-select" aria-label="Seleziona modalità visualizzazione immagini">
+                            <option value="last">Ultima</option>
+                            <option value="none">Nessuna</option>
+                            <option value="all">Tutte</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </header>
 
         <!-- Contenitore principale per la mappa -->
-        <main id="map"></main>
+        <main id="map" role="main" aria-label="Mappa interattiva delle pietre"></main>
     </div>
 
-    <!-- Pannello della Storia (inizialmente nascosto) -->
-    <div id="history-panel" class="hidden">
-        <button id="close-history" class="close-button">&times;</button>
+    <!-- Pannello della Storia migliorato -->
+    <div id="history-panel" class="hidden" role="dialog" aria-labelledby="history-title" aria-modal="true">
+        <button id="close-history" class="close-button" aria-label="Chiudi pannello storia" title="Chiudi">
+            ✕
+        </button>
+        
         <h2 id="history-title">Storia di...</h2>
         
         <div class="history-content">
-            <!-- Galleria Immagini -->
+            <!-- Galleria Immagini migliorata -->
             <div class="image-gallery">
-                <img id="history-image" src="" alt="Immagine della pietra"/>
-                <p id="history-image-caption">Data e ora</p>
+                <div class="image-container">
+                    <img id="history-image" src="" alt="Immagine della pietra" loading="lazy"/>
+                    <div class="image-overlay">
+                        <button id="fullscreen-btn" class="overlay-btn" aria-label="Visualizza a schermo intero" title="Schermo intero">
+                            🔍
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="image-info">
+                    <p id="history-image-caption" class="image-caption">Data e ora</p>
+                    <div class="image-meta">
+                        <span id="image-counter" class="image-counter">1 di 3</span>
+                    </div>
+                </div>
+                
                 <div class="navigation-buttons">
-                    <button id="prev-button">Indietro</button>
-                    <button id="next-button">Avanti</button>
+                    <button id="prev-button" class="nav-btn prev-btn" aria-label="Immagine precedente">
+                        <span class="btn-icon">←</span>
+                        <span class="btn-text">Precedente</span>
+                    </button>
+                    <button id="next-button" class="nav-btn next-btn" aria-label="Immagine successiva">
+                        <span class="btn-text">Successiva</span>
+                        <span class="btn-icon">→</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Mini Mappa -->
-            <div id="mini-map"></div>
+            <!-- Mini Mappa migliorata -->
+            <div class="mini-map-container">
+                <h3 class="mini-map-title">Percorso storico</h3>
+                <div id="mini-map" aria-label="Mini mappa del percorso"></div>
+                <div class="map-legend">
+                    <div class="legend-item">
+                        <span class="legend-dot current"></span>
+                        <span>Posizione attuale</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot path"></span>
+                        <span>Percorso storico</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Timeline -->
+        <!-- Timeline migliorata -->
         <div class="timeline-container">
-            <div id="timeline"></div>
+            <h3 class="timeline-title">Timeline degli spostamenti</h3>
+            <div id="timeline" role="slider" aria-label="Timeline degli spostamenti della pietra"></div>
+            <div class="timeline-info">
+                <span class="timeline-start">Inizio</span>
+                <span class="timeline-current" id="timeline-current-date">Data attuale</span>
+                <span class="timeline-end">Fine</span>
+            </div>
         </div>
     </div>
 
+    <!-- Fullscreen image modal -->
+    <div id="fullscreen-modal" class="fullscreen-modal hidden" role="dialog" aria-labelledby="fullscreen-image" aria-modal="true">
+        <button id="close-fullscreen" class="close-fullscreen" aria-label="Chiudi visualizzazione a schermo intero">✕</button>
+        <img id="fullscreen-image" src="" alt="Immagine a schermo intero" loading="lazy"/>
+    </div>
 
+    <!-- Scripts -->
     <!-- Leaflet core -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -75,6 +161,16 @@
 
     <!-- App JS -->
     <script src="script.js"></script>
+    
+    <!-- Service Worker per PWA (opzionale) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {
+                    // Service worker non disponibile, continua normalmente
+                });
+            });
+        }
+    </script>
 </body>
-</html>
-
+</html> 
