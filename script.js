@@ -510,10 +510,29 @@ function setupNavigationButtons() {
 function updateHistoryPanel() {
     const currentPos = currentStoneHistory[currentHistoryIndex];
     
-    // Aggiorna l'immagine
+    // Aggiorna l'immagine con transizione di sfumatura
     const historyImage = document.getElementById('history-image');
     if (currentPos.imageUrl) {
-        historyImage.src = currentPos.imageUrl;
+        // Se l'immagine è già visibile, applica la transizione
+        if (historyImage.src && historyImage.src !== currentPos.imageUrl) {
+            // Fade out
+            historyImage.classList.add('fade-out');
+            
+            // Dopo la transizione di fade out, cambia l'immagine e fade in
+            setTimeout(() => {
+                historyImage.src = currentPos.imageUrl;
+                historyImage.classList.remove('fade-out');
+                historyImage.classList.add('fade-in');
+                
+                // Rimuovi la classe fade-in dopo la transizione
+                setTimeout(() => {
+                    historyImage.classList.remove('fade-in');
+                }, 500);
+            }, 250); // Metà della durata della transizione CSS (0.5s)
+        } else {
+            // Prima immagine o stessa immagine
+            historyImage.src = currentPos.imageUrl;
+        }
         historyImage.style.display = 'block';
     } else {
         historyImage.style.display = 'none';
