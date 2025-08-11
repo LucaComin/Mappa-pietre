@@ -40,7 +40,11 @@ const translations = {
         'search': 'Cerca:',
         'search-placeholder': 'Cerca una pietra...',
         'no-results': 'Nessun risultato trovato',
-        'clear-search': 'Cancella ricerca'
+        'clear-search': 'Cancella ricerca',
+        // Nomi delle pietre
+        'Pietra_Rossa': 'Pietra Rossa',
+        'Pietra_Blu': 'Pietra Blu',
+        'Pietra_Verde': 'Pietra Verde'
     },
     en: {
         'title': 'Stones Map',
@@ -68,7 +72,11 @@ const translations = {
         'search': 'Search:',
         'search-placeholder': 'Search for a stone...',
         'no-results': 'No results found',
-        'clear-search': 'Clear search'
+        'clear-search': 'Clear search',
+        // Nomi delle pietre
+        'Pietra_Rossa': 'Red Stone',
+        'Pietra_Blu': 'Blue Stone',
+        'Pietra_Verde': 'Green Stone'
     },
     es: {
         'title': 'Mapa de Piedras',
@@ -96,7 +104,11 @@ const translations = {
         'search': 'Buscar:',
         'search-placeholder': 'Buscar una piedra...',
         'no-results': 'No se encontraron resultados',
-        'clear-search': 'Limpiar búsqueda'
+        'clear-search': 'Limpiar búsqueda',
+        // Nomi delle pietre
+        'Pietra_Rossa': 'Piedra Roja',
+        'Pietra_Blu': 'Piedra Azul',
+        'Pietra_Verde': 'Piedra Verde'
     },
     fr: {
         'title': 'Carte des Pierres',
@@ -124,7 +136,11 @@ const translations = {
         'search': 'Rechercher:',
         'search-placeholder': 'Rechercher une pierre...',
         'no-results': 'Aucun résultat trouvé',
-        'clear-search': 'Effacer la recherche'
+        'clear-search': 'Effacer la recherche',
+        // Nomi delle pietre
+        'Pietra_Rossa': 'Pierre Rouge',
+        'Pietra_Blu': 'Pierre Bleue',
+        'Pietra_Verde': 'Pierre Verte'
     },
     de: {
         'title': 'Steinekarte',
@@ -152,13 +168,22 @@ const translations = {
         'search': 'Suchen:',
         'search-placeholder': 'Einen Stein suchen...',
         'no-results': 'Keine Ergebnisse gefunden',
-        'clear-search': 'Suche löschen'
+        'clear-search': 'Suche löschen',
+        // Nomi delle pietre
+        'Pietra_Rossa': 'Roter Stein',
+        'Pietra_Blu': 'Blauer Stein',
+        'Pietra_Verde': 'Grüner Stein'
     }
 };
 
 // Funzione per tradurre il testo
 function translate(key) {
     return translations[currentLanguage][key] || translations['it'][key] || key;
+}
+
+// Funzione per tradurre i nomi delle pietre
+function translateStoneName(stoneName) {
+    return translate(stoneName) || stoneName.replace(/_/g, ' ');
 }
 
 // Funzione per aggiornare tutti i testi tradotti
@@ -180,8 +205,35 @@ function updateLanguage() {
         loadingText.textContent = translate('loading-map');
     }
     
+    // Aggiorna il titolo della pagina
+    document.title = translate('title');
+    
     // Aggiorna il documento lang attribute
     document.documentElement.lang = currentLanguage;
+    
+    // Aggiorna i nomi delle pietre nel dropdown
+    updateStoneDropdown();
+}
+
+// Funzione per aggiornare il dropdown delle pietre con le traduzioni
+function updateStoneDropdown() {
+    const stoneSelect = document.getElementById('stone-select');
+    if (!stoneSelect || !allStonesData) return;
+    
+    const currentValue = stoneSelect.value;
+    
+    // Ricostruisci il dropdown con le traduzioni
+    stoneSelect.innerHTML = `<option value="all">${translate('show-all')}</option>`;
+    
+    for (const stoneName in allStonesData) {
+        const option = document.createElement('option');
+        option.value = stoneName;
+        option.textContent = translateStoneName(stoneName);
+        stoneSelect.appendChild(option);
+    }
+    
+    // Ripristina la selezione precedente
+    stoneSelect.value = currentValue;
 }
 
 // Funzione per rilevare la lingua del browser
@@ -217,8 +269,10 @@ function filterStonesBySearch(searchTerm) {
     const term = searchTerm.toLowerCase().trim();
     
     for (const stoneName in allStonesData) {
-        const displayName = stoneName.replace(/_/g, ' ').toLowerCase();
-        if (displayName.includes(term)) {
+        const translatedName = translateStoneName(stoneName).toLowerCase();
+        const originalName = stoneName.replace(/_/g, ' ').toLowerCase();
+        
+        if (translatedName.includes(term) || originalName.includes(term)) {
             filtered[stoneName] = allStonesData[stoneName];
         }
     }
@@ -238,11 +292,20 @@ function updateSearchResults() {
     stoneSelect.innerHTML = `<option value="all" data-i18n="show-all">${translate('show-all')}</option>`;
     
     // Aggiungi le pietre filtrate
-    for (const stoneName in filteredStones) {
+    const stoneNames = Object.keys(filteredStones);
+    if (stoneNames.length === 0 && searchTerm.trim()) {
         const option = document.createElement('option');
-        option.value = stoneName;
-        option.textContent = stoneName.replace(/_/g, ' ');
+        option.value = '';
+        option.textContent = translate('no-results');
+        option.disabled = true;
         stoneSelect.appendChild(option);
+    } else {
+        for (const stoneName of stoneNames) {
+            const option = document.createElement('option');
+            option.value = stoneName;
+            option.textContent = translateStoneName(stoneName);
+            stoneSelect.appendChild(option);
+        }
     }
     
     // Ripristina la selezione se ancora valida
@@ -296,7 +359,7 @@ function displayFilteredStonesOnMap(filterStoneName = 'all') {
 
                 // Contenuto del popup migliorato
                 let popupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
-                popupContent += `<h3 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${stoneName.replace(/_/g, ' ')}</h3>`;
+                popupContent += `<h3 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${translateStoneName(stoneName)}</h3>`;
                 popupContent += `<p style="margin: 5px 0; color: #64748b;"><strong>${translate('last-position')}</strong><br>${formattedDate}</p>`;
                 
                 if (lastPosition.imageUrl) {
@@ -652,7 +715,7 @@ function populateStoneSelect() {
     for (const stoneName in allStonesData) {
         const option = document.createElement('option');
         option.value = stoneName;
-        option.textContent = stoneName.replace(/_/g, ' ');
+        option.textContent = translateStoneName(stoneName);
         stoneSelect.appendChild(option);
     }
 
@@ -705,7 +768,7 @@ function displayStonesOnMap(filterStoneName = 'all') {
 
                 // Contenuto del popup migliorato
                 let popupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
-                popupContent += `<h3 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${stoneName.replace(/_/g, ' ')}</h3>`;
+                popupContent += `<h3 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${translateStoneName(stoneName)}</h3>`;
                 popupContent += `<p style="margin: 5px 0; color: #64748b;"><strong>${translate('last-position')}</strong><br>${formattedDate}</p>`;
                 
                 if (lastPosition.imageUrl) {
@@ -852,7 +915,7 @@ function adjustColor(color, amount) {
 // Funzione per mostrare il pannello della storia
 function showStoneHistory(stoneName) {
     document.getElementById('history-panel').classList.remove('hidden');
-    document.getElementById('history-title').textContent = `${translate('history-of')} ${stoneName.replace(/_/g, ' ')}`;
+    document.getElementById('history-title').textContent = `${translate('history-of')} ${translateStoneName(stoneName)}`;
 
     // Inizializza la mini-mappa se non è già stata inizializzata
     if (!miniMap) {

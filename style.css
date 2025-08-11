@@ -1049,18 +1049,31 @@ select:focus-visible {
     }
 }
 
-/* Stili per la barra di ricerca */
-.search-container {
+/* Stili per il contenitore del selettore pietre */
+.stone-selector-group {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.stone-selector-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.stone-selector-container .search-container {
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
-.search-container input {
+.stone-selector-container .search-container input {
     width: 100%;
-    padding: 12px 40px 12px 16px;
+    padding: 10px 36px 10px 12px;
     border: 2px solid var(--border-color);
-    border-radius: 12px;
+    border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
     background: var(--surface-color);
@@ -1069,17 +1082,17 @@ select:focus-visible {
     outline: none;
 }
 
-.search-container input:focus {
+.stone-selector-container .search-container input:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px var(--primary-color-alpha);
     transform: translateY(-1px);
 }
 
-.search-container input::placeholder {
+.stone-selector-container .search-container input::placeholder {
     color: var(--text-muted);
 }
 
-.clear-search-btn {
+.stone-selector-container .clear-search-btn {
     position: absolute;
     right: 8px;
     top: 50%;
@@ -1088,36 +1101,40 @@ select:focus-visible {
     color: white;
     border: none;
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    font-size: 12px;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
     cursor: pointer;
     display: none;
     transition: all 0.2s ease;
     z-index: 10;
 }
 
-.clear-search-btn:hover {
+.stone-selector-container .clear-search-btn:hover {
     background: var(--text-color);
     transform: translateY(-50%) scale(1.1);
 }
 
-.clear-search-btn:active {
+.stone-selector-container .clear-search-btn:active {
     transform: translateY(-50%) scale(0.95);
 }
 
-/* Responsive design per la ricerca */
+/* Responsive design per il selettore pietre */
 @media (max-width: 768px) {
-    .search-container input {
-        padding: 10px 36px 10px 14px;
+    .stone-selector-container .search-container input {
+        padding: 8px 32px 8px 10px;
         font-size: 16px; /* Previene lo zoom su iOS */
     }
     
-    .clear-search-btn {
-        width: 22px;
-        height: 22px;
-        font-size: 11px;
+    .stone-selector-container .clear-search-btn {
+        width: 18px;
+        height: 18px;
+        font-size: 9px;
         right: 6px;
+    }
+    
+    .stone-selector-group {
+        margin-bottom: 16px;
     }
 }
 
