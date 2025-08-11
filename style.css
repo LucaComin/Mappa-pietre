@@ -1049,27 +1049,21 @@ select:focus-visible {
     }
 }
 
-/* Stili per il contenitore del selettore pietre */
-.stone-selector-group {
-    flex-direction: column;
-    align-items: stretch;
-}
-
-.stone-selector-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+/* Stili per il selettore con ricerca integrata */
+.custom-select-with-search {
+    position: relative;
     width: 100%;
 }
 
-.stone-selector-container .search-container {
+.custom-select-with-search .search-container {
     position: relative;
     display: flex;
     align-items: center;
     width: 100%;
+    margin-bottom: 8px;
 }
 
-.stone-selector-container .search-container input {
+.custom-select-with-search .search-container input {
     width: 100%;
     padding: 10px 36px 10px 12px;
     border: 2px solid var(--border-color);
@@ -1082,17 +1076,17 @@ select:focus-visible {
     outline: none;
 }
 
-.stone-selector-container .search-container input:focus {
+.custom-select-with-search .search-container input:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px var(--primary-color-alpha);
     transform: translateY(-1px);
 }
 
-.stone-selector-container .search-container input::placeholder {
+.custom-select-with-search .search-container input::placeholder {
     color: var(--text-muted);
 }
 
-.stone-selector-container .clear-search-btn {
+.custom-select-with-search .clear-search-btn {
     position: absolute;
     right: 8px;
     top: 50%;
@@ -1110,31 +1104,62 @@ select:focus-visible {
     z-index: 10;
 }
 
-.stone-selector-container .clear-search-btn:hover {
+.custom-select-with-search .clear-search-btn:hover {
     background: var(--text-color);
     transform: translateY(-50%) scale(1.1);
 }
 
-.stone-selector-container .clear-search-btn:active {
+.custom-select-with-search .clear-search-btn:active {
     transform: translateY(-50%) scale(0.95);
 }
 
-/* Responsive design per il selettore pietre */
+.custom-select-with-search select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--surface-color);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+.custom-select-with-search select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+    transform: translateY(-1px);
+}
+
+.custom-select-with-search select:hover {
+    border-color: var(--primary-color);
+}
+
+/* Responsive design per il selettore con ricerca */
 @media (max-width: 768px) {
-    .stone-selector-container .search-container input {
+    .custom-select-with-search .search-container input {
         padding: 8px 32px 8px 10px;
         font-size: 16px; /* Previene lo zoom su iOS */
     }
     
-    .stone-selector-container .clear-search-btn {
+    .custom-select-with-search .clear-search-btn {
         width: 18px;
         height: 18px;
         font-size: 9px;
         right: 6px;
     }
     
-    .stone-selector-group {
-        margin-bottom: 16px;
+    .custom-select-with-search select {
+        padding: 10px 36px 10px 14px;
+        font-size: 16px; /* Previene lo zoom su iOS */
     }
 }
 

@@ -62,21 +62,19 @@
                     </div>
                 </div>
                 
-                <div class="control-group stone-selector-group">
+                <div class="control-group">
                     <label for="stone-select">
                         <span class="control-icon">🪨</span>
                         <span data-i18n="select-stone">Seleziona una pietra:</span>
                     </label>
-                    <div class="stone-selector-container">
+                    <div class="custom-select-with-search">
                         <div class="search-container">
                             <input type="text" id="search-input" placeholder="Cerca una pietra..." data-i18n-placeholder="search-placeholder" aria-label="Cerca pietre">
                             <button id="clear-search" class="clear-search-btn" aria-label="Cancella ricerca" title="Cancella">✕</button>
                         </div>
-                        <div class="custom-select">
-                            <select id="stone-select" aria-label="Seleziona una pietra da visualizzare">
-                                <option value="all" data-i18n="show-all">Mostra tutte</option>
-                            </select>
-                        </div>
+                        <select id="stone-select" aria-label="Seleziona una pietra da visualizzare">
+                            <option value="all" data-i18n="show-all">Mostra tutte</option>
+                        </select>
                     </div>
                 </div>
                 

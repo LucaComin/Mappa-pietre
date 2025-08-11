@@ -284,11 +284,11 @@ function filterStonesBySearch(searchTerm) {
 function updateSearchResults() {
     filteredStones = filterStonesBySearch(searchTerm);
     
-    // Aggiorna il dropdown delle pietre
+    // Aggiorna SOLO il dropdown delle pietre, non la mappa
     const stoneSelect = document.getElementById('stone-select');
     const currentSelection = stoneSelect.value;
     
-    // Salva le opzioni esistenti (tranne "Mostra tutte")
+    // Ricostruisci il dropdown con le pietre filtrate
     stoneSelect.innerHTML = `<option value="all" data-i18n="show-all">${translate('show-all')}</option>`;
     
     // Aggiungi le pietre filtrate
@@ -308,15 +308,14 @@ function updateSearchResults() {
         }
     }
     
-    // Ripristina la selezione se ancora valida
-    if (filteredStones[currentSelection] || currentSelection === 'all') {
+    // Ripristina la selezione se ancora valida, altrimenti seleziona "Mostra tutte"
+    if (currentSelection === 'all' || filteredStones[currentSelection]) {
         stoneSelect.value = currentSelection;
     } else {
         stoneSelect.value = 'all';
     }
     
-    // Aggiorna la mappa
-    displayFilteredStonesOnMap(stoneSelect.value);
+    // NON aggiornare la mappa qui - la mappa viene aggiornata solo dal cambio del selettore
 }
 
 // Funzione per visualizzare le pietre filtrate sulla mappa
@@ -327,7 +326,7 @@ function displayFilteredStonesOnMap(filterStoneName = 'all') {
 
     let bounds = [];
     let colorIndex = 0;
-    const stonesToShow = Object.keys(filteredStones).length > 0 ? filteredStones : allStonesData;
+    const stonesToShow = allStonesData; // Usa sempre tutti i dati, la ricerca influenza solo il dropdown
 
     for (const stoneName in stonesToShow) {
         if (filterStoneName === 'all' || filterStoneName === stoneName) {
@@ -724,8 +723,7 @@ function populateStoneSelect() {
         displayFilteredStonesOnMap(this.value);
     });
 
-    // Inizializza la visualizzazione
-    filteredStones = allStonesData;
+    // Inizializza la visualizzazione con tutti i dati
     displayFilteredStonesOnMap('all');
 }
 
