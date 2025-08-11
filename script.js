@@ -1,749 +1,1031 @@
-// Variabili globali
-let map; // La mappa principale
-let miniMap; // La mini-mappa nel pannello storia
-let allStonesData = {}; // Oggetto per memorizzare i dati delle pietre, raggruppati per nome
-let currentMarkers = L.featureGroup(); // Gruppo di marcatori attualmente sulla mappa
-let currentPolylines = L.featureGroup(); // Gruppo di polilinee attualmente sulla mappa
-let currentImageMarkers = L.markerClusterGroup(); // Gruppo di marcatori per le immagini con clustering
+/* Import Google Fonts per tipografia moderna */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-// Configurazione del Google Sheet
-// *** SOSTITUISCI QUESTI VALORI CON I TUOI ***
-const GOOGLE_SHEET_ID = '1N9I1LpY7hSuyPY85CkH4EitsPcU1Oll-KjJBbFFwHn0'; // L'ID del tuo foglio di calcolo
-const GOOGLE_SHEET_GID = '0'; // Il GID del foglio specifico (solitamente 0 per il primo foglio)
-
-const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&gid=${GOOGLE_SHEET_GID}`;
-
-// Colori predefiniti per le pietre con palette moderna
-const STONE_COLORS = [
-    '#2563eb', '#dc2626', '#059669', '#d97706', '#7c3aed',
-    '#db2777', '#0891b2', '#65a30d', '#c2410c', '#4338ca'
-];
-
-// Inizializzazione dell'applicazione
-document.addEventListener('DOMContentLoaded', function() {
-    showLoadingOverlay();
-    initMap();
-    loadData();
-    setupEventListeners();
+/* Variabili CSS per design system avanzato */
+:root {
+    /* Palette colori moderna e sofisticata */
+    --primary-color: #6366f1;
+    --primary-dark: #4f46e5;
+    --primary-light: #8b5cf6;
+    --secondary-color: #06b6d4;
+    --accent-color: #f59e0b;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --error-color: #ef4444;
     
-    // Nascondi loading overlay dopo l'inizializzazione
-    setTimeout(() => {
-        hideLoadingOverlay();
-    }, 1500);
-});
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --gradient-dark: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    
+    /* Colori neutri raffinati */
+    --white: #ffffff;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+    
+    /* Spacing system perfezionato */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+    --space-3xl: 4rem;
+    
+    /* Border radius moderni */
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+    --radius-2xl: 2rem;
+    
+    /* Shadows sofisticate */
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    --shadow-glow: 0 0 20px rgb(99 102 241 / 0.3);
+    
+    /* Transizioni fluide */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Blur effects */
+    --blur-sm: blur(4px);
+    --blur-md: blur(8px);
+    --blur-lg: blur(16px);
+    --blur-xl: blur(24px);
+}
 
-// Funzioni per il loading overlay
-function showLoadingOverlay() {
-    const overlay = document.getElementById('loading-overlay');
-    if (overlay) {
-        overlay.classList.remove('hidden');
+/* Reset e stili base premium */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--gray-800);
+    background: var(--gradient-primary);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    position: relative;
+}
+
+/* Animated background particles */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:white;stop-opacity:0.1" /><stop offset="100%" style="stop-color:white;stop-opacity:0" /></radialGradient></defs><circle cx="100" cy="100" r="2" fill="url(%23glow)"><animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite" begin="0s"/></circle><circle cx="300" cy="200" r="1.5" fill="url(%23glow)"><animate attributeName="opacity" values="0;1;0" dur="4s" repeatCount="indefinite" begin="1s"/></circle><circle cx="700" cy="150" r="2.5" fill="url(%23glow)"><animate attributeName="opacity" values="0;1;0" dur="5s" repeatCount="indefinite" begin="2s"/></circle><circle cx="500" cy="400" r="1" fill="url(%23glow)"><animate attributeName="opacity" values="0;1;0" dur="3.5s" repeatCount="indefinite" begin="0.5s"/></circle><circle cx="800" cy="600" r="2" fill="url(%23glow)"><animate attributeName="opacity" values="0;1;0" dur="4.5s" repeatCount="indefinite" begin="1.5s"/></circle></svg>');
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Loading overlay premium */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity var(--transition-slow);
+}
+
+.loading-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loading-content {
+    text-align: center;
+    color: var(--white);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.loading-content p {
+    margin-top: var(--space-lg);
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: var(--blur-lg);
+    border-radius: var(--radius-2xl);
+    margin: var(--space-md);
+    box-shadow: var(--shadow-2xl);
+    overflow: hidden;
+    animation: slideInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
-function hideLoadingOverlay() {
-    const overlay = document.getElementById('loading-overlay');
-    if (overlay) {
-        overlay.classList.add('hidden');
+/* Header premium con glassmorphism */
+header {
+    padding: var(--space-xl) var(--space-2xl);
+    background: var(--gradient-primary);
+    color: var(--white);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: var(--blur-md);
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+    pointer-events: none;
+}
+
+header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+}
+
+.header-content {
+    position: relative;
+    z-index: 1;
+}
+
+.header-icon {
+    font-size: 2rem;
+    margin-right: var(--space-md);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, var(--white) 0%, rgba(255, 255, 255, 0.8) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.header-subtitle {
+    margin-top: var(--space-sm);
+    font-size: 1rem;
+    opacity: 0.9;
+    font-weight: 400;
+    letter-spacing: 0.025em;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+    position: relative;
+    z-index: 1;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.controls label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    letter-spacing: 0.025em;
+}
+
+.control-icon {
+    font-size: 1.125rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Select premium con glassmorphism */
+.custom-select {
+    position: relative;
+    display: inline-block;
+}
+
+.custom-select::after {
+    content: '▼';
+    position: absolute;
+    right: var(--space-md);
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--gray-600);
+    font-size: 0.75rem;
+    transition: transform var(--transition-normal);
+}
+
+.custom-select:hover::after {
+    transform: translateY(-50%) scale(1.2);
+}
+
+#stone-select,
+#image-display-select {
+    appearance: none;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: var(--blur-md);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md) var(--space-xl) var(--space-md) var(--space-lg);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-800);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-md);
+    min-width: 160px;
+    font-family: inherit;
+}
+
+#stone-select:hover,
+#image-display-select:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+#stone-select:focus,
+#image-display-select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2), var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+/* Stile premium per la mappa principale */
+#map {
+    flex-grow: 1;
+    background: var(--gradient-accent);
+    position: relative;
+    border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Pannello storia premium con glassmorphism avanzato */
+#history-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-dark);
+    backdrop-filter: var(--blur-xl);
+    color: var(--white);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-2xl);
+    box-sizing: border-box;
+    transition: all var(--transition-slow);
+    animation: fadeInScale 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+        backdrop-filter: blur(0px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        backdrop-filter: var(--blur-xl);
     }
 }
 
-// Setup degli event listeners
-function setupEventListeners() {
-    // Event listener per il pannello storia
-    const closeHistoryBtn = document.getElementById('close-history');
-    if (closeHistoryBtn) {
-        closeHistoryBtn.addEventListener('click', closeHistoryPanel);
+#history-panel.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.9) translateY(20px);
+}
+
+.close-button {
+    position: absolute;
+    top: var(--space-xl);
+    right: var(--space-2xl);
+    font-size: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: var(--blur-md);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: var(--white);
+    cursor: pointer;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-lg);
+}
+
+.close-button:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: var(--shadow-xl), 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+#history-title {
+    text-align: center;
+    margin: var(--space-3xl) 0 var(--space-2xl) 0;
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--white) 0%, var(--gray-300) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.025em;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.history-content {
+    display: flex;
+    gap: var(--space-3xl);
+    flex-grow: 1;
+    min-height: 0;
+    margin-bottom: var(--space-2xl);
+}
+
+.image-gallery {
+    flex-basis: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: var(--blur-md);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-2xl);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-xl);
+}
+
+.image-container {
+    position: relative;
+    max-width: 100%;
+    max-height: 70%;
+}
+
+#history-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: var(--radius-xl);
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--shadow-2xl);
+    transition: opacity 0.5s ease-in-out, transform var(--transition-normal);
+    opacity: 1;
+}
+
+#history-image.fade-out {
+    opacity: 0;
+}
+
+#history-image.fade-in {
+    opacity: 1;
+}
+
+#history-image:hover {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-2xl), var(--shadow-glow);
+}
+
+.image-overlay {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.image-container:hover .image-overlay {
+    opacity: 1;
+}
+
+.overlay-btn {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: var(--blur-md);
+    border: none;
+    border-radius: 50%;
+    color: var(--white);
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-lg);
+}
+
+.overlay-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+    box-shadow: var(--shadow-xl);
+}
+
+.image-info {
+    margin-top: var(--space-xl);
+    text-align: center;
+    width: 100%;
+}
+
+.image-caption {
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--gray-300);
+    margin-bottom: var(--space-md);
+    font-weight: 500;
+}
+
+.image-meta {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-lg);
+}
+
+.image-counter {
+    font-size: 0.875rem;
+    color: var(--gray-400);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: var(--blur-sm);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 500;
+}
+
+.navigation-buttons {
+    margin-top: var(--space-xl);
+    display: flex;
+    gap: var(--space-md);
+    width: 100%;
+}
+
+.nav-btn {
+    flex: 1;
+    padding: var(--space-lg) var(--space-xl);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--gradient-primary);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    backdrop-filter: var(--blur-sm);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left var(--transition-slow);
+}
+
+.nav-btn:hover::before {
+    left: 100%;
+}
+
+.nav-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-xl), var(--shadow-glow);
+}
+
+.nav-btn:active {
+    transform: translateY(-1px);
+}
+
+.nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.nav-btn:disabled:hover {
+    transform: none;
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-icon {
+    font-size: 1.25rem;
+}
+
+.mini-map-container {
+    flex-basis: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+.mini-map-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: var(--space-lg);
+    color: var(--gray-200);
+    text-align: center;
+}
+
+#mini-map {
+    flex-grow: 1;
+    border-radius: var(--radius-2xl);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    box-shadow: var(--shadow-2xl);
+    margin-bottom: var(--space-lg);
+}
+
+.map-legend {
+    display: flex;
+    gap: var(--space-xl);
+    justify-content: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.875rem;
+    color: var(--gray-300);
+    font-weight: 500;
+}
+
+.legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--white);
+    box-shadow: var(--shadow-sm);
+}
+
+.legend-dot.current {
+    background: var(--accent-color);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+.legend-dot.path {
+    background: var(--primary-color);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+/* Timeline premium con glassmorphism */
+.timeline-container {
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: var(--blur-md);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-2xl);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-xl);
+}
+
+.timeline-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: var(--space-xl);
+    color: var(--gray-200);
+    text-align: center;
+}
+
+#timeline {
+    width: 100%;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.timeline-point {
+    width: 24px;
+    height: 24px;
+    background: var(--white);
+    border-radius: 50%;
+    cursor: pointer;
+    position: absolute;
+    transform: translateX(-50%);
+    border: 3px solid var(--primary-color);
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-lg);
+}
+
+.timeline-point:hover {
+    transform: translateX(-50%) scale(1.3);
+    box-shadow: var(--shadow-xl), 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+.timeline-point.active {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    transform: translateX(-50%) scale(1.5);
+    box-shadow: var(--shadow-xl), 0 0 20px rgba(245, 158, 11, 0.6);
+}
+
+.timeline-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+    color: var(--gray-400);
+    font-weight: 500;
+}
+
+.timeline-current {
+    font-weight: 700;
+    color: var(--accent-color);
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+/* Fullscreen modal premium */
+.fullscreen-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: var(--blur-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    transition: opacity var(--transition-normal);
+}
+
+.fullscreen-modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.close-fullscreen {
+    position: absolute;
+    top: var(--space-xl);
+    right: var(--space-xl);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: var(--blur-md);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: var(--white);
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-lg);
+}
+
+.close-fullscreen:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+    transform: scale(1.1);
+    box-shadow: var(--shadow-xl), 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+#fullscreen-image {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-2xl);
+}
+
+/* Popup personalizzati premium */
+.leaflet-popup-content-wrapper {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: var(--blur-md) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-xl) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.leaflet-popup-tip {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: var(--blur-md) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Marcatori immagine premium */
+.custom-image-marker {
+    animation: none;
+    border-radius: 50% !important;
+    overflow: hidden !important;
+    box-shadow: var(--shadow-xl) !important;
+    border: 3px solid rgba(255, 255, 255, 0.9) !important;
+    transition: all var(--transition-normal) !important;
+}
+
+.custom-image-marker:hover {
+    transform: scale(1.1) !important;
+    box-shadow: var(--shadow-2xl), 0 0 20px rgba(99, 102, 241, 0.3) !important;
+}
+
+/* Controlli video premium */
+.video-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+    padding: var(--space-lg);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: var(--blur-sm);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.video-btn {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: var(--blur-sm);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--white);
+    padding: var(--space-sm) var(--space-md);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-weight: 500;
+}
+
+.video-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.speed-select {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: var(--blur-sm);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--white);
+    padding: var(--space-sm) var(--space-md);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.speed-select:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.speed-select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+/* Responsive design premium */
+@media (max-width: 768px) {
+    .container {
+        margin: 0;
+        border-radius: 0;
     }
     
-    // Event listener per il fullscreen
-    const fullscreenBtn = document.getElementById('fullscreen-btn');
-    const closeFullscreenBtn = document.getElementById('close-fullscreen');
-    const fullscreenModal = document.getElementById('fullscreen-modal');
-    
-    if (fullscreenBtn) {
-        fullscreenBtn.addEventListener('click', openFullscreen);
+    header {
+        padding: var(--space-lg);
+        flex-direction: column;
+        gap: var(--space-lg);
+        text-align: center;
     }
     
-    if (closeFullscreenBtn) {
-        closeFullscreenBtn.addEventListener('click', closeFullscreen);
+    .header-content {
+        text-align: center;
     }
     
-    if (fullscreenModal) {
-        fullscreenModal.addEventListener('click', function(e) {
-            if (e.target === fullscreenModal) {
-                closeFullscreen();
-            }
-        });
+    header h1 {
+        font-size: 1.875rem;
+        justify-content: center;
     }
     
-    // Event listener per i controlli
-    const imageDisplaySelect = document.getElementById('image-display-select');
-    if (imageDisplaySelect) {
-        imageDisplaySelect.addEventListener('change', function() {
-            const selectedStone = document.getElementById('stone-select').value;
-            displayStonesOnMap(selectedStone);
-        });
+    .controls {
+        flex-direction: column;
+        gap: var(--space-lg);
+        width: 100%;
     }
     
-    // Keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeHistoryPanel();
-            closeFullscreen();
-        }
-    });
-}
-
-// Funzione per inizializzare la mappa
-function initMap() {
-    map = L.map('map').setView([41.9028, 12.4964], 6); // Centro iniziale (Roma) e zoom
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    // Aggiungi i gruppi di layer alla mappa
-    currentMarkers.addTo(map);
-    currentPolylines.addTo(map);
-    currentImageMarkers.addTo(map);
-}
-
-// Funzione per caricare e processare i dati dal Google Sheet
-async function loadData() {
-    try {
-        // Per test, usiamo dati di esempio se non è configurato il Google Sheet
-        if (GOOGLE_SHEET_ID === 'YOUR_GOOGLE_SHEET_ID') {
-            loadSampleData();
-            return;
-        }
-
-        const response = await fetch(GOOGLE_SHEET_URL);
-        const text = await response.text();
-        
-        // Google Sheets API restituisce un JSON con un wrapper, dobbiamo estrarlo
-        const jsonString = text.substring(text.indexOf('(') + 1, text.lastIndexOf(')'));
-        const jsonData = JSON.parse(jsonString);
-
-        const rows = jsonData.table.rows;
-        processSheetData(rows);
-
-    } catch (error) {
-        console.error('Errore nel caricamento dei dati:', error);
-        console.log('Caricamento dati di esempio per test...');
-        loadSampleData();
-    }
-}
-
-// Funzione per processare i dati dal Google Sheet
-function processSheetData(rows) {
-    allStonesData = {}; // Reset dei dati
-
-    rows.forEach(row => {
-        if (!row.c || row.c.length < 4) return; // Salta righe incomplete
-
-        const name = row.c[0] ? row.c[0].v : null;
-        const lat = row.c[1] ? parseFloat(row.c[1].v) : null;
-        const lon = row.c[2] ? parseFloat(row.c[2].v) : null;
-        const timestamp = row.c[3] ? row.c[3].v : null;
-        const imageUrl = row.c[4] ? row.c[4].v : null;
-
-        if (name && lat !== null && lon !== null && timestamp) {
-            let date;
-            
-            // Gestisci diversi formati di data
-            if (typeof timestamp === 'string') {
-                date = new Date(timestamp);
-            } else {
-                // Il timestamp da Google Sheets è un formato numerico che rappresenta giorni da 1899-12-30
-                date = new Date((timestamp - 25569) * 86400 * 1000);
-            }
-
-            if (!allStonesData[name]) {
-                allStonesData[name] = [];
-            }
-            
-            allStonesData[name].push({
-                lat: lat,
-                lon: lon,
-                timestamp: date.toISOString(),
-                dateObj: date,
-                imageUrl: imageUrl
-            });
-        }
-    });
-
-    // Ordina le posizioni di ogni pietra per timestamp (dal più vecchio al più recente)
-    for (const stoneName in allStonesData) {
-        allStonesData[stoneName].sort((a, b) => a.dateObj - b.dateObj);
-    }
-
-    populateStoneSelect();
-    displayStonesOnMap('all');
-}
-
-// Funzione per caricare dati di esempio per test
-function loadSampleData() {
-    const sampleData = {
-        'Pietra_Rossa': [
-            {
-                lat: 41.9028,
-                lon: 12.4964,
-                timestamp: '2024-01-15T10:00:00Z',
-                dateObj: new Date('2024-01-15T10:00:00Z'),
-                imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=300&fit=crop'
-            },
-            {
-                lat: 41.9128,
-                lon: 12.5064,
-                timestamp: '2024-02-15T14:30:00Z',
-                dateObj: new Date('2024-02-15T14:30:00Z'),
-                imageUrl: 'https://images.unsplash.com/photo-1544552866-d3ed42536cfd?w=300&h=300&fit=crop'
-            },
-            {
-                lat: 41.9228,
-                lon: 12.5164,
-                timestamp: '2024-03-15T16:45:00Z',
-                dateObj: new Date('2024-03-15T16:45:00Z'),
-                imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop'
-            }
-        ],
-        'Pietra_Blu': [
-            {
-                lat: 45.4642,
-                lon: 9.1900,
-                timestamp: '2024-01-20T09:15:00Z',
-                dateObj: new Date('2024-01-20T09:15:00Z'),
-                imageUrl: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=300&h=300&fit=crop'
-            },
-            {
-                lat: 45.4742,
-                lon: 9.2000,
-                timestamp: '2024-02-20T11:20:00Z',
-                dateObj: new Date('2024-02-20T11:20:00Z'),
-                imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=300&fit=crop'
-            }
-        ],
-        'Pietra_Verde': [
-            {
-                lat: 40.8518,
-                lon: 14.2681,
-                timestamp: '2024-01-25T08:00:00Z',
-                dateObj: new Date('2024-01-25T08:00:00Z'),
-                imageUrl: 'https://images.unsplash.com/photo-1544552866-d3ed42536cfd?w=300&h=300&fit=crop'
-            },
-            {
-                lat: 40.8618,
-                lon: 14.2781,
-                timestamp: '2024-02-25T12:15:00Z',
-                dateObj: new Date('2024-02-25T12:15:00Z'),
-                imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop'
-            }
-        ]
-    };
-
-    allStonesData = sampleData;
-    populateStoneSelect();
-    displayStonesOnMap('all');
-}
-
-// Funzione per popolare il menu a tendina delle pietre
-function populateStoneSelect() {
-    const select = document.getElementById('stone-select');
-    select.innerHTML = '<option value="all">Mostra tutte</option>';
-
-    for (const stoneName in allStonesData) {
-        const option = document.createElement('option');
-        option.value = stoneName;
-        option.textContent = stoneName.replace(/_/g, ' ');
-        select.appendChild(option);
-    }
-
-    select.addEventListener('change', (event) => {
-        displayStonesOnMap(event.target.value);
-    });
-}
-
-// Funzione principale per visualizzare le pietre sulla mappa
-function displayStonesOnMap(filterStoneName = 'all') {
-    currentMarkers.clearLayers();
-    currentPolylines.clearLayers();
-    currentImageMarkers.clearLayers();
-
-    let bounds = [];
-    let colorIndex = 0;
-
-    for (const stoneName in allStonesData) {
-        if (filterStoneName === 'all' || filterStoneName === stoneName) {
-            const positions = allStonesData[stoneName];
-            if (positions.length > 0) {
-                const stoneColor = STONE_COLORS[colorIndex % STONE_COLORS.length];
-                colorIndex++;
-
-                // Disegna la polilinea per il percorso storico
-                const latlngs = positions.map(pos => [pos.lat, pos.lon]);
-                const polyline = L.polyline(latlngs, { 
-                    color: stoneColor, 
-                    weight: 4,
-                    opacity: 0.8,
-                    dashArray: '10, 5'
-                }).addTo(currentPolylines);
-                
-                // Aggiungi l'ultima posizione come marcatore principale
-                const lastPosition = positions[positions.length - 1];
-                const marker = L.marker([lastPosition.lat, lastPosition.lon], {
-                    icon: createCustomIcon(stoneColor, true)
-                }).addTo(currentMarkers);
-                
-                // Formatta la data per il popup
-                const formattedDate = lastPosition.dateObj.toLocaleString('it-IT', {
-                    year: 'numeric', month: 'long', day: 'numeric',
-                    hour: '2-digit', minute: '2-digit'
-                });
-
-                // Contenuto del popup migliorato
-                let popupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
-                popupContent += `<h3 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${stoneName.replace(/_/g, ' ')}</h3>`;
-                popupContent += `<p style="margin: 5px 0; color: #64748b;"><strong>Ultima posizione:</strong><br>${formattedDate}</p>`;
-                
-                if (lastPosition.imageUrl) {
-                    popupContent += `<img src="${lastPosition.imageUrl}" style="max-width:200px; max-height:150px; border-radius: 8px; margin: 10px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">`;
-                }
-                
-                popupContent += `<br><button onclick="showStoneHistory('${stoneName}')" style="
-                    background: linear-gradient(135deg, ${stoneColor} 0%, ${adjustColor(stoneColor, -20)} 100%); 
-                    color: white; 
-                    border: none; 
-                    padding: 10px 20px; 
-                    border-radius: 8px; 
-                    cursor: pointer; 
-                    margin-top: 10px;
-                    font-weight: 500;
-                    transition: all 0.2s ease;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">📖 Vedi la storia</button>`;
-                popupContent += `</div>`;
-
-                marker.bindPopup(popupContent, { maxWidth: 280, className: 'custom-popup' });
-
-                // Aggiungi le coordinate ai bounds per il fit della mappa
-                bounds.push([lastPosition.lat, lastPosition.lon]);
-
-                // Gestione della visualizzazione delle immagini
-                addImageMarkers(positions, stoneName, stoneColor);
-            }
-        }
-    }
-
-    // Adatta la mappa per mostrare tutte le pietre filtrate
-    if (bounds.length > 0) {
-        map.fitBounds(bounds, { padding: [50, 50] });
-    }
-}
-
-// Funzione per aggiungere marcatori immagine
-function addImageMarkers(positions, stoneName, stoneColor) {
-    const imageDisplayMode = document.getElementById('image-display-select').value;
-    
-    if (imageDisplayMode === 'all') {
-        positions.forEach((pos, index) => {
-            if (pos.imageUrl) {
-                addSingleImageMarker(pos, stoneName, stoneColor, index);
-            }
-        });
-    } else if (imageDisplayMode === 'last') {
-        const lastPosition = positions[positions.length - 1];
-        if (lastPosition.imageUrl) {
-            addSingleImageMarker(lastPosition, stoneName, stoneColor, positions.length - 1);
-        }
-    }
-    // Se imageDisplayMode === 'none', non aggiungiamo marcatori immagine
-}
-
-// Funzione per aggiungere un singolo marcatore immagine
-function addSingleImageMarker(position, stoneName, stoneColor, index) {
-    const imageIcon = L.divIcon({
-        className: 'custom-image-marker',
-        html: `<div style="
-            width: 60px; 
-            height: 60px; 
-            border-radius: 50%; 
-            border: 4px solid ${stoneColor}; 
-            background-image: url('${position.imageUrl}'); 
-            background-size: cover; 
-            background-position: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-        " onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></div>`,
-        iconSize: [60, 60],
-        iconAnchor: [30, 30]
-    });
-
-    const imageMarker = L.marker([position.lat, position.lon], { icon: imageIcon });
-    
-    const formattedDate = position.dateObj.toLocaleString('it-IT', {
-        year: 'numeric', month: 'long', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-    });
-
-    imageMarker.bindPopup(`
-        <div style="text-align: center; font-family: 'Inter', sans-serif;">
-            <h4 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${stoneName.replace(/_/g, ' ')}</h4>
-            <img src="${position.imageUrl}" style="max-width: 200px; max-height: 150px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <p style="margin: 10px 0 5px 0; font-size: 0.9em; color: #64748b;">${formattedDate}</p>
-        </div>
-    `, { maxWidth: 250, className: 'custom-popup' });
-
-    currentImageMarkers.addLayer(imageMarker);
-}
-
-// Funzione per creare icone personalizzate
-function createCustomIcon(color, isMain = false) {
-    const size = isMain ? 30 : 20;
-    const borderWidth = isMain ? 4 : 3;
-    
-    return L.divIcon({
-        className: 'custom-marker',
-        html: `<div style="
-            width: ${size}px; 
-            height: ${size}px; 
-            border-radius: 50%; 
-            background: linear-gradient(135deg, ${color} 0%, ${adjustColor(color, -20)} 100%); 
-            border: ${borderWidth}px solid white; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            position: relative;
-        ">
-            ${isMain ? '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 12px; font-weight: bold;">📍</div>' : ''}
-        </div>`,
-        iconSize: [size, size],
-        iconAnchor: [size/2, size/2]
-    });
-}
-
-// Funzione helper per regolare il colore
-function adjustColor(color, amount) {
-    const usePound = color[0] === '#';
-    const col = usePound ? color.slice(1) : color;
-    const num = parseInt(col, 16);
-    let r = (num >> 16) + amount;
-    let g = (num >> 8 & 0x00FF) + amount;
-    let b = (num & 0x0000FF) + amount;
-    r = r > 255 ? 255 : r < 0 ? 0 : r;
-    g = g > 255 ? 255 : g < 0 ? 0 : g;
-    b = b > 255 ? 255 : b < 0 ? 0 : b;
-    return (usePound ? '#' : '') + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
-}
-
-// Funzione per mostrare il pannello della storia
-function showStoneHistory(stoneName) {
-    document.getElementById('history-panel').classList.remove('hidden');
-    document.getElementById('history-title').textContent = `Storia di ${stoneName.replace(/_/g, ' ')}`;
-
-    // Inizializza la mini-mappa se non è già stata inizializzata
-    if (!miniMap) {
-        setTimeout(() => {
-            miniMap = L.map('mini-map', { 
-                zoomControl: false, 
-                attributionControl: false, 
-                dragging: true, 
-                scrollWheelZoom: true, 
-                doubleClickZoom: true, 
-                boxZoom: false, 
-                keyboard: false,
-                tap: true,
-                touchZoom: true
-            }).setView([0, 0], 1);
-            
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {}).addTo(miniMap);
-            populateHistoryPanel(stoneName);
-        }, 100);
-    } else {
-        populateHistoryPanel(stoneName);
-    }
-}
-
-// Funzione per chiudere il pannello storia
-function closeHistoryPanel() {
-    document.getElementById('history-panel').classList.add('hidden');
-}
-
-// Variabili per il pannello storia
-let currentStoneHistory = [];
-let currentHistoryIndex = 0;
-let miniMapMarkers = L.featureGroup();
-let miniMapPolyline;
-
-// Funzione per popolare il pannello della storia
-function populateHistoryPanel(stoneName) {
-    currentStoneHistory = allStonesData[stoneName];
-    currentHistoryIndex = 0; // Inizia sempre dalla prima posizione (la più vecchia)
-    
-    // Inizializza le variabili di riproduzione se non esistono
-    if (typeof isPlaying === 'undefined') {
-        isPlaying = false;
-        playbackTimer = null;
-        playbackSpeed = 1;
-    }
-
-    updateHistoryPanel();
-    populateTimeline();
-    setupNavigationButtons();
-}
-
-// Funzione per configurare i pulsanti di navigazione
-function setupNavigationButtons() {
-    document.getElementById('prev-button').onclick = () => {
-        if (currentHistoryIndex > 0) {
-            currentHistoryIndex--;
-            updateHistoryPanel();
-        }
-    };
-    
-    document.getElementById('next-button').onclick = () => {
-        if (currentHistoryIndex < currentStoneHistory.length - 1) {
-            currentHistoryIndex++;
-            updateHistoryPanel();
-        }
-    };
-}
-
-// Funzione per aggiornare il contenuto del pannello della storia
-function updateHistoryPanel() {
-    const currentPos = currentStoneHistory[currentHistoryIndex];
-    
-    // Aggiorna l'immagine con transizione di sfumatura
-    const historyImage = document.getElementById('history-image');
-    if (currentPos.imageUrl) {
-        // Se l'immagine è già visibile, applica la transizione
-        if (historyImage.src && historyImage.src !== currentPos.imageUrl) {
-            // Fade out
-            historyImage.classList.add('fade-out');
-            
-            // Dopo la transizione di fade out, cambia l'immagine e fade in
-            setTimeout(() => {
-                historyImage.src = currentPos.imageUrl;
-                historyImage.classList.remove('fade-out');
-                historyImage.classList.add('fade-in');
-                
-                // Rimuovi la classe fade-in dopo la transizione
-                setTimeout(() => {
-                    historyImage.classList.remove('fade-in');
-                }, 500);
-            }, 250); // Metà della durata della transizione CSS (0.5s)
-        } else {
-            // Prima immagine o stessa immagine
-            historyImage.src = currentPos.imageUrl;
-        }
-        historyImage.style.display = 'block';
-    } else {
-        historyImage.style.display = 'none';
+    .control-group {
+        width: 100%;
     }
     
-    // Aggiorna la caption
-    const formattedDate = currentPos.dateObj.toLocaleString('it-IT', {
-        year: 'numeric', month: 'long', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-    });
-    document.getElementById('history-image-caption').textContent = formattedDate;
-    
-    // Aggiorna il contatore immagini
-    const imageCounter = document.getElementById('image-counter');
-    if (imageCounter) {
-        imageCounter.textContent = `${currentHistoryIndex + 1} di ${currentStoneHistory.length}`;
+    #stone-select,
+    #image-display-select {
+        width: 100%;
+        min-width: auto;
     }
     
-    // Aggiorna la data corrente nella timeline
-    const timelineCurrent = document.getElementById('timeline-current-date');
-    if (timelineCurrent) {
-        timelineCurrent.textContent = formattedDate;
+    #history-panel {
+        padding: var(--space-lg);
     }
-
-    // Aggiorna lo stato dei pulsanti
-    document.getElementById('prev-button').disabled = currentHistoryIndex === 0;
-    document.getElementById('next-button').disabled = currentHistoryIndex === currentStoneHistory.length - 1;
-
-    // Aggiorna la mini-mappa
-    if (miniMap) {
-        updateMiniMap();
-    }
-
-    // Aggiorna la timeline
-    updateTimelineActivePoint();
-}
-
-// Funzione per aggiornare la mini-mappa
-function updateMiniMap() {
-    if (!miniMap) return;
-
-    // Pulisci i layer esistenti
-    miniMapMarkers.clearLayers();
-    if (miniMapPolyline) {
-        miniMap.removeLayer(miniMapPolyline);
-    }
-
-    // Disegna la polilinea del percorso
-    const latlngs = currentStoneHistory.map(pos => [pos.lat, pos.lon]);
-    miniMapPolyline = L.polyline(latlngs, { 
-        color: '#2563eb', 
-        weight: 3,
-        opacity: 0.8,
-        dashArray: '5, 5'
-    }).addTo(miniMap);
-
-    // Aggiungi tutti i marcatori
-    currentStoneHistory.forEach((pos, index) => {
-        const isActive = index === currentHistoryIndex;
-        const marker = L.circleMarker([pos.lat, pos.lon], {
-            radius: isActive ? 10 : 6,
-            fillColor: isActive ? '#f59e0b' : '#2563eb',
-            color: '#ffffff',
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 0.9
-        });
-        
-        marker.addTo(miniMapMarkers);
-        
-        // Aggiungi click handler per navigare
-        marker.on('click', () => {
-            currentHistoryIndex = index;
-            updateHistoryPanel();
-        });
-    });
-
-    miniMapMarkers.addTo(miniMap);
-
-    // Adatta la vista per mostrare tutto il percorso
-    if (latlngs.length > 0) {
-        miniMap.fitBounds(miniMapPolyline.getBounds(), { padding: [10, 10] });
-    }
-}
-
-// Funzione per popolare la timeline
-function populateTimeline() {
-    const timeline = document.getElementById('timeline');
-    timeline.innerHTML = ''; // Pulisci la timeline esistente
-
-    currentStoneHistory.forEach((pos, index) => {
-        const point = document.createElement('div');
-        point.className = 'timeline-point';
-        point.style.left = `${(index / (currentStoneHistory.length - 1)) * 100}%`;
-        
-        point.addEventListener('click', () => {
-            currentHistoryIndex = index;
-            updateHistoryPanel();
-        });
-        
-        timeline.appendChild(point);
-    });
     
-    updateTimelineActivePoint();
-}
-
-// Funzione per aggiornare il punto attivo della timeline
-function updateTimelineActivePoint() {
-    const points = document.querySelectorAll('.timeline-point');
-    points.forEach((point, index) => {
-        if (index === currentHistoryIndex) {
-            point.classList.add('active');
-        } else {
-            point.classList.remove('active');
-        }
-    });
-}
-
-// Funzioni per il fullscreen
-function openFullscreen() {
-    const historyImage = document.getElementById('history-image');
-    const fullscreenImage = document.getElementById('fullscreen-image');
-    const fullscreenModal = document.getElementById('fullscreen-modal');
+    .history-content {
+        flex-direction: column;
+        gap: var(--space-xl);
+    }
     
-    if (historyImage.src && fullscreenImage && fullscreenModal) {
-        fullscreenImage.src = historyImage.src;
-        fullscreenModal.classList.remove('hidden');
+    #history-title {
+        margin-top: var(--space-2xl);
+        font-size: 2rem;
     }
-}
-
-function closeFullscreen() {
-    const fullscreenModal = document.getElementById('fullscreen-modal');
-    if (fullscreenModal) {
-        fullscreenModal.classList.add('hidden');
-    }
-}
-
-// CSS personalizzato per i popup
-const style = document.createElement('style');
-style.textContent = `
-    .custom-popup .leaflet-popup-content-wrapper {
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        border: none;
-    }
-    .custom-popup .leaflet-popup-tip {
-        background: white;
-        border: none;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-`;
-document.head.appendChild(style);
-
-// Funzioni per la riproduzione automatica
-function startPlayback() {
-    if (currentStoneHistory.length <= 1) return;
     
-    isPlaying = true;
-    updatePlayPauseButton();
+    .navigation-buttons {
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
     
-    const interval = 2000 / playbackSpeed; // 2 secondi base diviso per la velocità
+    .video-controls {
+        flex-wrap: wrap;
+        gap: var(--space-sm);
+    }
     
-    playbackTimer = setInterval(() => {
-        if (currentHistoryIndex < currentStoneHistory.length - 1) {
-            currentHistoryIndex++;
-            updateHistoryPanel();
-        } else {
-            // Fine della riproduzione, torna all'inizio
-            currentHistoryIndex = 0;
-            updateHistoryPanel();
-        }
-    }, interval);
-}
-
-function pausePlayback() {
-    isPlaying = false;
-    updatePlayPauseButton();
-    
-    if (playbackTimer) {
-        clearInterval(playbackTimer);
-        playbackTimer = null;
+    .close-button,
+    .close-fullscreen {
+        top: var(--space-lg);
+        right: var(--space-lg);
+        width: 48px;
+        height: 48px;
     }
 }
 
-function stopPlayback() {
-    pausePlayback();
-    currentHistoryIndex = 0;
-    updateHistoryPanel();
-}
-
-function updatePlayPauseButton() {
-    const playPauseBtn = document.getElementById('play-pause-btn');
-    if (playPauseBtn) {
-        if (isPlaying) {
-            playPauseBtn.innerHTML = '⏸️';
-            playPauseBtn.setAttribute('aria-label', 'Pausa riproduzione automatica');
-            playPauseBtn.setAttribute('title', 'Pause');
-            playPauseBtn.classList.add('playing');
-        } else {
-            playPauseBtn.innerHTML = '▶️';
-            playPauseBtn.setAttribute('aria-label', 'Riproduci automaticamente');
-            playPauseBtn.setAttribute('title', 'Play');
-            playPauseBtn.classList.remove('playing');
-        }
+@media (max-width: 480px) {
+    header {
+        padding: var(--space-md);
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .header-icon {
+        font-size: 1.5rem;
+    }
+    
+    #history-title {
+        font-size: 1.75rem;
+    }
+    
+    .timeline-container {
+        padding: var(--space-lg);
+    }
+    
+    #timeline {
+        height: 60px;
+        padding: var(--space-md);
+    }
+    
+    .timeline-point {
+        width: 20px;
+        height: 20px;
     }
 }
 
-// Modifica la funzione closeHistoryPanel per fermare la riproduzione
-function closeHistoryPanel() {
-    if (typeof pausePlayback === 'function') {
-        pausePlayback(); // Ferma la riproduzione quando si chiude il pannello
+/* Animazioni e micro-interazioni premium */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: var(--shadow-lg); }
+    50% { box-shadow: var(--shadow-xl), var(--shadow-glow); }
+}
+
+.floating {
+    animation: float 3s ease-in-out infinite;
+}
+
+.glowing {
+    animation: glow 2s ease-in-out infinite;
+}
+
+/* Miglioramenti per l'accessibilità */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
     }
-    document.getElementById('history-panel').classList.add('hidden');
+}
+
+/* Focus states migliorati */
+button:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* Scrollbar personalizzate */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
 }
