@@ -23,14 +23,14 @@
     <link rel="stylesheet" href="style.css">
     
     <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'.9em\' font-size=\'90\'>🗺️</text></svg>">
 </head>
 <body>
     <!-- Loading overlay -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="loading-content">
             <div class="loading-spinner"></div>
-            <p>Caricamento mappa...</p>
+            <p data-i18n="loading-map">Caricamento mappa...</p>
         </div>
     </div>
 
@@ -133,7 +133,7 @@
                 </div>
                 
                 <div class="navigation-buttons">
-                    <button id="play-pause-btn" class="nav-btn play-pause-btn" aria-label="Riproduci/Pausa automatica" onclick="toggleAutoPlay()">
+                    <button id="play-pause-btn" class="nav-btn play-pause-btn" aria-label="Riproduci/Pausa automatica">
                         <span class="btn-icon">▶️</span>
                         <span class="btn-text" data-i18n="play">Play</span>
                     </button>
@@ -195,9 +195,9 @@
     
     <!-- Service Worker per PWA (opzionale) -->
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(() => {
+        if (\'serviceWorker\' in navigator) {
+            window.addEventListener(\'load\', () => {
+                navigator.serviceWorker.register(\'/sw.js\').catch(() => {
                     // Service worker non disponibile, continua normalmente
                 });
             });
@@ -205,3 +205,4 @@
     </script>
 </body>
 </html>
+
