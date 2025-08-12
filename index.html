@@ -193,16 +193,6 @@
 
     <!-- App JS -->
     <script src="script.js"></script>
-    
-    <!-- Service Worker per PWA (opzionale) -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(() => {
-                    // Service worker non disponibile, continua normalmente
-                });
-            });
-        }
-    </script>
 </body>
 </html>
+
