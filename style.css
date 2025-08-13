@@ -1,4 +1,3 @@
-/* Import Google Fonts per tipografia moderna */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* Variabili CSS per design system coerente */
@@ -1250,4 +1249,3 @@ select:focus-visible {
         max-height: 150px;
     }
 }
-
