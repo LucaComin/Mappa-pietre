@@ -6,7 +6,542 @@ let currentMarkers = L.featureGroup(); // Gruppo di marcatori attualmente sulla 
 let currentPolylines = L.featureGroup(); // Gruppo di polilinee attualmente sulla mappa
 let currentImageMarkers = L.markerClusterGroup(); // Gruppo di marcatori per le immagini con clustering
 
-// Configurazione del Google Sheet
+// Variabili per la riproduzione automatica
+let autoPlayInterval = null;
+let isAutoPlaying = false;
+let autoPlaySpeed = 2000; // 2 secondi
+
+// Sistema di internazionalizzazione
+let currentLanguage = 'it';
+const translations = {
+    it: {
+        'title': 'Mappa delle Pietre',
+        'subtitle': 'Esplora la storia attraverso il tempo',
+        'language': 'Lingua:',
+        'select-stone': 'Seleziona una pietra:',
+        'show-images': 'Mostra immagini:',
+        'show-all': 'Mostra tutte',
+        'last': 'Ultima',
+        'none': 'Nessuna',
+        'all': 'Tutte',
+        'history-of': 'Storia di',
+        'play': 'Play',
+        'pause': 'Pausa',
+        'previous': 'Precedente',
+        'next': 'Successiva',
+        'historical-path': 'Percorso storico',
+        'current-position': 'Posizione attuale',
+        'movements-timeline': 'Timeline degli spostamenti',
+        'start': 'Inizio',
+        'end': 'Fine',
+        'see-history': 'Vedi la storia',
+        'last-position': 'Ultima posizione:',
+        'loading-map': 'Caricamento mappa...',
+        'search': 'Cerca:',
+        'search-placeholder': 'Cerca una pietra...',
+        'no-results': 'Nessun risultato trovato',
+        'clear-search': 'Cancella ricerca',
+        // Nomi delle pietre
+        'Pietra_Rossa': 'Pietra Rossa',
+        'Pietra_Blu': 'Pietra Blu',
+        'Pietra_Verde': 'Pietra Verde'
+    },
+    en: {
+        'title': 'Stones Map',
+        'subtitle': 'Explore history through time',
+        'language': 'Language:',
+        'select-stone': 'Select a stone:',
+        'show-images': 'Show images:',
+        'show-all': 'Show all',
+        'last': 'Last',
+        'none': 'None',
+        'all': 'All',
+        'history-of': 'History of',
+        'play': 'Play',
+        'pause': 'Pause',
+        'previous': 'Previous',
+        'next': 'Next',
+        'historical-path': 'Historical path',
+        'current-position': 'Current position',
+        'movements-timeline': 'Movements timeline',
+        'start': 'Start',
+        'end': 'End',
+        'see-history': 'See history',
+        'last-position': 'Last position:',
+        'loading-map': 'Loading map...',
+        'search': 'Search:',
+        'search-placeholder': 'Search for a stone...',
+        'no-results': 'No results found',
+        'clear-search': 'Clear search',
+        // Nomi delle pietre
+        'Pietra_Rossa': 'Red Stone',
+        'Pietra_Blu': 'Blue Stone',
+        'Pietra_Verde': 'Green Stone'
+    },
+    es: {
+        'title': 'Mapa de Piedras',
+        'subtitle': 'Explora la historia a través del tiempo',
+        'language': 'Idioma:',
+        'select-stone': 'Selecciona una piedra:',
+        'show-images': 'Mostrar imágenes:',
+        'show-all': 'Mostrar todas',
+        'last': 'Última',
+        'none': 'Ninguna',
+        'all': 'Todas',
+        'history-of': 'Historia de',
+        'play': 'Reproducir',
+        'pause': 'Pausa',
+        'previous': 'Anterior',
+        'next': 'Siguiente',
+        'historical-path': 'Ruta histórica',
+        'current-position': 'Posición actual',
+        'movements-timeline': 'Cronología de movimientos',
+        'start': 'Inicio',
+        'end': 'Fin',
+        'see-history': 'Ver historia',
+        'last-position': 'Última posición:',
+        'loading-map': 'Cargando mapa...',
+        'search': 'Buscar:',
+        'search-placeholder': 'Buscar una piedra...',
+        'no-results': 'No se encontraron resultados',
+        'clear-search': 'Limpiar búsqueda',
+        // Nomi delle pietre
+        'Pietra_Rossa': 'Piedra Roja',
+        'Pietra_Blu': 'Piedra Azul',
+        'Pietra_Verde': 'Piedra Verde'
+    },
+    fr: {
+        'title': 'Carte des Pierres',
+        'subtitle': 'Explorez l\'histoire à travers le temps',
+        'language': 'Langue:',
+        'select-stone': 'Sélectionnez une pierre:',
+        'show-images': 'Afficher les images:',
+        'show-all': 'Afficher toutes',
+        'last': 'Dernière',
+        'none': 'Aucune',
+        'all': 'Toutes',
+        'history-of': 'Histoire de',
+        'play': 'Lecture',
+        'pause': 'Pause',
+        'previous': 'Précédent',
+        'next': 'Suivant',
+        'historical-path': 'Chemin historique',
+        'current-position': 'Position actuelle',
+        'movements-timeline': 'Chronologie des mouvements',
+        'start': 'Début',
+        'end': 'Fin',
+        'see-history': 'Voir l\'histoire',
+        'last-position': 'Dernière position:',
+        'loading-map': 'Chargement de la carte...',
+        'search': 'Rechercher:',
+        'search-placeholder': 'Rechercher une pierre...',
+        'no-results': 'Aucun résultat trouvé',
+        'clear-search': 'Effacer la recherche',
+        // Nomi delle pietre
+        'Pietra_Rossa': 'Pierre Rouge',
+        'Pietra_Blu': 'Pierre Bleue',
+        'Pietra_Verde': 'Pierre Verte'
+    },
+    de: {
+        'title': 'Steinekarte',
+        'subtitle': 'Erkunden Sie die Geschichte durch die Zeit',
+        'language': 'Sprache:',
+        'select-stone': 'Wählen Sie einen Stein:',
+        'show-images': 'Bilder anzeigen:',
+        'show-all': 'Alle anzeigen',
+        'last': 'Letzte',
+        'none': 'Keine',
+        'all': 'Alle',
+        'history-of': 'Geschichte von',
+        'play': 'Abspielen',
+        'pause': 'Pause',
+        'previous': 'Vorherige',
+        'next': 'Nächste',
+        'historical-path': 'Historischer Pfad',
+        'current-position': 'Aktuelle Position',
+        'movements-timeline': 'Bewegungszeitleiste',
+        'start': 'Start',
+        'end': 'Ende',
+        'see-history': 'Geschichte ansehen',
+        'last-position': 'Letzte Position:',
+        'loading-map': 'Karte wird geladen...',
+        'search': 'Suchen:',
+        'search-placeholder': 'Einen Stein suchen...',
+        'no-results': 'Keine Ergebnisse gefunden',
+        'clear-search': 'Suche löschen',
+        // Nomi delle pietre
+        'Pietra_Rossa': 'Roter Stein',
+        'Pietra_Blu': 'Blauer Stein',
+        'Pietra_Verde': 'Grüner Stein'
+    }
+};
+
+// Funzione per tradurre il testo
+function translate(key) {
+    return translations[currentLanguage][key] || translations['it'][key] || key;
+}
+
+// Funzione per tradurre i nomi delle pietre
+function translateStoneName(stoneName) {
+    // Controlla se esistono le traduzioni per la lingua corrente
+    if (!translations[currentLanguage]) {
+        return stoneName.replace(/_/g, ' ');
+    }
+    
+    // Cerca prima nelle traduzioni dirette
+    if (translations[currentLanguage][stoneName]) {
+        return translations[currentLanguage][stoneName];
+    }
+    
+    // Fallback alle traduzioni italiane
+    if (translations['it'][stoneName]) {
+        return translations['it'][stoneName];
+    }
+    
+    // Fallback finale: formatta il nome
+    return stoneName.replace(/_/g, ' ');
+}
+
+// Funzione per aggiornare la lingua dell'interfaccia
+function updateLanguage(langCode) {
+    currentLanguage = langCode;
+    
+    // Salva la preferenza nel localStorage
+    localStorage.setItem('preferredLanguage', langCode);
+    
+    // Aggiorna tutti gli elementi con data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        element.textContent = translate(key);
+    });
+    
+    // Aggiorna i placeholder
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-i18n-placeholder');
+        element.placeholder = translate(key);
+    });
+    
+    // Aggiorna il dropdown personalizzato
+    updateDropdownLanguage();
+    
+    // Aggiorna il titolo della pagina
+    document.title = translate('title');
+    
+    // Aggiorna il documento lang attribute
+    document.documentElement.lang = currentLanguage;
+}
+
+// Funzione per rilevare la lingua del browser
+function detectBrowserLanguage() {
+    // Controlla se c'è una preferenza salvata
+    const savedLanguage = localStorage.getItem('preferredLanguage');
+    if (savedLanguage && translations[savedLanguage]) {
+        return savedLanguage;
+    }
+    
+    // Rileva la lingua del browser
+    const browserLang = navigator.language || navigator.userLanguage;
+    const langCode = browserLang.split('-')[0]; // es: 'en-US' -> 'en'
+    
+    // Verifica se la lingua è supportata
+    if (translations[langCode]) {
+        return langCode;
+    }
+    
+    return 'it'; // Fallback all'italiano
+}
+
+// Variabili globali per il dropdown personalizzato
+let currentDropdownValue = 'all';
+let dropdownSearchTerm = '';
+let isDropdownOpen = false;
+
+// Funzione per rilevare la lingua del browser
+function detectBrowserLanguage() {
+    // Prima controlla se c'è una preferenza salvata
+    const savedLang = localStorage.getItem('preferred-language');
+    if (savedLang && translations[savedLang]) {
+        return savedLang;
+    }
+    
+    const browserLang = navigator.language || navigator.userLanguage;
+    const langCode = browserLang.substring(0, 2);
+    
+    // Controlla se la lingua è supportata
+    if (translations[langCode]) {
+        return langCode;
+    }
+    
+    return 'it'; // Fallback all'italiano
+}
+
+// Funzione per inizializzare il dropdown personalizzato
+function initializeCustomDropdown() {
+    const dropdownTrigger = document.getElementById('dropdown-trigger');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+    const dropdownSearchInput = document.getElementById('dropdown-search-input');
+    const clearDropdownSearch = document.getElementById('clear-dropdown-search');
+    const dropdownOptions = document.getElementById('dropdown-options');
+
+    // Popola le opzioni del dropdown
+    populateDropdownOptions();
+
+    // Event listener per aprire/chiudere il dropdown
+    dropdownTrigger.addEventListener('click', toggleDropdown);
+    dropdownTrigger.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleDropdown();
+        }
+    });
+
+    // Event listener per la ricerca nel dropdown
+    dropdownSearchInput.addEventListener('input', (e) => {
+        dropdownSearchTerm = e.target.value.toLowerCase();
+        updateDropdownSearchVisibility();
+        filterDropdownOptions();
+    });
+
+    // Event listener per il bottone di cancellazione ricerca
+    clearDropdownSearch.addEventListener('click', () => {
+        dropdownSearchInput.value = '';
+        dropdownSearchTerm = '';
+        updateDropdownSearchVisibility();
+        filterDropdownOptions();
+        dropdownSearchInput.focus();
+    });
+
+    // Chiudi il dropdown quando si clicca fuori
+    document.addEventListener('click', (e) => {
+        if (!document.getElementById('stone-dropdown').contains(e.target)) {
+            closeDropdown();
+        }
+    });
+
+    // Event listener per le opzioni del dropdown
+    dropdownOptions.addEventListener('click', (e) => {
+        const option = e.target.closest('.dropdown-option');
+        if (option && !option.classList.contains('no-results')) {
+            selectDropdownOption(option.dataset.value);
+        }
+    });
+}
+
+// Funzione per aprire/chiudere il dropdown
+function toggleDropdown() {
+    if (isDropdownOpen) {
+        closeDropdown();
+    } else {
+        openDropdown();
+    }
+}
+
+// Funzione per aprire il dropdown
+function openDropdown() {
+    const dropdownTrigger = document.getElementById('dropdown-trigger');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+    const dropdownSearchInput = document.getElementById('dropdown-search-input');
+
+    isDropdownOpen = true;
+    dropdownTrigger.setAttribute('aria-expanded', 'true');
+    dropdownMenu.classList.add('open');
+    
+    // Focus sull'input di ricerca quando si apre il dropdown
+    setTimeout(() => {
+        dropdownSearchInput.focus();
+    }, 100);
+}
+
+// Funzione per chiudere il dropdown
+function closeDropdown() {
+    const dropdownTrigger = document.getElementById('dropdown-trigger');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+
+    isDropdownOpen = false;
+    dropdownTrigger.setAttribute('aria-expanded', 'false');
+    dropdownMenu.classList.remove('open');
+}
+
+// Funzione per selezionare un'opzione del dropdown
+function selectDropdownOption(value) {
+    const dropdownValue = document.getElementById('dropdown-value');
+    const dropdownOptions = document.querySelectorAll('.dropdown-option');
+
+    // Aggiorna la selezione visiva
+    dropdownOptions.forEach(option => {
+        option.setAttribute('aria-selected', option.dataset.value === value ? 'true' : 'false');
+    });
+
+    // Aggiorna il valore mostrato
+    const selectedOption = document.querySelector(`[data-value="${value}"]`);
+    if (selectedOption) {
+        dropdownValue.textContent = selectedOption.textContent.trim();
+    }
+
+    currentDropdownValue = value;
+    closeDropdown();
+
+    // Aggiorna la mappa
+    displayFilteredStonesOnMap(value);
+}
+
+// Funzione per popolare le opzioni del dropdown
+function populateDropdownOptions() {
+    const dropdownOptions = document.getElementById('dropdown-options');
+    
+    // Pulisci le opzioni esistenti
+    dropdownOptions.innerHTML = `
+        <div class="dropdown-option" data-value="all" role="option" aria-selected="true">
+            <span data-i18n="show-all">${translate('show-all')}</span>
+        </div>
+    `;
+
+    // Aggiungi le pietre
+    for (const stoneName in allStonesData) {
+        const option = document.createElement('div');
+        option.className = 'dropdown-option';
+        option.setAttribute('data-value', stoneName);
+        option.setAttribute('role', 'option');
+        option.setAttribute('aria-selected', 'false');
+        option.innerHTML = `<span>${translateStoneName(stoneName)}</span>`;
+        dropdownOptions.appendChild(option);
+    }
+}
+
+// Funzione per filtrare le opzioni del dropdown in base alla ricerca
+function filterDropdownOptions() {
+    const dropdownOptions = document.getElementById('dropdown-options');
+    const options = dropdownOptions.querySelectorAll('.dropdown-option:not(.no-results)');
+    let visibleCount = 0;
+
+    options.forEach(option => {
+        const text = option.textContent.toLowerCase();
+        const isVisible = text.includes(dropdownSearchTerm);
+        option.style.display = isVisible ? 'block' : 'none';
+        if (isVisible) visibleCount++;
+    });
+
+    // Gestisci il messaggio "Nessun risultato"
+    let noResultsOption = dropdownOptions.querySelector('.no-results');
+    if (visibleCount === 0 && dropdownSearchTerm.trim()) {
+        if (!noResultsOption) {
+            noResultsOption = document.createElement('div');
+            noResultsOption.className = 'dropdown-option no-results';
+            noResultsOption.textContent = translate('no-results');
+            dropdownOptions.appendChild(noResultsOption);
+        }
+        noResultsOption.style.display = 'block';
+    } else if (noResultsOption) {
+        noResultsOption.style.display = 'none';
+    }
+}
+
+// Funzione per aggiornare la visibilità del bottone di cancellazione ricerca
+function updateDropdownSearchVisibility() {
+    const clearButton = document.getElementById('clear-dropdown-search');
+    clearButton.style.display = dropdownSearchTerm ? 'block' : 'none';
+}
+
+// Funzione per aggiornare il dropdown quando cambia la lingua
+function updateDropdownLanguage() {
+    const dropdownValue = document.getElementById('dropdown-value');
+    const dropdownSearchInput = document.getElementById('dropdown-search-input');
+    
+    // Aggiorna il placeholder
+    dropdownSearchInput.placeholder = translate('search-placeholder');
+    
+    // Ripopola le opzioni con le traduzioni aggiornate
+    populateDropdownOptions();
+    
+    // Aggiorna il valore mostrato
+    const selectedOption = document.querySelector(`[data-value="${currentDropdownValue}"]`);
+    if (selectedOption) {
+        dropdownValue.textContent = selectedOption.textContent.trim();
+    }
+    
+    // Riapplica il filtro se c'è una ricerca attiva
+    if (dropdownSearchTerm) {
+        filterDropdownOptions();
+    }
+}
+
+// Funzione per visualizzare le pietre filtrate sulla mappa
+function displayFilteredStonesOnMap(filterStoneName = 'all') {
+    currentMarkers.clearLayers();
+    currentPolylines.clearLayers();
+    currentImageMarkers.clearLayers();
+
+    let bounds = [];
+    let colorIndex = 0;
+    const stonesToShow = allStonesData; // Usa sempre tutti i dati, la ricerca influenza solo il dropdown
+
+    for (const stoneName in stonesToShow) {
+        if (filterStoneName === 'all' || filterStoneName === stoneName) {
+            const positions = stonesToShow[stoneName];
+            if (positions.length > 0) {
+                const stoneColor = STONE_COLORS[colorIndex % STONE_COLORS.length];
+                colorIndex++;
+
+                // Disegna la polilinea per il percorso storico
+                const latlngs = positions.map(pos => [pos.lat, pos.lon]);
+                const polyline = L.polyline(latlngs, { 
+                    color: stoneColor, 
+                    weight: 4,
+                    opacity: 0.8,
+                    dashArray: '10, 5'
+                }).addTo(currentPolylines);
+                
+                // Aggiungi l'ultima posizione come marcatore principale
+                const lastPosition = positions[positions.length - 1];
+                const marker = L.marker([lastPosition.lat, lastPosition.lon], {
+                    icon: createCustomIcon(stoneColor, true)
+                }).addTo(currentMarkers);
+                
+                // Formatta la data per il popup
+                const formattedDate = lastPosition.dateObj.toLocaleString(currentLanguage === 'en' ? 'en-US' : 'it-IT', {
+                    year: 'numeric', month: 'long', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                });
+
+                // Contenuto del popup migliorato
+                let popupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
+                popupContent += `<h3 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${translateStoneName(stoneName)}</h3>`;
+                popupContent += `<p style="margin: 5px 0; color: #64748b;"><strong>${translate('last-position')}</strong><br>${formattedDate}</p>`;
+                
+                if (lastPosition.imageUrl) {
+                    popupContent += `<img src="${lastPosition.imageUrl}" style="max-width:200px; max-height:150px; border-radius: 8px; margin: 10px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">`;
+                }
+                
+                popupContent += `<br><button onclick="showStoneHistory('${stoneName}')" style="
+                    background: linear-gradient(135deg, ${stoneColor} 0%, ${adjustColor(stoneColor, -20)} 100%); 
+                    color: white; 
+                    border: none; 
+                    padding: 10px 20px; 
+                    border-radius: 8px; 
+                    cursor: pointer; 
+                    margin-top: 10px;
+                    font-weight: 500;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">📖 ${translate('see-history')}</button>`;
+                popupContent += `</div>`;
+
+                marker.bindPopup(popupContent, { maxWidth: 280, className: 'custom-popup' });
+
+                // Aggiungi le coordinate ai bounds per il fit della mappa
+                bounds.push([lastPosition.lat, lastPosition.lon]);
+
+                // Gestione della visualizzazione delle immagini
+                addImageMarkers(positions, stoneName, stoneColor);
+            }
+        }
+    }
+
+    // Adatta la mappa per mostrare tutte le pietre filtrate
+    if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [50, 50] });
+    }
+}
 // *** SOSTITUISCI QUESTI VALORI CON I TUOI ***
 const GOOGLE_SHEET_ID = '1N9I1LpY7hSuyPY85CkH4EitsPcU1Oll-KjJBbFFwHn0'; // L'ID del tuo foglio di calcolo
 const GOOGLE_SHEET_GID = '0'; // Il GID del foglio specifico (solitamente 0 per il primo foglio)
@@ -21,6 +556,11 @@ const STONE_COLORS = [
 
 // Inizializzazione dell'applicazione
 document.addEventListener('DOMContentLoaded', function() {
+    // Rileva e imposta la lingua del browser
+    currentLanguage = detectBrowserLanguage();
+    document.getElementById('language-select').value = currentLanguage;
+    updateLanguage();
+    
     showLoadingOverlay();
     initMap();
     loadData();
@@ -49,7 +589,20 @@ function hideLoadingOverlay() {
 
 // Setup degli event listeners
 function setupEventListeners() {
-    // Event listener per il pannello storia
+    // Event listener per il cambio lingua
+    const languageSelect = document.getElementById('language-select');
+    if (languageSelect) {
+        languageSelect.addEventListener('change', function(e) {
+            updateLanguage(e.target.value);
+        });
+    }
+    
+    // Inizializza il dropdown personalizzato
+    initializeCustomDropdown();
+}
+
+// Funzione di inizializzazione principale
+function init() {
     const closeHistoryBtn = document.getElementById('close-history');
     if (closeHistoryBtn) {
         closeHistoryBtn.addEventListener('click', closeHistoryPanel);
@@ -80,8 +633,7 @@ function setupEventListeners() {
     const imageDisplaySelect = document.getElementById('image-display-select');
     if (imageDisplaySelect) {
         imageDisplaySelect.addEventListener('change', function() {
-            const selectedStone = document.getElementById('stone-select').value;
-            displayStonesOnMap(selectedStone);
+            displayFilteredStonesOnMap(currentDropdownValue);
         });
     }
     
@@ -90,6 +642,7 @@ function setupEventListeners() {
         if (e.key === 'Escape') {
             closeHistoryPanel();
             closeFullscreen();
+            closeDropdown();
         }
     });
 }
@@ -177,8 +730,9 @@ function processSheetData(rows) {
         allStonesData[stoneName].sort((a, b) => a.dateObj - b.dateObj);
     }
 
-    populateStoneSelect();
-    displayStonesOnMap('all');
+    // Inizializza il dropdown personalizzato
+    initializeCustomDropdown();
+    displayFilteredStonesOnMap('all');
 }
 
 // Funzione per caricare dati di esempio per test
@@ -242,28 +796,34 @@ function loadSampleData() {
     };
 
     allStonesData = sampleData;
-    populateStoneSelect();
-    displayStonesOnMap('all');
+    // Inizializza il dropdown personalizzato
+    initializeCustomDropdown();
+    displayFilteredStonesOnMap('all');
 }
 
-// Funzione per popolare il menu a tendina delle pietre
+// Funzione per popolare il dropdown delle pietre
 function populateStoneSelect() {
-    const select = document.getElementById('stone-select');
-    select.innerHTML = '<option value="all">Mostra tutte</option>';
-
+    // Popola il dropdown delle pietre
+    const stoneSelect = document.getElementById('stone-select');
+    stoneSelect.innerHTML = `<option value="all" data-i18n="show-all">${translate('show-all')}</option>`;
+    
     for (const stoneName in allStonesData) {
         const option = document.createElement('option');
         option.value = stoneName;
-        option.textContent = stoneName.replace(/_/g, ' ');
-        select.appendChild(option);
+        option.textContent = translateStoneName(stoneName);
+        stoneSelect.appendChild(option);
     }
 
-    select.addEventListener('change', (event) => {
-        displayStonesOnMap(event.target.value);
+    // Event listener per il cambio di selezione
+    stoneSelect.addEventListener('change', function() {
+        displayFilteredStonesOnMap(this.value);
     });
+
+    // Inizializza la visualizzazione con tutti i dati
+    displayFilteredStonesOnMap('all');
 }
 
-// Funzione principale per visualizzare le pietre sulla mappa
+// Funzione per visualizzare le pietre sulla mappa (versione originale per compatibilità)
 function displayStonesOnMap(filterStoneName = 'all') {
     currentMarkers.clearLayers();
     currentPolylines.clearLayers();
@@ -302,8 +862,8 @@ function displayStonesOnMap(filterStoneName = 'all') {
 
                 // Contenuto del popup migliorato
                 let popupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
-                popupContent += `<h3 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${stoneName.replace(/_/g, ' ')}</h3>`;
-                popupContent += `<p style="margin: 5px 0; color: #64748b;"><strong>Ultima posizione:</strong><br>${formattedDate}</p>`;
+                popupContent += `<h3 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${translateStoneName(stoneName)}</h3>`;
+                popupContent += `<p style="margin: 5px 0; color: #64748b;"><strong>${translate('last-position')}</strong><br>${formattedDate}</p>`;
                 
                 if (lastPosition.imageUrl) {
                     popupContent += `<img src="${lastPosition.imageUrl}" style="max-width:200px; max-height:150px; border-radius: 8px; margin: 10px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">`;
@@ -320,7 +880,7 @@ function displayStonesOnMap(filterStoneName = 'all') {
                     font-weight: 500;
                     transition: all 0.2s ease;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">📖 Vedi la storia</button>`;
+                " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">📖 ${translate('see-history')}</button>`;
                 popupContent += `</div>`;
 
                 marker.bindPopup(popupContent, { maxWidth: 280, className: 'custom-popup' });
@@ -385,13 +945,26 @@ function addSingleImageMarker(position, stoneName, stoneColor, index) {
         hour: '2-digit', minute: '2-digit'
     });
 
-    imageMarker.bindPopup(`
-        <div style="text-align: center; font-family: 'Inter', sans-serif;">
-            <h4 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${stoneName.replace(/_/g, ' ')}</h4>
-            <img src="${position.imageUrl}" style="max-width: 200px; max-height: 150px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <p style="margin: 10px 0 5px 0; font-size: 0.9em; color: #64748b;">${formattedDate}</p>
-        </div>
-    `, { maxWidth: 250, className: 'custom-popup' });
+    let imagePopupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
+    imagePopupContent += `<h4 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${stoneName.replace(/_/g, ' ')}</h4>`;
+    imagePopupContent += `<img src="${position.imageUrl}" style="max-width: 200px; max-height: 150px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
+    imagePopupContent += `<p style="margin: 10px 0 5px 0; font-size: 0.9em; color: #64748b;">${formattedDate}</p>`;
+    imagePopupContent += `<br><button onclick="showStoneHistory('${stoneName}')" style="
+        background: linear-gradient(135deg, ${stoneColor} 0%, ${adjustColor(stoneColor, -20)} 100%); 
+        color: white; 
+        border: none; 
+        padding: 8px 16px; 
+        border-radius: 6px; 
+        cursor: pointer; 
+        margin-top: 8px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">📖 ${translate('see-history')}</button>`;
+    imagePopupContent += `</div>`;
+
+    imageMarker.bindPopup(imagePopupContent, { maxWidth: 250, className: 'custom-popup' });
 
     currentImageMarkers.addLayer(imageMarker);
 }
@@ -436,7 +1009,7 @@ function adjustColor(color, amount) {
 // Funzione per mostrare il pannello della storia
 function showStoneHistory(stoneName) {
     document.getElementById('history-panel').classList.remove('hidden');
-    document.getElementById('history-title').textContent = `Storia di ${stoneName.replace(/_/g, ' ')}`;
+    document.getElementById('history-title').textContent = `${translate('history-of')} ${translateStoneName(stoneName)}`;
 
     // Inizializza la mini-mappa se non è già stata inizializzata
     if (!miniMap) {
@@ -463,6 +1036,7 @@ function showStoneHistory(stoneName) {
 
 // Funzione per chiudere il pannello storia
 function closeHistoryPanel() {
+    stopAutoPlay(); // Ferma l'autoplay quando si chiude il pannello
     document.getElementById('history-panel').classList.add('hidden');
 }
 
@@ -476,13 +1050,6 @@ let miniMapPolyline;
 function populateHistoryPanel(stoneName) {
     currentStoneHistory = allStonesData[stoneName];
     currentHistoryIndex = 0; // Inizia sempre dalla prima posizione (la più vecchia)
-    
-    // Inizializza le variabili di riproduzione se non esistono
-    if (typeof isPlaying === 'undefined') {
-        isPlaying = false;
-        playbackTimer = null;
-        playbackSpeed = 1;
-    }
 
     updateHistoryPanel();
     populateTimeline();
@@ -491,7 +1058,9 @@ function populateHistoryPanel(stoneName) {
 
 // Funzione per configurare i pulsanti di navigazione
 function setupNavigationButtons() {
+    // Event listener per i pulsanti di navigazione
     document.getElementById('prev-button').onclick = () => {
+        stopAutoPlay(); // Ferma l'autoplay quando si naviga manualmente
         if (currentHistoryIndex > 0) {
             currentHistoryIndex--;
             updateHistoryPanel();
@@ -499,6 +1068,7 @@ function setupNavigationButtons() {
     };
     
     document.getElementById('next-button').onclick = () => {
+        stopAutoPlay(); // Ferma l'autoplay quando si naviga manualmente
         if (currentHistoryIndex < currentStoneHistory.length - 1) {
             currentHistoryIndex++;
             updateHistoryPanel();
@@ -510,30 +1080,23 @@ function setupNavigationButtons() {
 function updateHistoryPanel() {
     const currentPos = currentStoneHistory[currentHistoryIndex];
     
-    // Aggiorna l'immagine con transizione di sfumatura
+    // Aggiorna l'immagine con transizione
     const historyImage = document.getElementById('history-image');
     if (currentPos.imageUrl) {
-        // Se l'immagine è già visibile, applica la transizione
-        if (historyImage.src && historyImage.src !== currentPos.imageUrl) {
-            // Fade out
-            historyImage.classList.add('fade-out');
-            
-            // Dopo la transizione di fade out, cambia l'immagine e fade in
-            setTimeout(() => {
-                historyImage.src = currentPos.imageUrl;
-                historyImage.classList.remove('fade-out');
-                historyImage.classList.add('fade-in');
-                
-                // Rimuovi la classe fade-in dopo la transizione
-                setTimeout(() => {
-                    historyImage.classList.remove('fade-in');
-                }, 500);
-            }, 250); // Metà della durata della transizione CSS (0.5s)
-        } else {
-            // Prima immagine o stessa immagine
+        // Aggiungi effetto di transizione
+        historyImage.style.opacity = '0';
+        historyImage.style.transform = 'scale(0.95)';
+        
+        setTimeout(() => {
             historyImage.src = currentPos.imageUrl;
-        }
-        historyImage.style.display = 'block';
+            historyImage.style.display = 'block';
+            
+            // Anima l'entrata della nuova immagine
+            setTimeout(() => {
+                historyImage.style.opacity = '1';
+                historyImage.style.transform = 'scale(1)';
+            }, 50);
+        }, 200);
     } else {
         historyImage.style.display = 'none';
     }
@@ -605,6 +1168,7 @@ function updateMiniMap() {
         
         // Aggiungi click handler per navigare
         marker.on('click', () => {
+            stopAutoPlay(); // Ferma l'autoplay quando si clicca sulla mini-mappa
             currentHistoryIndex = index;
             updateHistoryPanel();
         });
@@ -629,6 +1193,7 @@ function populateTimeline() {
         point.style.left = `${(index / (currentStoneHistory.length - 1)) * 100}%`;
         
         point.addEventListener('click', () => {
+            stopAutoPlay(); // Ferma l'autoplay quando si clicca sulla timeline
             currentHistoryIndex = index;
             updateHistoryPanel();
         });
@@ -649,6 +1214,58 @@ function updateTimelineActivePoint() {
             point.classList.remove('active');
         }
     });
+}
+
+// Funzioni per la riproduzione automatica
+function startAutoPlay() {
+    if (isAutoPlaying || currentStoneHistory.length <= 1) return;
+    
+    isAutoPlaying = true;
+    updatePlayPauseButton();
+    
+    autoPlayInterval = setInterval(() => {
+        if (currentHistoryIndex < currentStoneHistory.length - 1) {
+            currentHistoryIndex++;
+            updateHistoryPanel();
+        } else {
+            // Ricomincia dall'inizio
+            currentHistoryIndex = 0;
+            updateHistoryPanel();
+        }
+    }, autoPlaySpeed);
+}
+
+function stopAutoPlay() {
+    if (!isAutoPlaying) return;
+    
+    isAutoPlaying = false;
+    updatePlayPauseButton();
+    
+    if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = null;
+    }
+}
+
+function toggleAutoPlay() {
+    if (isAutoPlaying) {
+        stopAutoPlay();
+    } else {
+        startAutoPlay();
+    }
+}
+
+function updatePlayPauseButton() {
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    if (playPauseBtn) {
+        if (isAutoPlaying) {
+            playPauseBtn.innerHTML = `<span class="btn-icon">⏸️</span><span class="btn-text">${translate('pause')}</span>`;
+            playPauseBtn.title = 'Metti in pausa la riproduzione automatica';
+        } else {
+            playPauseBtn.innerHTML = `<span class="btn-icon">▶️</span><span class="btn-text">${translate('play')}</span>`;
+            playPauseBtn.title = 'Avvia la riproduzione automatica';
+        }
+    }
 }
 
 // Funzioni per il fullscreen
@@ -685,66 +1302,3 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
-
-// Funzioni per la riproduzione automatica
-function startPlayback() {
-    if (currentStoneHistory.length <= 1) return;
-    
-    isPlaying = true;
-    updatePlayPauseButton();
-    
-    const interval = 2000 / playbackSpeed; // 2 secondi base diviso per la velocità
-    
-    playbackTimer = setInterval(() => {
-        if (currentHistoryIndex < currentStoneHistory.length - 1) {
-            currentHistoryIndex++;
-            updateHistoryPanel();
-        } else {
-            // Fine della riproduzione, torna all'inizio
-            currentHistoryIndex = 0;
-            updateHistoryPanel();
-        }
-    }, interval);
-}
-
-function pausePlayback() {
-    isPlaying = false;
-    updatePlayPauseButton();
-    
-    if (playbackTimer) {
-        clearInterval(playbackTimer);
-        playbackTimer = null;
-    }
-}
-
-function stopPlayback() {
-    pausePlayback();
-    currentHistoryIndex = 0;
-    updateHistoryPanel();
-}
-
-function updatePlayPauseButton() {
-    const playPauseBtn = document.getElementById('play-pause-btn');
-    if (playPauseBtn) {
-        if (isPlaying) {
-            playPauseBtn.innerHTML = '⏸️';
-            playPauseBtn.setAttribute('aria-label', 'Pausa riproduzione automatica');
-            playPauseBtn.setAttribute('title', 'Pause');
-            playPauseBtn.classList.add('playing');
-        } else {
-            playPauseBtn.innerHTML = '▶️';
-            playPauseBtn.setAttribute('aria-label', 'Riproduci automaticamente');
-            playPauseBtn.setAttribute('title', 'Play');
-            playPauseBtn.classList.remove('playing');
-        }
-    }
-}
-
-// Modifica la funzione closeHistoryPanel per fermare la riproduzione
-function closeHistoryPanel() {
-    if (typeof pausePlayback === 'function') {
-        pausePlayback(); // Ferma la riproduzione quando si chiude il pannello
-    }
-    document.getElementById('history-panel').classList.add('hidden');
-}
-
