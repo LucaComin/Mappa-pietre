@@ -148,8 +148,8 @@ function processStonesData(data) {
                     const color = STONE_COLORS[(colorIndex || 0) % STONE_COLORS.length];
                     const stone = {
                         name, 
-                        lat: parseFloat(lat), 
-                        lon: parseFloat(lon), 
+                        lat: parseFloat(String(lat).replace(',', '.')), 
+                        lon: parseFloat(String(lon).replace(',', '.')), 
                         description, 
                         date, 
                         image, 
@@ -344,7 +344,7 @@ function toggleAutoplay() {
         isAutoplaying = false;
         autoplayButton.textContent = 'Avvia Riproduzione Automatica';
     } else {
-        isAutoplaying = true;
+        isAutoplayling = true;
         autoplayButton.textContent = 'Ferma Riproduzione Automatica';
         startAutoplay();
     }
@@ -399,4 +399,5 @@ function exportDataToJson() {
 //     exportButton.addEventListener('click', exportDataToJson);
 //     document.body.appendChild(exportButton);
 // });
+
 
