@@ -16,7 +16,8 @@ let autoplaySpeed = 2000; // 2 secondi
 const GOOGLE_SHEET_ID = '1N91lpY7hSuyPY85CkH4E1tsPcUI01L-KjJBBFfWnH0';
 const GOOGLE_SHEET_GID = '0'; // Il GID del foglio specifico (solitamente 0 per il primo foglio)
 
-const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&gid=${GOOGLE_SHEET_GID}`;
+// Nuovo URL per scaricare il foglio come CSV
+const GOOGLE_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/export?format=csv&gid=${GOOGLE_SHEET_GID}`;
 
 // Colori predefiniti per le pietre con palette moderna
 const STONE_COLORS = [
@@ -69,114 +70,73 @@ function initializeMiniMap() {
     }).addTo(map);
 }
 
-// Funzione per caricare i dati delle pietre dal Google Sheet
+// Funzione per caricare i dati delle pietre dal Google Sheet (ora da CSV)
 function loadStonesData() {
-    fetch(GOOGLE_SHEET_URL)
+    fetch(GOOGLE_SHEET_CSV_URL)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.text();
         })
-        .then(text => {
-            try {
-                // Metodo più robusto per pulire la risposta del Google Sheet
-                let jsonString = text;
-                
-                // Rimuovi i commenti JavaScript se presenti
-                jsonString = jsonString.replace(/\/\*.*?\*\//g, '');
-                
-                // Trova l'inizio della risposta JSON
-                const startIndex = jsonString.indexOf('google.visualization.Query.setResponse(');
-                if (startIndex !== -1) {
-                    jsonString = jsonString.substring(startIndex + 'google.visualization.Query.setResponse('.length);
-                }
-                
-                // Trova la fine della risposta JSON
-                const endIndex = jsonString.lastIndexOf(');');
-                if (endIndex !== -1) {
-                    jsonString = jsonString.substring(0, endIndex);
-                }
-                
-                // Prova a parsare il JSON
-                const data = JSON.parse(jsonString);
-                processStonesData(data);
-            } catch (parseError) {
-                console.error('Errore nel parsing JSON:', parseError);
-                console.log('Testo ricevuto:', text);
-                alert('Errore nel parsing dei dati del Google Sheet. Controlla la console per i dettagli.');
-            }
+        .then(csvText => {
+            processCsvData(csvText);
         })
         .catch(error => {
-            console.error('Errore nel caricamento dei dati:', error);
-            alert('Impossibile caricare i dati delle pietre. Controlla la console per i dettagli.');
+            console.error('Errore nel caricamento dei dati CSV:', error);
+            alert('Impossibile caricare i dati delle pietre dal CSV. Controlla la console per i dettagli.');
         });
 }
 
-// Funzione per processare i dati delle pietre
-function processStonesData(data) {
-    try {
-        if (!data || !data.table || !data.table.rows) {
-            console.error('Struttura dati non valida:', data);
-            alert('Struttura dati del Google Sheet non valida.');
-            return;
-        }
+// Funzione per processare i dati CSV
+function processCsvData(csvText) {
+    const rows = csvText.split('\n');
+    allStonesData = {}; // Reset dei dati
 
-        const rows = data.table.rows;
-        allStonesData = {}; // Reset dei dati
+    // Salta la prima riga (intestazione)
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i].trim();
+        if (row === '') continue; // Salta righe vuote
 
-        console.log(`Processando ${rows.length} righe dal Google Sheet`);
+        const cells = row.split(','); // Assumiamo che il CSV sia delimitato da virgole
 
-        rows.forEach((row, index) => {
-            try {
-                const cells = row.c;
-                if (!cells) {
-                    console.warn(`Riga ${index} non ha celle valide`);
-                    return;
+        try {
+            const name = cells[0]; // Nome della pietra
+            const lat = cells[1]; // Latitudine
+            const lon = cells[2]; // Longitudine
+            const description = cells[3]; // Descrizione
+            const date = cells[4]; // Data
+            const image = cells[5]; // URL immagine
+            const colorIndex = cells[6]; // Indice colore
+            const type = cells[7]; // Tipo di pietra
+
+            if (name && lat && lon) { // Assicurati che i dati essenziali siano presenti
+                const color = STONE_COLORS[(parseInt(colorIndex) || 0) % STONE_COLORS.length];
+                const stone = {
+                    name, 
+                    lat: parseFloat(String(lat).replace(',', '.')), 
+                    lon: parseFloat(String(lon).replace(',', '.')), 
+                    description, 
+                    date, 
+                    image, 
+                    color, 
+                    type
+                };
+
+                if (!allStonesData[name]) {
+                    allStonesData[name] = [];
                 }
-
-                const name = cells[0]?.v; // Nome della pietra
-                const lat = cells[1]?.v; // Latitudine
-                const lon = cells[2]?.v; // Longitudine
-                const description = cells[3]?.v; // Descrizione
-                const date = cells[4]?.v; // Data
-                const image = cells[5]?.v; // URL immagine
-                const colorIndex = cells[6]?.v; // Indice colore
-                const type = cells[7]?.v; // Tipo di pietra
-
-                if (name && lat && lon) { // Assicurati che i dati essenziali siano presenti
-                    const color = STONE_COLORS[(colorIndex || 0) % STONE_COLORS.length];
-                    const stone = {
-                        name, 
-                        lat: parseFloat(String(lat).replace(',', '.')), 
-                        lon: parseFloat(String(lon).replace(',', '.')), 
-                        description, 
-                        date, 
-                        image, 
-                        color, 
-                        type
-                    };
-
-                    if (!allStonesData[name]) {
-                        allStonesData[name] = [];
-                    }
-                    allStonesData[name].push(stone);
-                    console.log(`Aggiunta pietra: ${name} (${lat}, ${lon})`);
-                } else {
-                    console.warn(`Riga ${index} manca di dati essenziali:`, { name, lat, lon });
-                }
-            } catch (rowError) {
-                console.error(`Errore nel processare la riga ${index}:`, rowError);
+                allStonesData[name].push(stone);
+            } else {
+                console.warn(`Riga ${i} manca di dati essenziali:`, { name, lat, lon });
             }
-        });
-
-        console.log(`Totale pietre caricate: ${Object.keys(allStonesData).length}`);
-        populateStoneSelect();
-        displayAllStones();
-    } catch (error) {
-        console.error('Errore nel processare i dati:', error);
-        alert('Errore nel processare i dati delle pietre. Controlla la console per i dettagli.');
+        } catch (rowError) {
+            console.error(`Errore nel processare la riga CSV ${i}:`, rowError);
+        }
     }
+
+    populateStoneSelect();
+    displayAllStones();
 }
 
 // Funzione per popolare il menu a tendina delle pietre
@@ -344,7 +304,7 @@ function toggleAutoplay() {
         isAutoplaying = false;
         autoplayButton.textContent = 'Avvia Riproduzione Automatica';
     } else {
-        isAutoplayling = true;
+        isAutoplaying = true;
         autoplayButton.textContent = 'Ferma Riproduzione Automatica';
         startAutoplay();
     }
