@@ -1,3 +1,4 @@
+// Variabili globali
 let map;
 let miniMap;
 let allStonesData = {};
@@ -100,8 +101,8 @@ function processCsvData(csvText) {
 
         try {
             const name = cells[0].replace(/"/g, ""); // Nome della pietra
-            const lat = cells[1].replace(/"/g, ""); // Latitudine
-            const lon = cells[2].replace(/"/g, ""); // Longitudine
+            const lat = cells[1].replace(/"/g, "").replace(",", "."); // Latitudine
+            const lon = cells[2].replace(/"/g, "").replace(",", "."); // Longitudine
             const description = cells[3]; // Descrizione
             const date = cells[4]; // Data
             const image = cells[5]; // URL immagine
