@@ -97,12 +97,12 @@ function processCsvData(csvText) {
         const row = rows[i].trim();
         if (row === '') continue; // Salta righe vuote
 
-        const cells = row.split(','); // Assumiamo che il CSV sia delimitato da virgole
+        const cells = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // Split by comma, but not inside quotes
 
         try {
-            const name = cells[0]; // Nome della pietra
-            const lat = cells[1]; // Latitudine
-            const lon = cells[2]; // Longitudine
+            const name = cells[0].replace(/"/g, ""); // Nome della pietra
+            const lat = cells[1].replace(/"/g, ""); // Latitudine
+            const lon = cells[2].replace(/"/g, ""); // Longitudine
             const description = cells[3]; // Descrizione
             const date = cells[4]; // Data
             const image = cells[5]; // URL immagine
