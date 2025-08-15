@@ -612,9 +612,16 @@ function processSheetData(rows) {
             // Gestisci diversi formati di data
             if (typeof timestamp === 'string') {
                 date = new Date(timestamp);
-            } else {
+            } else if (typeof timestamp === 'number') {
                 // Il timestamp da Google Sheets è un formato numerico che rappresenta giorni da 1899-12-30
                 date = new Date((timestamp - 25569) * 86400 * 1000);
+            } else {
+                date = new Date('Invalid Date'); // Imposta una data non valida per gestire il caso
+            }
+
+            let isoTimestamp = null;
+            if (!isNaN(date.getTime())) { // Controlla se la data è valida
+                isoTimestamp = date.toISOString();
             }
 
             if (!allStonesData[name]) {
@@ -624,7 +631,7 @@ function processSheetData(rows) {
             allStonesData[name].push({
                 lat: lat,
                 lon: lon,
-                timestamp: date.toISOString(),
+                timestamp: isoTimestamp,
                 dateObj: date,
                 imageUrl: imageUrl
             });
