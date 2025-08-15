@@ -17,8 +17,7 @@ const GOOGLE_SHEET_ID = '1N91lpY7hSuyPY85CkH4E1tsPcUI01L-KjJBBFfWnH0';
 const GOOGLE_SHEET_GID = '0'; // Il GID del foglio specifico (solitamente 0 per il primo foglio)
 
 // Nuovo URL per scaricare il foglio come CSV
-const GOOGLE_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/export?format=csv&gid=${GOOGLE_SHEET_GID}`;
-
+const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTSNKDm2yeKcEZOkXVNsQAcFfLXkxDoq1UlCykMf8JVy5g3yhQsa2ox8_gMFxNuxasgrDktvJRcPJRX/pub?gid=0&single=true&output=csv';
 // Colori predefiniti per le pietre con palette moderna
 const STONE_COLORS = [
     '#2563eb', '#dc2626', '#0f766e', '#9d7706',
