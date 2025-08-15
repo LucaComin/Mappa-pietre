@@ -1,4 +1,3 @@
-// Variabili globali
 let map;
 let miniMap;
 let allStonesData = {};
