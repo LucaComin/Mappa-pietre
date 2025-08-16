@@ -6,6 +6,11 @@ let currentMarkers = L.featureGroup(); // Gruppo di marcatori attualmente sulla 
 let currentPolylines = L.featureGroup(); // Gruppo di polilinee attualmente sulla mappa
 let currentImageMarkers = L.markerClusterGroup(); // Gruppo di marcatori per le immagini con clustering
 
+// Variabili per la riproduzione automatica
+let autoPlayInterval = null;
+let isAutoPlaying = false;
+let autoPlaySpeed = 2000; // 2 secondi
+
 // Configurazione del Google Sheet
 // *** SOSTITUISCI QUESTI VALORI CON I TUOI ***
 const GOOGLE_SHEET_ID = '1N9I1LpY7hSuyPY85CkH4EitsPcU1Oll-KjJBbFFwHn0'; // L'ID del tuo foglio di calcolo
@@ -385,13 +390,26 @@ function addSingleImageMarker(position, stoneName, stoneColor, index) {
         hour: '2-digit', minute: '2-digit'
     });
 
-    imageMarker.bindPopup(`
-        <div style="text-align: center; font-family: 'Inter', sans-serif;">
-            <h4 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${stoneName.replace(/_/g, ' ')}</h4>
-            <img src="${position.imageUrl}" style="max-width: 200px; max-height: 150px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <p style="margin: 10px 0 5px 0; font-size: 0.9em; color: #64748b;">${formattedDate}</p>
-        </div>
-    `, { maxWidth: 250, className: 'custom-popup' });
+    let imagePopupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
+    imagePopupContent += `<h4 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${stoneName.replace(/_/g, ' ')}</h4>`;
+    imagePopupContent += `<img src="${position.imageUrl}" style="max-width: 200px; max-height: 150px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
+    imagePopupContent += `<p style="margin: 10px 0 5px 0; font-size: 0.9em; color: #64748b;">${formattedDate}</p>`;
+    imagePopupContent += `<br><button onclick="showStoneHistory('${stoneName}')" style="
+        background: linear-gradient(135deg, ${stoneColor} 0%, ${adjustColor(stoneColor, -20)} 100%); 
+        color: white; 
+        border: none; 
+        padding: 8px 16px; 
+        border-radius: 6px; 
+        cursor: pointer; 
+        margin-top: 8px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">📖 Vedi la storia</button>`;
+    imagePopupContent += `</div>`;
+
+    imageMarker.bindPopup(imagePopupContent, { maxWidth: 250, className: 'custom-popup' });
 
     currentImageMarkers.addLayer(imageMarker);
 }
@@ -463,6 +481,7 @@ function showStoneHistory(stoneName) {
 
 // Funzione per chiudere il pannello storia
 function closeHistoryPanel() {
+    stopAutoPlay(); // Ferma l'autoplay quando si chiude il pannello
     document.getElementById('history-panel').classList.add('hidden');
 }
 
@@ -484,7 +503,9 @@ function populateHistoryPanel(stoneName) {
 
 // Funzione per configurare i pulsanti di navigazione
 function setupNavigationButtons() {
+    // Event listener per i pulsanti di navigazione
     document.getElementById('prev-button').onclick = () => {
+        stopAutoPlay(); // Ferma l'autoplay quando si naviga manualmente
         if (currentHistoryIndex > 0) {
             currentHistoryIndex--;
             updateHistoryPanel();
@@ -492,6 +513,7 @@ function setupNavigationButtons() {
     };
     
     document.getElementById('next-button').onclick = () => {
+        stopAutoPlay(); // Ferma l'autoplay quando si naviga manualmente
         if (currentHistoryIndex < currentStoneHistory.length - 1) {
             currentHistoryIndex++;
             updateHistoryPanel();
@@ -503,11 +525,23 @@ function setupNavigationButtons() {
 function updateHistoryPanel() {
     const currentPos = currentStoneHistory[currentHistoryIndex];
     
-    // Aggiorna l'immagine
+    // Aggiorna l'immagine con transizione
     const historyImage = document.getElementById('history-image');
     if (currentPos.imageUrl) {
-        historyImage.src = currentPos.imageUrl;
-        historyImage.style.display = 'block';
+        // Aggiungi effetto di transizione
+        historyImage.style.opacity = '0';
+        historyImage.style.transform = 'scale(0.95)';
+        
+        setTimeout(() => {
+            historyImage.src = currentPos.imageUrl;
+            historyImage.style.display = 'block';
+            
+            // Anima l'entrata della nuova immagine
+            setTimeout(() => {
+                historyImage.style.opacity = '1';
+                historyImage.style.transform = 'scale(1)';
+            }, 50);
+        }, 200);
     } else {
         historyImage.style.display = 'none';
     }
@@ -579,6 +613,7 @@ function updateMiniMap() {
         
         // Aggiungi click handler per navigare
         marker.on('click', () => {
+            stopAutoPlay(); // Ferma l'autoplay quando si clicca sulla mini-mappa
             currentHistoryIndex = index;
             updateHistoryPanel();
         });
@@ -603,6 +638,7 @@ function populateTimeline() {
         point.style.left = `${(index / (currentStoneHistory.length - 1)) * 100}%`;
         
         point.addEventListener('click', () => {
+            stopAutoPlay(); // Ferma l'autoplay quando si clicca sulla timeline
             currentHistoryIndex = index;
             updateHistoryPanel();
         });
@@ -623,6 +659,58 @@ function updateTimelineActivePoint() {
             point.classList.remove('active');
         }
     });
+}
+
+// Funzioni per la riproduzione automatica
+function startAutoPlay() {
+    if (isAutoPlaying || currentStoneHistory.length <= 1) return;
+    
+    isAutoPlaying = true;
+    updatePlayPauseButton();
+    
+    autoPlayInterval = setInterval(() => {
+        if (currentHistoryIndex < currentStoneHistory.length - 1) {
+            currentHistoryIndex++;
+            updateHistoryPanel();
+        } else {
+            // Ricomincia dall'inizio
+            currentHistoryIndex = 0;
+            updateHistoryPanel();
+        }
+    }, autoPlaySpeed);
+}
+
+function stopAutoPlay() {
+    if (!isAutoPlaying) return;
+    
+    isAutoPlaying = false;
+    updatePlayPauseButton();
+    
+    if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = null;
+    }
+}
+
+function toggleAutoPlay() {
+    if (isAutoPlaying) {
+        stopAutoPlay();
+    } else {
+        startAutoPlay();
+    }
+}
+
+function updatePlayPauseButton() {
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    if (playPauseBtn) {
+        if (isAutoPlaying) {
+            playPauseBtn.innerHTML = '<span class="btn-icon">⏸️</span><span class="btn-text">Pausa</span>';
+            playPauseBtn.title = 'Metti in pausa la riproduzione automatica';
+        } else {
+            playPauseBtn.innerHTML = '<span class="btn-icon">▶️</span><span class="btn-text">Play</span>';
+            playPauseBtn.title = 'Avvia la riproduzione automatica';
+        }
+    }
 }
 
 // Funzioni per il fullscreen
