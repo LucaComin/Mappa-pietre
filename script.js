@@ -6,395 +6,7 @@ let currentMarkers = L.featureGroup(); // Gruppo di marcatori attualmente sulla 
 let currentPolylines = L.featureGroup(); // Gruppo di polilinee attualmente sulla mappa
 let currentImageMarkers = L.markerClusterGroup(); // Gruppo di marcatori per le immagini con clustering
 
-// Variabili per la riproduzione automatica
-let autoPlayInterval = null;
-let isAutoPlaying = false;
-let autoPlaySpeed = 2000; // 2 secondi
-
-// Sistema di internazionalizzazione
-let currentLanguage = 'it';
-const translations = {
-    it: {
-        'title': 'Mappa delle Pietre',
-        'subtitle': 'Esplora la storia attraverso il tempo',
-        'language': 'Lingua:',
-        'select-stone': 'Seleziona una pietra:',
-        'show-images': 'Mostra immagini:',
-        'show-all': 'Mostra tutte',
-        'last': 'Ultima',
-        'none': 'Nessuna',
-        'all': 'Tutte',
-        'history-of': 'Storia di',
-        'play': 'Play',
-        'pause': 'Pausa',
-        'previous': 'Precedente',
-        'next': 'Successiva',
-        'historical-path': 'Percorso storico',
-        'current-position': 'Posizione attuale',
-        'movements-timeline': 'Timeline degli spostamenti',
-        'start': 'Inizio',
-        'end': 'Fine',
-        'see-history': 'Vedi la storia',
-        'last-position': 'Ultima posizione:',
-        'loading-map': 'Caricamento mappa...',
-        'search': 'Cerca:',
-        'search-placeholder': 'Cerca una pietra...',
-        'no-results': 'Nessun risultato trovato',
-        'clear-search': 'Cancella ricerca',
-        // Nomi delle pietre
-        'Pietra_Rossa': 'Pietra Rossa',
-        'Pietra_Blu': 'Pietra Blu',
-        'Pietra_Verde': 'Pietra Verde'
-    },
-    en: {
-        'title': 'Stones Map',
-        'subtitle': 'Explore history through time',
-        'language': 'Language:',
-        'select-stone': 'Select a stone:',
-        'show-images': 'Show images:',
-        'show-all': 'Show all',
-        'last': 'Last',
-        'none': 'None',
-        'all': 'All',
-        'history-of': 'History of',
-        'play': 'Play',
-        'pause': 'Pause',
-        'previous': 'Previous',
-        'next': 'Next',
-        'historical-path': 'Historical path',
-        'current-position': 'Current position',
-        'movements-timeline': 'Movements timeline',
-        'start': 'Start',
-        'end': 'End',
-        'see-history': 'See history',
-        'last-position': 'Last position:',
-        'loading-map': 'Loading map...',
-        'search': 'Search:',
-        'search-placeholder': 'Search for a stone...',
-        'no-results': 'No results found',
-        'clear-search': 'Clear search',
-        // Nomi delle pietre
-        'Pietra_Rossa': 'Red Stone',
-        'Pietra_Blu': 'Blue Stone',
-        'Pietra_Verde': 'Green Stone'
-    },
-    es: {
-        'title': 'Mapa de Piedras',
-        'subtitle': 'Explora la historia a través del tiempo',
-        'language': 'Idioma:',
-        'select-stone': 'Selecciona una piedra:',
-        'show-images': 'Mostrar imágenes:',
-        'show-all': 'Mostrar todas',
-        'last': 'Última',
-        'none': 'Ninguna',
-        'all': 'Todas',
-        'history-of': 'Historia de',
-        'play': 'Reproducir',
-        'pause': 'Pausa',
-        'previous': 'Anterior',
-        'next': 'Siguiente',
-        'historical-path': 'Ruta histórica',
-        'current-position': 'Posición actual',
-        'movements-timeline': 'Cronología de movimientos',
-        'start': 'Inicio',
-        'end': 'Fin',
-        'see-history': 'Ver historia',
-        'last-position': 'Última posición:',
-        'loading-map': 'Cargando mapa...',
-        'search': 'Buscar:',
-        'search-placeholder': 'Buscar una piedra...',
-        'no-results': 'No se encontraron resultados',
-        'clear-search': 'Limpiar búsqueda',
-        // Nomi delle pietre
-        'Pietra_Rossa': 'Piedra Roja',
-        'Pietra_Blu': 'Piedra Azul',
-        'Pietra_Verde': 'Piedra Verde'
-    },
-    fr: {
-        'title': 'Carte des Pierres',
-        'subtitle': 'Explorez l\'histoire à travers le temps',
-        'language': 'Langue:',
-        'select-stone': 'Sélectionnez une pierre:',
-        'show-images': 'Afficher les images:',
-        'show-all': 'Afficher toutes',
-        'last': 'Dernière',
-        'none': 'Aucune',
-        'all': 'Toutes',
-        'history-of': 'Histoire de',
-        'play': 'Lecture',
-        'pause': 'Pause',
-        'previous': 'Précédent',
-        'next': 'Suivant',
-        'historical-path': 'Chemin historique',
-        'current-position': 'Position actuelle',
-        'movements-timeline': 'Chronologie des mouvements',
-        'start': 'Début',
-        'end': 'Fin',
-        'see-history': 'Voir l\'histoire',
-        'last-position': 'Dernière position:',
-        'loading-map': 'Chargement de la carte...',
-        'search': 'Rechercher:',
-        'search-placeholder': 'Rechercher une pierre...',
-        'no-results': 'Aucun résultat trouvé',
-        'clear-search': 'Effacer la recherche',
-        // Nomi delle pietre
-        'Pietra_Rossa': 'Pierre Rouge',
-        'Pietra_Blu': 'Pierre Bleue',
-        'Pietra_Verde': 'Pierre Verte'
-    },
-    de: {
-        'title': 'Steinekarte',
-        'subtitle': 'Erkunden Sie die Geschichte durch die Zeit',
-        'language': 'Sprache:',
-        'select-stone': 'Wählen Sie einen Stein:',
-        'show-images': 'Bilder anzeigen:',
-        'show-all': 'Alle anzeigen',
-        'last': 'Letzte',
-        'none': 'Keine',
-        'all': 'Alle',
-        'history-of': 'Geschichte von',
-        'play': 'Abspielen',
-        'pause': 'Pause',
-        'previous': 'Vorherige',
-        'next': 'Nächste',
-        'historical-path': 'Historischer Pfad',
-        'current-position': 'Aktuelle Position',
-        'movements-timeline': 'Bewegungszeitleiste',
-        'start': 'Start',
-        'end': 'Ende',
-        'see-history': 'Geschichte ansehen',
-        'last-position': 'Letzte Position:',
-        'loading-map': 'Karte wird geladen...',
-        'search': 'Suchen:',
-        'search-placeholder': 'Einen Stein suchen...',
-        'no-results': 'Keine Ergebnisse gefunden',
-        'clear-search': 'Suche löschen',
-        // Nomi delle pietre
-        'Pietra_Rossa': 'Roter Stein',
-        'Pietra_Blu': 'Blauer Stein',
-        'Pietra_Verde': 'Grüner Stein'
-    }
-};
-
-// Funzione per tradurre il testo
-function translate(key) {
-    return translations[currentLanguage][key] || translations['it'][key] || key;
-}
-
-// Funzione per tradurre i nomi delle pietre
-function translateStoneName(stoneName) {
-    return translate(stoneName) || stoneName.replace(/_/g, ' ');
-}
-
-// Funzione per aggiornare tutti i testi tradotti
-function updateLanguage() {
-    document.querySelectorAll('[data-i18n]').forEach(element => {
-        const key = element.getAttribute('data-i18n');
-        element.textContent = translate(key);
-    });
-    
-    // Aggiorna i placeholder
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
-        const key = element.getAttribute('data-i18n-placeholder');
-        element.placeholder = translate(key);
-    });
-    
-    // Aggiorna il testo di caricamento
-    const loadingText = document.querySelector('.loading-content p');
-    if (loadingText) {
-        loadingText.textContent = translate('loading-map');
-    }
-    
-    // Aggiorna il titolo della pagina
-    document.title = translate('title');
-    
-    // Aggiorna il documento lang attribute
-    document.documentElement.lang = currentLanguage;
-    
-    // Aggiorna i nomi delle pietre nel dropdown
-    updateStoneDropdown();
-}
-
-// Funzione per aggiornare il dropdown delle pietre con le traduzioni
-function updateStoneDropdown() {
-    const stoneSelect = document.getElementById('stone-select');
-    if (!stoneSelect || !allStonesData) return;
-    
-    const currentValue = stoneSelect.value;
-    
-    // Ricostruisci il dropdown con le traduzioni
-    stoneSelect.innerHTML = `<option value="all">${translate('show-all')}</option>`;
-    
-    for (const stoneName in allStonesData) {
-        const option = document.createElement('option');
-        option.value = stoneName;
-        option.textContent = translateStoneName(stoneName);
-        stoneSelect.appendChild(option);
-    }
-    
-    // Ripristina la selezione precedente
-    stoneSelect.value = currentValue;
-}
-
-// Funzione per rilevare la lingua del browser
-function detectBrowserLanguage() {
-    // Prima controlla se c'è una preferenza salvata
-    const savedLang = localStorage.getItem('preferred-language');
-    if (savedLang && translations[savedLang]) {
-        return savedLang;
-    }
-    
-    const browserLang = navigator.language || navigator.userLanguage;
-    const langCode = browserLang.substring(0, 2);
-    
-    // Controlla se la lingua è supportata
-    if (translations[langCode]) {
-        return langCode;
-    }
-    
-    return 'it'; // Fallback all'italiano
-}
-
-// Variabili per la ricerca
-let searchTerm = '';
-let filteredStones = {};
-
-// Funzione per filtrare le pietre in base al termine di ricerca
-function filterStonesBySearch(searchTerm) {
-    if (!searchTerm.trim()) {
-        return allStonesData;
-    }
-    
-    const filtered = {};
-    const term = searchTerm.toLowerCase().trim();
-    
-    for (const stoneName in allStonesData) {
-        const translatedName = translateStoneName(stoneName).toLowerCase();
-        const originalName = stoneName.replace(/_/g, ' ').toLowerCase();
-        
-        if (translatedName.includes(term) || originalName.includes(term)) {
-            filtered[stoneName] = allStonesData[stoneName];
-        }
-    }
-    
-    return filtered;
-}
-
-// Funzione per aggiornare la visualizzazione in base alla ricerca
-function updateSearchResults() {
-    filteredStones = filterStonesBySearch(searchTerm);
-    
-    // Aggiorna SOLO il dropdown delle pietre, non la mappa
-    const stoneSelect = document.getElementById('stone-select');
-    const currentSelection = stoneSelect.value;
-    
-    // Ricostruisci il dropdown con le pietre filtrate
-    stoneSelect.innerHTML = `<option value="all" data-i18n="show-all">${translate('show-all')}</option>`;
-    
-    // Aggiungi le pietre filtrate
-    const stoneNames = Object.keys(filteredStones);
-    if (stoneNames.length === 0 && searchTerm.trim()) {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = translate('no-results');
-        option.disabled = true;
-        stoneSelect.appendChild(option);
-    } else {
-        for (const stoneName of stoneNames) {
-            const option = document.createElement('option');
-            option.value = stoneName;
-            option.textContent = translateStoneName(stoneName);
-            stoneSelect.appendChild(option);
-        }
-    }
-    
-    // Ripristina la selezione se ancora valida, altrimenti seleziona "Mostra tutte"
-    if (currentSelection === 'all' || filteredStones[currentSelection]) {
-        stoneSelect.value = currentSelection;
-    } else {
-        stoneSelect.value = 'all';
-    }
-    
-    // NON aggiornare la mappa qui - la mappa viene aggiornata solo dal cambio del selettore
-}
-
-// Funzione per visualizzare le pietre filtrate sulla mappa
-function displayFilteredStonesOnMap(filterStoneName = 'all') {
-    currentMarkers.clearLayers();
-    currentPolylines.clearLayers();
-    currentImageMarkers.clearLayers();
-
-    let bounds = [];
-    let colorIndex = 0;
-    const stonesToShow = allStonesData; // Usa sempre tutti i dati, la ricerca influenza solo il dropdown
-
-    for (const stoneName in stonesToShow) {
-        if (filterStoneName === 'all' || filterStoneName === stoneName) {
-            const positions = stonesToShow[stoneName];
-            if (positions.length > 0) {
-                const stoneColor = STONE_COLORS[colorIndex % STONE_COLORS.length];
-                colorIndex++;
-
-                // Disegna la polilinea per il percorso storico
-                const latlngs = positions.map(pos => [pos.lat, pos.lon]);
-                const polyline = L.polyline(latlngs, { 
-                    color: stoneColor, 
-                    weight: 4,
-                    opacity: 0.8,
-                    dashArray: '10, 5'
-                }).addTo(currentPolylines);
-                
-                // Aggiungi l'ultima posizione come marcatore principale
-                const lastPosition = positions[positions.length - 1];
-                const marker = L.marker([lastPosition.lat, lastPosition.lon], {
-                    icon: createCustomIcon(stoneColor, true)
-                }).addTo(currentMarkers);
-                
-                // Formatta la data per il popup
-                const formattedDate = lastPosition.dateObj.toLocaleString(currentLanguage === 'en' ? 'en-US' : 'it-IT', {
-                    year: 'numeric', month: 'long', day: 'numeric',
-                    hour: '2-digit', minute: '2-digit'
-                });
-
-                // Contenuto del popup migliorato
-                let popupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
-                popupContent += `<h3 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${translateStoneName(stoneName)}</h3>`;
-                popupContent += `<p style="margin: 5px 0; color: #64748b;"><strong>${translate('last-position')}</strong><br>${formattedDate}</p>`;
-                
-                if (lastPosition.imageUrl) {
-                    popupContent += `<img src="${lastPosition.imageUrl}" style="max-width:200px; max-height:150px; border-radius: 8px; margin: 10px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">`;
-                }
-                
-                popupContent += `<br><button onclick="showStoneHistory('${stoneName}')" style="
-                    background: linear-gradient(135deg, ${stoneColor} 0%, ${adjustColor(stoneColor, -20)} 100%); 
-                    color: white; 
-                    border: none; 
-                    padding: 10px 20px; 
-                    border-radius: 8px; 
-                    cursor: pointer; 
-                    margin-top: 10px;
-                    font-weight: 500;
-                    transition: all 0.2s ease;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">📖 ${translate('see-history')}</button>`;
-                popupContent += `</div>`;
-
-                marker.bindPopup(popupContent, { maxWidth: 280, className: 'custom-popup' });
-
-                // Aggiungi le coordinate ai bounds per il fit della mappa
-                bounds.push([lastPosition.lat, lastPosition.lon]);
-
-                // Gestione della visualizzazione delle immagini
-                addImageMarkers(positions, stoneName, stoneColor);
-            }
-        }
-    }
-
-    // Adatta la mappa per mostrare tutte le pietre filtrate
-    if (bounds.length > 0) {
-        map.fitBounds(bounds, { padding: [50, 50] });
-    }
-}
+// Configurazione del Google Sheet
 // *** SOSTITUISCI QUESTI VALORI CON I TUOI ***
 const GOOGLE_SHEET_ID = '1N9I1LpY7hSuyPY85CkH4EitsPcU1Oll-KjJBbFFwHn0'; // L'ID del tuo foglio di calcolo
 const GOOGLE_SHEET_GID = '0'; // Il GID del foglio specifico (solitamente 0 per il primo foglio)
@@ -409,11 +21,6 @@ const STONE_COLORS = [
 
 // Inizializzazione dell'applicazione
 document.addEventListener('DOMContentLoaded', function() {
-    // Rileva e imposta la lingua del browser
-    currentLanguage = detectBrowserLanguage();
-    document.getElementById('language-select').value = currentLanguage;
-    updateLanguage();
-    
     showLoadingOverlay();
     initMap();
     loadData();
@@ -442,58 +49,6 @@ function hideLoadingOverlay() {
 
 // Setup degli event listeners
 function setupEventListeners() {
-    // Event listener per il cambio lingua
-    const languageSelect = document.getElementById('language-select');
-    if (languageSelect) {
-        languageSelect.addEventListener('change', function(e) {
-            currentLanguage = e.target.value;
-            updateLanguage();
-            
-            // Salva la preferenza nel localStorage
-            localStorage.setItem('preferred-language', currentLanguage);
-            
-            // Aggiorna i popup esistenti se ci sono pietre visualizzate
-            const selectedStone = document.getElementById('stone-select').value;
-            if (selectedStone) {
-                updateSearchResults();
-            }
-        });
-    }
-    
-    // Event listener per la ricerca
-    const searchInput = document.getElementById('search-input');
-    const clearSearchBtn = document.getElementById('clear-search');
-    
-    if (searchInput) {
-        searchInput.addEventListener('input', function(e) {
-            searchTerm = e.target.value;
-            updateSearchResults();
-            
-            // Mostra/nascondi il bottone di cancellazione
-            if (clearSearchBtn) {
-                clearSearchBtn.style.display = searchTerm.trim() ? 'block' : 'none';
-            }
-        });
-        
-        // Gestione dell'invio con Enter
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                updateSearchResults();
-            }
-        });
-    }
-    
-    if (clearSearchBtn) {
-        clearSearchBtn.addEventListener('click', function() {
-            searchInput.value = '';
-            searchTerm = '';
-            updateSearchResults();
-            clearSearchBtn.style.display = 'none';
-            searchInput.focus();
-        });
-    }
-    
     // Event listener per il pannello storia
     const closeHistoryBtn = document.getElementById('close-history');
     if (closeHistoryBtn) {
@@ -525,14 +80,8 @@ function setupEventListeners() {
     const imageDisplaySelect = document.getElementById('image-display-select');
     if (imageDisplaySelect) {
         imageDisplaySelect.addEventListener('change', function() {
-            updateSearchResults();
-        });
-    }
-    
-    const stoneSelect = document.getElementById('stone-select');
-    if (stoneSelect) {
-        stoneSelect.addEventListener('change', function() {
-            displayFilteredStonesOnMap(this.value);
+            const selectedStone = document.getElementById('stone-select').value;
+            displayStonesOnMap(selectedStone);
         });
     }
     
@@ -541,14 +90,6 @@ function setupEventListeners() {
         if (e.key === 'Escape') {
             closeHistoryPanel();
             closeFullscreen();
-        }
-        
-        // Focus sulla ricerca con Ctrl+F o Cmd+F
-        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-            e.preventDefault();
-            if (searchInput) {
-                searchInput.focus();
-            }
         }
     });
 }
@@ -705,29 +246,24 @@ function loadSampleData() {
     displayStonesOnMap('all');
 }
 
-// Funzione per popolare il dropdown delle pietre
+// Funzione per popolare il menu a tendina delle pietre
 function populateStoneSelect() {
-    // Popola il dropdown delle pietre
-    const stoneSelect = document.getElementById('stone-select');
-    stoneSelect.innerHTML = `<option value="all" data-i18n="show-all">${translate('show-all')}</option>`;
-    
+    const select = document.getElementById('stone-select');
+    select.innerHTML = '<option value="all">Mostra tutte</option>';
+
     for (const stoneName in allStonesData) {
         const option = document.createElement('option');
         option.value = stoneName;
-        option.textContent = translateStoneName(stoneName);
-        stoneSelect.appendChild(option);
+        option.textContent = stoneName.replace(/_/g, ' ');
+        select.appendChild(option);
     }
 
-    // Event listener per il cambio di selezione
-    stoneSelect.addEventListener('change', function() {
-        displayFilteredStonesOnMap(this.value);
+    select.addEventListener('change', (event) => {
+        displayStonesOnMap(event.target.value);
     });
-
-    // Inizializza la visualizzazione con tutti i dati
-    displayFilteredStonesOnMap('all');
 }
 
-// Funzione per visualizzare le pietre sulla mappa (versione originale per compatibilità)
+// Funzione principale per visualizzare le pietre sulla mappa
 function displayStonesOnMap(filterStoneName = 'all') {
     currentMarkers.clearLayers();
     currentPolylines.clearLayers();
@@ -766,8 +302,8 @@ function displayStonesOnMap(filterStoneName = 'all') {
 
                 // Contenuto del popup migliorato
                 let popupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
-                popupContent += `<h3 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${translateStoneName(stoneName)}</h3>`;
-                popupContent += `<p style="margin: 5px 0; color: #64748b;"><strong>${translate('last-position')}</strong><br>${formattedDate}</p>`;
+                popupContent += `<h3 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${stoneName.replace(/_/g, ' ')}</h3>`;
+                popupContent += `<p style="margin: 5px 0; color: #64748b;"><strong>Ultima posizione:</strong><br>${formattedDate}</p>`;
                 
                 if (lastPosition.imageUrl) {
                     popupContent += `<img src="${lastPosition.imageUrl}" style="max-width:200px; max-height:150px; border-radius: 8px; margin: 10px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">`;
@@ -784,7 +320,7 @@ function displayStonesOnMap(filterStoneName = 'all') {
                     font-weight: 500;
                     transition: all 0.2s ease;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">📖 ${translate('see-history')}</button>`;
+                " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">📖 Vedi la storia</button>`;
                 popupContent += `</div>`;
 
                 marker.bindPopup(popupContent, { maxWidth: 280, className: 'custom-popup' });
@@ -849,26 +385,13 @@ function addSingleImageMarker(position, stoneName, stoneColor, index) {
         hour: '2-digit', minute: '2-digit'
     });
 
-    let imagePopupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
-    imagePopupContent += `<h4 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${stoneName.replace(/_/g, ' ')}</h4>`;
-    imagePopupContent += `<img src="${position.imageUrl}" style="max-width: 200px; max-height: 150px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
-    imagePopupContent += `<p style="margin: 10px 0 5px 0; font-size: 0.9em; color: #64748b;">${formattedDate}</p>`;
-    imagePopupContent += `<br><button onclick="showStoneHistory('${stoneName}')" style="
-        background: linear-gradient(135deg, ${stoneColor} 0%, ${adjustColor(stoneColor, -20)} 100%); 
-        color: white; 
-        border: none; 
-        padding: 8px 16px; 
-        border-radius: 6px; 
-        cursor: pointer; 
-        margin-top: 8px;
-        font-weight: 500;
-        font-size: 0.875rem;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">📖 ${translate('see-history')}</button>`;
-    imagePopupContent += `</div>`;
-
-    imageMarker.bindPopup(imagePopupContent, { maxWidth: 250, className: 'custom-popup' });
+    imageMarker.bindPopup(`
+        <div style="text-align: center; font-family: 'Inter', sans-serif;">
+            <h4 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${stoneName.replace(/_/g, ' ')}</h4>
+            <img src="${position.imageUrl}" style="max-width: 200px; max-height: 150px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <p style="margin: 10px 0 5px 0; font-size: 0.9em; color: #64748b;">${formattedDate}</p>
+        </div>
+    `, { maxWidth: 250, className: 'custom-popup' });
 
     currentImageMarkers.addLayer(imageMarker);
 }
@@ -913,7 +436,7 @@ function adjustColor(color, amount) {
 // Funzione per mostrare il pannello della storia
 function showStoneHistory(stoneName) {
     document.getElementById('history-panel').classList.remove('hidden');
-    document.getElementById('history-title').textContent = `${translate('history-of')} ${translateStoneName(stoneName)}`;
+    document.getElementById('history-title').textContent = `Storia di ${stoneName.replace(/_/g, ' ')}`;
 
     // Inizializza la mini-mappa se non è già stata inizializzata
     if (!miniMap) {
@@ -940,7 +463,6 @@ function showStoneHistory(stoneName) {
 
 // Funzione per chiudere il pannello storia
 function closeHistoryPanel() {
-    stopAutoPlay(); // Ferma l'autoplay quando si chiude il pannello
     document.getElementById('history-panel').classList.add('hidden');
 }
 
@@ -962,9 +484,7 @@ function populateHistoryPanel(stoneName) {
 
 // Funzione per configurare i pulsanti di navigazione
 function setupNavigationButtons() {
-    // Event listener per i pulsanti di navigazione
     document.getElementById('prev-button').onclick = () => {
-        stopAutoPlay(); // Ferma l'autoplay quando si naviga manualmente
         if (currentHistoryIndex > 0) {
             currentHistoryIndex--;
             updateHistoryPanel();
@@ -972,7 +492,6 @@ function setupNavigationButtons() {
     };
     
     document.getElementById('next-button').onclick = () => {
-        stopAutoPlay(); // Ferma l'autoplay quando si naviga manualmente
         if (currentHistoryIndex < currentStoneHistory.length - 1) {
             currentHistoryIndex++;
             updateHistoryPanel();
@@ -984,23 +503,11 @@ function setupNavigationButtons() {
 function updateHistoryPanel() {
     const currentPos = currentStoneHistory[currentHistoryIndex];
     
-    // Aggiorna l'immagine con transizione
+    // Aggiorna l'immagine
     const historyImage = document.getElementById('history-image');
     if (currentPos.imageUrl) {
-        // Aggiungi effetto di transizione
-        historyImage.style.opacity = '0';
-        historyImage.style.transform = 'scale(0.95)';
-        
-        setTimeout(() => {
-            historyImage.src = currentPos.imageUrl;
-            historyImage.style.display = 'block';
-            
-            // Anima l'entrata della nuova immagine
-            setTimeout(() => {
-                historyImage.style.opacity = '1';
-                historyImage.style.transform = 'scale(1)';
-            }, 50);
-        }, 200);
+        historyImage.src = currentPos.imageUrl;
+        historyImage.style.display = 'block';
     } else {
         historyImage.style.display = 'none';
     }
@@ -1072,7 +579,6 @@ function updateMiniMap() {
         
         // Aggiungi click handler per navigare
         marker.on('click', () => {
-            stopAutoPlay(); // Ferma l'autoplay quando si clicca sulla mini-mappa
             currentHistoryIndex = index;
             updateHistoryPanel();
         });
@@ -1097,7 +603,6 @@ function populateTimeline() {
         point.style.left = `${(index / (currentStoneHistory.length - 1)) * 100}%`;
         
         point.addEventListener('click', () => {
-            stopAutoPlay(); // Ferma l'autoplay quando si clicca sulla timeline
             currentHistoryIndex = index;
             updateHistoryPanel();
         });
@@ -1118,58 +623,6 @@ function updateTimelineActivePoint() {
             point.classList.remove('active');
         }
     });
-}
-
-// Funzioni per la riproduzione automatica
-function startAutoPlay() {
-    if (isAutoPlaying || currentStoneHistory.length <= 1) return;
-    
-    isAutoPlaying = true;
-    updatePlayPauseButton();
-    
-    autoPlayInterval = setInterval(() => {
-        if (currentHistoryIndex < currentStoneHistory.length - 1) {
-            currentHistoryIndex++;
-            updateHistoryPanel();
-        } else {
-            // Ricomincia dall'inizio
-            currentHistoryIndex = 0;
-            updateHistoryPanel();
-        }
-    }, autoPlaySpeed);
-}
-
-function stopAutoPlay() {
-    if (!isAutoPlaying) return;
-    
-    isAutoPlaying = false;
-    updatePlayPauseButton();
-    
-    if (autoPlayInterval) {
-        clearInterval(autoPlayInterval);
-        autoPlayInterval = null;
-    }
-}
-
-function toggleAutoPlay() {
-    if (isAutoPlaying) {
-        stopAutoPlay();
-    } else {
-        startAutoPlay();
-    }
-}
-
-function updatePlayPauseButton() {
-    const playPauseBtn = document.getElementById('play-pause-btn');
-    if (playPauseBtn) {
-        if (isAutoPlaying) {
-            playPauseBtn.innerHTML = `<span class="btn-icon">⏸️</span><span class="btn-text">${translate('pause')}</span>`;
-            playPauseBtn.title = 'Metti in pausa la riproduzione automatica';
-        } else {
-            playPauseBtn.innerHTML = `<span class="btn-icon">▶️</span><span class="btn-text">${translate('play')}</span>`;
-            playPauseBtn.title = 'Avvia la riproduzione automatica';
-        }
-    }
 }
 
 // Funzioni per il fullscreen

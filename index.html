@@ -40,40 +40,20 @@
             <div class="header-content">
                 <h1>
                     <span class="header-icon">🗺️</span>
-                    <span data-i18n="title">Mappa delle Pietre</span>
+                    Mappa delle Pietre
                 </h1>
-                <p class="header-subtitle" data-i18n="subtitle">Esplora la storia attraverso il tempo</p>
+                <p class="header-subtitle">Esplora la storia attraverso il tempo</p>
             </div>
             
             <div class="controls">
                 <div class="control-group">
-                    <label for="language-select">
-                        <span class="control-icon">🌐</span>
-                        <span data-i18n="language">Lingua:</span>
-                    </label>
-                    <div class="custom-select">
-                        <select id="language-select" aria-label="Seleziona lingua">
-                            <option value="it">🇮🇹 Italiano</option>
-                            <option value="en">🇬🇧 English</option>
-                            <option value="es">🇪🇸 Español</option>
-                            <option value="fr">🇫🇷 Français</option>
-                            <option value="de">🇩🇪 Deutsch</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="control-group">
                     <label for="stone-select">
                         <span class="control-icon">🪨</span>
-                        <span data-i18n="select-stone">Seleziona una pietra:</span>
+                        Seleziona una pietra:
                     </label>
-                    <div class="custom-select-with-search">
-                        <div class="search-container">
-                            <input type="text" id="search-input" placeholder="Cerca una pietra..." data-i18n-placeholder="search-placeholder" aria-label="Cerca pietre">
-                            <button id="clear-search" class="clear-search-btn" aria-label="Cancella ricerca" title="Cancella">✕</button>
-                        </div>
+                    <div class="custom-select">
                         <select id="stone-select" aria-label="Seleziona una pietra da visualizzare">
-                            <option value="all" data-i18n="show-all">Mostra tutte</option>
+                            <option value="all">Mostra tutte</option>
                         </select>
                     </div>
                 </div>
@@ -81,13 +61,13 @@
                 <div class="control-group">
                     <label for="image-display-select">
                         <span class="control-icon">📸</span>
-                        <span data-i18n="show-images">Mostra immagini:</span>
+                        Mostra immagini:
                     </label>
                     <div class="custom-select">
                         <select id="image-display-select" aria-label="Seleziona modalità visualizzazione immagini">
-                            <option value="last" data-i18n="last">Ultima</option>
-                            <option value="none" data-i18n="none">Nessuna</option>
-                            <option value="all" data-i18n="all">Tutte</option>
+                            <option value="last">Ultima</option>
+                            <option value="none">Nessuna</option>
+                            <option value="all">Tutte</option>
                         </select>
                     </div>
                 </div>
@@ -104,7 +84,7 @@
             ✕
         </button>
         
-        <h2 id="history-title" data-i18n="history-of">Storia di...</h2>
+        <h2 id="history-title">Storia di...</h2>
         
         <div class="history-content">
             <!-- Galleria Immagini migliorata -->
@@ -126,16 +106,12 @@
                 </div>
                 
                 <div class="navigation-buttons">
-                    <button id="play-pause-btn" class="nav-btn play-pause-btn" aria-label="Riproduci/Pausa automatica" onclick="toggleAutoPlay()">
-                        <span class="btn-icon">▶️</span>
-                        <span class="btn-text" data-i18n="play">Play</span>
-                    </button>
                     <button id="prev-button" class="nav-btn prev-btn" aria-label="Immagine precedente">
                         <span class="btn-icon">←</span>
-                        <span class="btn-text" data-i18n="previous">Precedente</span>
+                        <span class="btn-text">Precedente</span>
                     </button>
                     <button id="next-button" class="nav-btn next-btn" aria-label="Immagine successiva">
-                        <span class="btn-text" data-i18n="next">Successiva</span>
+                        <span class="btn-text">Successiva</span>
                         <span class="btn-icon">→</span>
                     </button>
                 </div>
@@ -143,16 +119,16 @@
 
             <!-- Mini Mappa migliorata -->
             <div class="mini-map-container">
-                <h3 class="mini-map-title" data-i18n="historical-path">Percorso storico</h3>
+                <h3 class="mini-map-title">Percorso storico</h3>
                 <div id="mini-map" aria-label="Mini mappa del percorso"></div>
                 <div class="map-legend">
                     <div class="legend-item">
                         <span class="legend-dot current"></span>
-                        <span data-i18n="current-position">Posizione attuale</span>
+                        <span>Posizione attuale</span>
                     </div>
                     <div class="legend-item">
                         <span class="legend-dot path"></span>
-                        <span data-i18n="historical-path">Percorso storico</span>
+                        <span>Percorso storico</span>
                     </div>
                 </div>
             </div>
@@ -160,12 +136,12 @@
 
         <!-- Timeline migliorata -->
         <div class="timeline-container">
-            <h3 class="timeline-title" data-i18n="movements-timeline">Timeline degli spostamenti</h3>
+            <h3 class="timeline-title">Timeline degli spostamenti</h3>
             <div id="timeline" role="slider" aria-label="Timeline degli spostamenti della pietra"></div>
             <div class="timeline-info">
-                <span class="timeline-start" data-i18n="start">Inizio</span>
+                <span class="timeline-start">Inizio</span>
                 <span class="timeline-current" id="timeline-current-date">Data attuale</span>
-                <span class="timeline-end" data-i18n="end">Fine</span>
+                <span class="timeline-end">Fine</span>
             </div>
         </div>
     </div>
