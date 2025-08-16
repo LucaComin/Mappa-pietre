@@ -156,11 +156,18 @@ function processSheetData(rows) {
             let date;
             
             // Gestisci diversi formati di data
-            if (typeof timestamp === 'string') {
-                date = new Date(timestamp);
-            } else {
+            if (typeof timestamp === 'string' && timestamp.startsWith('Date(')) {
+                // Estrai i valori numerici da 'Date(YYYY,M,D)'
+                const dateParts = timestamp.substring(5, timestamp.length - 1).split(',');
+                const year = parseInt(dateParts[0]);
+                const month = parseInt(dateParts[1]); // Mese è 0-based in JS
+                const day = parseInt(dateParts[2]);
+                date = new Date(year, month, day);
+            } else if (typeof timestamp === 'number') {
                 // Il timestamp da Google Sheets è un formato numerico che rappresenta giorni da 1899-12-30
                 date = new Date((timestamp - 25569) * 86400 * 1000);
+            } else if (typeof timestamp === 'string') {
+                date = new Date(timestamp);
             }
 
             if (!allStonesData[name]) {
