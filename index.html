@@ -43,9 +43,34 @@
                     Mappa delle Pietre
                 </h1>
                 <p class="header-subtitle">Esplora la storia attraverso il tempo</p>
+                <div class="header-nav">
+                    <a href="about.html" id="about-us-link" class="nav-link">Chi Siamo</a>
+                </div>
             </div>
             
             <div class="controls">
+                <div class="control-group">
+                    <label for="language-select">
+                        <span class="control-icon">🌐</span>
+                        Seleziona lingua:
+                    </label>
+                    <div class="custom-select">
+                        <select id="language-select" aria-label="Seleziona la lingua dell'interfaccia" onchange="changeLanguage(this.value)">
+                            <option value="it">Italiano</option>
+                            <option value="en">English</option>
+                            <option value="zh">中文</option>
+                            <option value="fr">Français</option>
+                            <option value="ru">Русский</option>
+                            <option value="ar">العربية</option>
+                            <option value="de">Deutsch</option>
+                            <option value="es">Español</option>
+                            <option value="pl">Polski</option>
+                            <option value="pt">Português</option>
+                            <option value="ja">日本語</option>
+                        </select>
+                    </div>
+                </div>
+                
                 <div class="control-group">
                     <label for="stone-select">
                         <span class="control-icon">🪨</span>
@@ -106,6 +131,10 @@
                 </div>
                 
                 <div class="navigation-buttons">
+                    <button id="play-pause-btn" class="nav-btn play-pause-btn" aria-label="Riproduci/Pausa automatica" onclick="toggleAutoPlay()">
+                        <span class="btn-icon">▶️</span>
+                        <span class="btn-text">Play</span>
+                    </button>
                     <button id="prev-button" class="nav-btn prev-btn" aria-label="Immagine precedente">
                         <span class="btn-icon">←</span>
                         <span class="btn-text">Precedente</span>
@@ -159,6 +188,9 @@
     <!-- MarkerCluster plugin -->
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
+    <!-- Translations -->
+    <script src="translations.js"></script>
+    
     <!-- App JS -->
     <script src="script.js"></script>
     
@@ -174,3 +206,72 @@
     </script>
 </body>
 </html>
+
+    <!-- Guida Interattiva -->
+    <div id="tutorial-overlay" class="tutorial-overlay hidden" role="dialog" aria-labelledby="tutorial-title" aria-modal="true">
+        <div class="tutorial-content">
+            <div class="tutorial-header">
+                <h2 id="tutorial-title">Benvenuto nella Mappa delle Pietre!</h2>
+                <button id="tutorial-close" class="tutorial-close-btn" aria-label="Chiudi guida">✕</button>
+            </div>
+            
+            <div class="tutorial-body">
+                <div class="tutorial-step" data-step="1">
+                    <div class="tutorial-icon">🗺️</div>
+                    <h3>Esplora la Mappa</h3>
+                    <p>Questa mappa interattiva ti permette di seguire il viaggio delle pietre attraverso il tempo. Ogni pietra ha una sua storia unica da raccontare.</p>
+                </div>
+                
+                <div class="tutorial-step hidden" data-step="2">
+                    <div class="tutorial-icon">🪨</div>
+                    <h3>Seleziona una Pietra</h3>
+                    <p>Usa il menu a tendina in alto per selezionare una pietra specifica o visualizzare tutte le pietre contemporaneamente. Ogni pietra ha un colore distintivo.</p>
+                </div>
+                
+                <div class="tutorial-step hidden" data-step="3">
+                    <div class="tutorial-icon">📸</div>
+                    <h3>Visualizza le Immagini</h3>
+                    <p>Puoi scegliere di mostrare tutte le immagini, solo l'ultima o nessuna immagine. Le immagini sono rappresentate da marcatori circolari sulla mappa.</p>
+                </div>
+                
+                <div class="tutorial-step hidden" data-step="4">
+                    <div class="tutorial-icon">📖</div>
+                    <h3>Scopri la Storia</h3>
+                    <p>Clicca su una pietra per vedere il popup informativo, poi clicca su "Vedi la storia" per aprire il pannello dettagliato con timeline e galleria immagini.</p>
+                </div>
+                
+                <div class="tutorial-step hidden" data-step="5">
+                    <div class="tutorial-icon">🌐</div>
+                    <h3>Cambia Lingua</h3>
+                    <p>Il sito supporta multiple lingue. Usa il selettore lingua in alto per cambiare l'interfaccia nella tua lingua preferita.</p>
+                </div>
+                
+                <div class="tutorial-step hidden" data-step="6">
+                    <div class="tutorial-icon">✨</div>
+                    <h3>Inizia l'Esplorazione!</h3>
+                    <p>Ora sei pronto per esplorare la mappa! Ricorda che puoi sempre riaprire questa guida cliccando sul pulsante "?" nell'angolo in basso a destra.</p>
+                </div>
+            </div>
+            
+            <div class="tutorial-footer">
+                <div class="tutorial-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 16.67%"></div>
+                    </div>
+                    <span class="progress-text">1 di 6</span>
+                </div>
+                
+                <div class="tutorial-buttons">
+                    <button id="tutorial-prev" class="tutorial-btn tutorial-btn-secondary" disabled>Precedente</button>
+                    <button id="tutorial-skip" class="tutorial-btn tutorial-btn-outline">Salta</button>
+                    <button id="tutorial-next" class="tutorial-btn tutorial-btn-primary">Avanti</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pulsante per riaprire la guida -->
+    <button id="help-button" class="help-button" aria-label="Apri guida" title="Guida">
+        <span class="help-icon">?</span>
+    </button>
+
