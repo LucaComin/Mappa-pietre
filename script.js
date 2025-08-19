@@ -49,14 +49,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Inizializza la guida interattiva
-        tutorialGuide = new TutorialGuide();
-        console.log('Guida interattiva inizializzata');
+        if (typeof TutorialGuide !== 'undefined') {
+            tutorialGuide = new TutorialGuide();
+            console.log('Guida interattiva inizializzata');
+        } else {
+            console.warn('TutorialGuide non trovata, guida non disponibile');
+        }
         
         // Nascondi loading overlay dopo l'inizializzazione
         setTimeout(() => {
             hideLoadingOverlay();
             console.log('Loading overlay nascosto');
-        }, 3000); // Aumentato a 3 secondi per dare più tempo
+        }, 5000); // Aumentato a 5 secondi per dare più tempo
         
     } catch (error) {
         console.error('Errore durante l\'inizializzazione:', error);

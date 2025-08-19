@@ -74,14 +74,29 @@
     </div>
     <script src="translations.js"></script>
     <script>
+        // Funzione per ottenere la traduzione
+        function t(key) {
+            const currentLang = localStorage.getItem('selectedLanguage') || 'it';
+            if (translations[currentLang] && translations[currentLang][key]) {
+                return translations[currentLang][key];
+            }
+            // Fallback ai testi italiani se la traduzione non esiste
+            return translations['it'][key] || key;
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             const currentLang = localStorage.getItem('selectedLanguage') || 'it';
-            document.getElementById('about-us-title').textContent = t('aboutUsTitle');
-            document.getElementById('about-us-description-1').innerHTML = t('aboutUsDescription1');
-            document.getElementById('about-us-description-2').textContent = t('aboutUsDescription2');
-            document.getElementById('about-us-description-3').textContent = t('aboutUsDescription3');
-            document.getElementById('instagram-follow').textContent = t('instagramFollow');
-            document.getElementById('back-to-map').textContent = t('backToMap');
+            
+            // Aggiorna il titolo della pagina
+            document.title = t('aboutPageTitle') || 'Chi Siamo - Mappa delle Pietre';
+            
+            // Aggiorna tutti i testi
+            document.getElementById('about-us-title').textContent = t('aboutUsTitle') || 'Chi Siamo';
+            document.getElementById('about-us-description-1').innerHTML = t('aboutUsDescription1') || 'Benvenuti nel progetto <b>Mappa delle Pietre</b>! Questo progetto nasce da un\'idea semplice ma profonda: trasformare oggetti comuni, come i sassi, in veicoli di gioia e connessione. L\'obiettivo principale è regalare un sorriso a chi trova una delle nostre pietre viaggianti e, allo stesso tempo, creare una rete invisibile di persone che condividono un piccolo gesto di felicità.';
+            document.getElementById('about-us-description-2').textContent = t('aboutUsDescription2') || 'Ogni sasso che vedi sulla mappa ha una storia. È stato dipinto con cura, nascosto in un luogo speciale e poi trovato da qualcuno che ha deciso di farlo viaggiare ancora. Il nostro desiderio è che queste pietre continuino il loro percorso, portando un messaggio di positività e avventura in ogni angolo del mondo. È un modo per unire le persone attraverso la curiosità e la sorpresa, dimostrando come anche le cose più piccole possano generare un impatto significativo.';
+            document.getElementById('about-us-description-3').textContent = t('aboutUsDescription3') || 'Unisciti a noi in questa avventura! Puoi trovare una pietra, nasconderne una nuova, o semplicemente seguire il viaggio delle pietre esistenti sulla mappa. Ogni interazione contribuisce a rendere il mondo un posto un po\' più magico e sorridente.';
+            document.getElementById('instagram-follow').textContent = t('instagramFollow') || 'Seguici su Instagram per aggiornamenti e nuove pietre:';
+            document.getElementById('back-to-map').textContent = t('backToMap') || 'Torna alla Mappa';
         });
     </script>
 </body>
