@@ -29,39 +29,23 @@ let tutorialGuide;
 
 // Inizializzazione dell'applicazione
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM caricato, inizializzazione in corso...');
     showLoadingOverlay();
+    initMap();
+    loadData();
+    setupEventListeners();
     
-    try {
-        initMap();
-        console.log('Mappa inizializzata');
-        
-        loadData();
-        console.log('Caricamento dati avviato');
-        
-        setupEventListeners();
-        console.log('Event listeners configurati');
-        
-        // Inizializza il sistema di traduzione
-        if (typeof initializeLanguageSelector === 'function') {
-            initializeLanguageSelector();
-            console.log('Selettore lingua inizializzato');
-        }
-        
-        // Inizializza la guida interattiva
-        tutorialGuide = new TutorialGuide();
-        console.log('Guida interattiva inizializzata');
-        
-        // Nascondi loading overlay dopo l'inizializzazione
-        setTimeout(() => {
-            hideLoadingOverlay();
-            console.log('Loading overlay nascosto');
-        }, 3000); // Aumentato a 3 secondi per dare più tempo
-        
-    } catch (error) {
-        console.error('Errore durante l\'inizializzazione:', error);
-        hideLoadingOverlay();
+    // Inizializza il sistema di traduzione
+    if (typeof initializeLanguageSelector === 'function') {
+        initializeLanguageSelector();
     }
+    
+    // Inizializza la guida interattiva
+    tutorialGuide = new TutorialGuide();
+    
+    // Nascondi loading overlay dopo l'inizializzazione
+    setTimeout(() => {
+        hideLoadingOverlay();
+    }, 1500);
 });
 
 // Funzioni per il loading overlay
@@ -142,29 +126,21 @@ function initMap() {
 
 // Funzione per caricare e processare i dati dal Google Sheet
 async function loadData() {
-    console.log('Inizio caricamento dati...');
     try {
         // Per test, usiamo dati di esempio se non è configurato il Google Sheet
         if (GOOGLE_SHEET_ID === 'YOUR_GOOGLE_SHEET_ID') {
-            console.log('Caricamento dati di esempio (Google Sheet non configurato)');
             loadSampleData();
             return;
         }
 
-        console.log('Tentativo di caricamento da Google Sheet:', GOOGLE_SHEET_URL);
         const response = await fetch(GOOGLE_SHEET_URL);
-        console.log('Risposta ricevuta:', response.status);
-        
         const text = await response.text();
-        console.log('Testo ricevuto (primi 200 caratteri):', text.substring(0, 200));
         
         // Google Sheets API restituisce un JSON con un wrapper, dobbiamo estrarlo
         const jsonString = text.substring(text.indexOf('(') + 1, text.lastIndexOf(')'));
         const jsonData = JSON.parse(jsonString);
-        console.log('Dati JSON parsati:', jsonData);
 
         const rows = jsonData.table.rows;
-        console.log('Numero di righe trovate:', rows.length);
         processSheetData(rows);
 
     } catch (error) {
@@ -230,7 +206,6 @@ function processSheetData(rows) {
 
 // Funzione per caricare dati di esempio per test
 function loadSampleData() {
-    console.log('Caricamento dati di esempio...');
     const sampleData = {
         'Pietra_Rossa': [
             {
@@ -290,13 +265,8 @@ function loadSampleData() {
     };
 
     allStonesData = sampleData;
-    console.log('Dati di esempio caricati:', allStonesData);
-    
     populateStoneSelect();
-    console.log('Menu pietre popolato');
-    
     displayStonesOnMap('all');
-    console.log('Pietre visualizzate sulla mappa');
 }
 
 // Funzione per popolare il menu a tendina delle pietre
@@ -449,43 +419,44 @@ function addSingleImageMarker(position, stoneName, stoneColor, index) {
         padding: 8px 16px; 
         border-radius: 6px; 
         cursor: pointer; 
-        margin-top: 8px;
+        font-size: 0.9em;
         font-weight: 500;
-        font-size: 0.875rem;
         transition: all 0.2s ease;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">📖 ${typeof t === 'function' ? t('seeHistory') : 'Vedi la storia'}</button>`;
+    " onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)';">📖 ${typeof t === 'function' ? t('seeHistory') : 'Vedi la storia'}</button>`;
     imagePopupContent += `</div>`;
 
     imageMarker.bindPopup(imagePopupContent, { maxWidth: 250, className: 'custom-popup' });
-
     currentImageMarkers.addLayer(imageMarker);
 }
 
 // Funzione per creare icone personalizzate
 function createCustomIcon(color, isMain = false) {
-    const size = isMain ? 30 : 20;
-    const borderWidth = isMain ? 4 : 3;
-    
+    const size = isMain ? 40 : 30;
+    const iconHtml = `<div style="
+        width: ${size}px; 
+        height: ${size}px; 
+        background-color: ${color}; 
+        border: 3px solid white; 
+        border-radius: 50%; 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: ${size * 0.6}px;
+        color: white;
+        font-weight: bold;
+    ">${isMain ? '📍' : '•'}</div>`;
+
     return L.divIcon({
         className: 'custom-marker',
-        html: `<div style="
-            width: ${size}px; 
-            height: ${size}px; 
-            border-radius: 50%; 
-            background: linear-gradient(135deg, ${color} 0%, ${adjustColor(color, -20)} 100%); 
-            border: ${borderWidth}px solid white; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            position: relative;
-        ">
-            ${isMain ? '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 12px; font-weight: bold;">📍</div>' : ''}
-        </div>`,
+        html: iconHtml,
         iconSize: [size, size],
         iconAnchor: [size/2, size/2]
     });
 }
 
-// Funzione helper per regolare il colore
+// Funzione per regolare la luminosità di un colore
 function adjustColor(color, amount) {
     const usePound = color[0] === '#';
     const col = usePound ? color.slice(1) : color;
@@ -499,41 +470,42 @@ function adjustColor(color, amount) {
     return (usePound ? '#' : '') + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
 }
 
-// Funzione per mostrare il pannello della storia
+// Funzione per mostrare la storia di una pietra
 function showStoneHistory(stoneName) {
-    document.getElementById('history-panel').classList.remove('hidden');
-    document.getElementById('history-title').textContent = `${typeof t === 'function' ? t('historyOf') : 'Storia di'} ${stoneName.replace(/_/g, ' ')}`;
-
-    // Inizializza la mini-mappa se non è già stata inizializzata
-    if (!miniMap) {
-        setTimeout(() => {
-            miniMap = L.map('mini-map', { 
-                zoomControl: false, 
-                attributionControl: false, 
-                dragging: true, 
-                scrollWheelZoom: true, 
-                doubleClickZoom: true, 
-                boxZoom: false, 
-                keyboard: false,
-                tap: true,
-                touchZoom: true
-            }).setView([0, 0], 1);
-            
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {}).addTo(miniMap);
+    const historyPanel = document.getElementById('history-panel');
+    const historyTitle = document.getElementById('history-title');
+    
+    if (historyPanel && historyTitle) {
+        historyTitle.textContent = `Storia di ${stoneName.replace(/_/g, ' ')}`;
+        historyPanel.classList.remove('hidden');
+        
+        // Inizializza la mini-mappa se non esiste
+        if (!miniMap) {
+            setTimeout(() => {
+                miniMap = L.map('mini-map').setView([41.9028, 12.4964], 6);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(miniMap);
+                miniMapMarkers.addTo(miniMap);
+                
+                populateHistoryPanel(stoneName);
+            }, 100);
+        } else {
             populateHistoryPanel(stoneName);
-        }, 100);
-    } else {
-        populateHistoryPanel(stoneName);
+        }
     }
 }
 
-// Funzione per chiudere il pannello storia
+// Funzione per chiudere il pannello della storia
 function closeHistoryPanel() {
-    stopAutoPlay(); // Ferma l'autoplay quando si chiude il pannello
-    document.getElementById('history-panel').classList.add('hidden');
+    const historyPanel = document.getElementById('history-panel');
+    if (historyPanel) {
+        historyPanel.classList.add('hidden');
+        stopAutoPlay(); // Ferma l'autoplay quando si chiude il pannello
+    }
 }
 
-// Variabili per il pannello storia
+// Variabili per la gestione della storia
 let currentStoneHistory = [];
 let currentHistoryIndex = 0;
 let miniMapMarkers = L.featureGroup();
@@ -1094,58 +1066,5 @@ function resetTutorial() {
     if (tutorialGuide) {
         tutorialGuide.reset();
     }
-}
-
-
-// Funzione per aggiornare il link About Us con la traduzione corretta
-function updateAboutUsLink() {
-    const aboutUsLink = document.getElementById('about-us-link');
-    const currentLang = localStorage.getItem('selectedLanguage') || 'it';
-    
-    if (aboutUsLink && translations[currentLang] && translations[currentLang]['aboutUs']) {
-        aboutUsLink.textContent = translations[currentLang]['aboutUs'];
-    }
-}
-
-// Aggiorna la funzione di inizializzazione del selettore di lingua
-function initializeLanguageSelector() {
-    const languageSelect = document.getElementById('language-select');
-    const savedLanguage = localStorage.getItem('selectedLanguage') || 'it';
-    
-    if (languageSelect) {
-        languageSelect.value = savedLanguage;
-        updateUIText(savedLanguage);
-        updateAboutUsLink();
-    }
-}
-
-// Funzione per cambiare lingua (aggiornata)
-function changeLanguage(lang) {
-    localStorage.setItem('selectedLanguage', lang);
-    updateUIText(lang);
-    updateAboutUsLink();
-    
-    if (tutorialGuide) {
-        tutorialGuide.updateLanguage(lang);
-    }
-}
-
-// Funzione per aggiornare tutti i testi dell'interfaccia
-function updateUIText(lang) {
-    const elements = {
-        'language-label': 'selectLanguage',
-        'stone-label': 'selectStone', 
-        'image-label': 'showImages'
-    };
-    
-    Object.entries(elements).forEach(([id, key]) => {
-        const element = document.getElementById(id);
-        if (element && translations[lang] && translations[lang][key]) {
-            element.textContent = translations[lang][key];
-        }
-    });
-    
-    updateSelectOptions(lang);
-    updateHeaderSubtitle(lang);
 }
 
