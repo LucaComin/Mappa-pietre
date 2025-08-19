@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Siamo - Mappa delle Pietre</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 800px;
+            margin: 20px auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        p {
+            margin-bottom: 15px;
+        }
+        .instagram-link {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+        }
+        .instagram-link a {
+            color: #e1306c;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .instagram-link a:hover {
+            text-decoration: underline;
+        }
+        .back-button {
+            display: block;
+            text-align: center;
+            margin-top: 40px;
+        }
+        .back-button a {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1.1em;
+        }
+        .back-button a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="about-us-title">Chi Siamo</h1>
+    <p id="about-us-description-1">Benvenuti nel progetto 
+
+
+<b>Mappa delle Pietre</b>! Questo progetto nasce da un'idea semplice ma profonda: trasformare oggetti comuni, come i sassi, in veicoli di gioia e connessione. L'obiettivo principale è regalare un sorriso a chi trova una delle nostre pietre viaggianti e, allo stesso tempo, creare una rete invisibile di persone che condividono un piccolo gesto di felicità.</p>
+    <p id="about-us-description-2">Ogni sasso che vedi sulla mappa ha una storia. È stato dipinto con cura, nascosto in un luogo speciale e poi trovato da qualcuno che ha deciso di farlo viaggiare ancora. Il nostro desiderio è che queste pietre continuino il loro percorso, portando un messaggio di positività e avventura in ogni angolo del mondo. È un modo per unire le persone attraverso la curiosità e la sorpresa, dimostrando come anche le cose più piccole possano generare un impatto significativo.</p>
+    <p id="about-us-description-3">Unisciti a noi in questa avventura! Puoi trovare una pietra, nasconderne una nuova, o semplicemente seguire il viaggio delle pietre esistenti sulla mappa. Ogni interazione contribuisce a rendere il mondo un posto un po' più magico e sorridente.</p>
+    <div class="instagram-link">
+        <p id="instagram-follow">Seguici su Instagram per aggiornamenti e nuove pietre:</p>
+        <a href="https://www.instagram.com/slidingstones?igsh=eGpxb2FnZXVmOXhi" target="_blank">@slidingstones</a>
+    </div>
+    <div class="back-button">
+        <a href="index.html" id="back-to-map">Torna alla Mappa</a>
+    </div>
+    <script src="translations.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentLang = localStorage.getItem('selectedLanguage') || 'it';
+            document.getElementById('about-us-title').textContent = t('aboutUsTitle');
+            document.getElementById('about-us-description-1').innerHTML = t('aboutUsDescription1');
+            document.getElementById('about-us-description-2').textContent = t('aboutUsDescription2');
+            document.getElementById('about-us-description-3').textContent = t('aboutUsDescription3');
+            document.getElementById('instagram-follow').textContent = t('instagramFollow');
+            document.getElementById('back-to-map').textContent = t('backToMap');
+        });
+    </script>
+</body>
+</html>
+
