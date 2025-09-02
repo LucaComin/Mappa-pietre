@@ -4,7 +4,11 @@ let miniMap; // La mini-mappa nel pannello storia
 let allStonesData = {}; // Oggetto per memorizzare i dati delle pietre, raggruppati per nome
 let currentMarkers = L.featureGroup(); // Gruppo di marcatori attualmente sulla mappa
 let currentPolylines = L.featureGroup(); // Gruppo di polilinee attualmente sulla mappa
-let currentImageMarkers = L.markerClusterGroup(); // Gruppo di marcatori per le immagini con clustering
+let currentImageMarkers = L.markerClusterGroup({
+    showCoverageOnHover: false, // Disabilita i pallini piccoli quando si passa sopra il cluster
+    spiderfyOnMaxZoom: false, // Disabilita l'espansione a ragno quando si raggiunge il massimo zoom
+    removeOutsideVisibleBounds: true // Rimuove i marker fuori dalla vista per migliorare le performance
+}); // Gruppo di marcatori per le immagini con clustering
 
 // Variabili per la riproduzione automatica
 let autoPlayInterval = null;
@@ -319,8 +323,7 @@ function displayStonesOnMap(filterStoneName = 'all') {
                 
                 // Formatta la data per il popup
                 const formattedDate = lastPosition.dateObj.toLocaleString('it-IT', {
-                    year: 'numeric', month: 'long', day: 'numeric',
-                    hour: '2-digit', minute: '2-digit'
+                    year: 'numeric', month: 'long', day: 'numeric'
                 });
 
                 // Contenuto del popup migliorato
@@ -404,8 +407,7 @@ function addSingleImageMarker(position, stoneName, stoneColor, index) {
     const imageMarker = L.marker([position.lat, position.lon], { icon: imageIcon });
     
     const formattedDate = position.dateObj.toLocaleString('it-IT', {
-        year: 'numeric', month: 'long', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
+        year: 'numeric', month: 'long', day: 'numeric'
     });
 
     let imagePopupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
@@ -566,8 +568,7 @@ function updateHistoryPanel() {
     
     // Aggiorna la caption
     const formattedDate = currentPos.dateObj.toLocaleString('it-IT', {
-        year: 'numeric', month: 'long', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
+        year: 'numeric', month: 'long', day: 'numeric'
     });
     document.getElementById('history-image-caption').textContent = formattedDate;
     
