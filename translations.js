@@ -75,7 +75,16 @@ const translations = {
         tutorialSkip: "Salta",
         tutorialStart: "Inizia!",
         tutorialClose: "Chiudi guida",
-        tutorialHelp: "Guida"
+        tutorialHelp: "Guida",
+        
+        // About Us
+        aboutUs: "Chi Siamo",
+        aboutUsTitle: "Chi Siamo",
+        aboutUsDescription1: "Benvenuti nel progetto <b>Mappa delle Pietre</b>! Questo progetto nasce da un'idea semplice ma profonda: trasformare oggetti comuni, come i sassi, in veicoli di gioia e connessione. L'obiettivo principale è regalare un sorriso a chi trova una delle nostre pietre viaggianti e, allo stesso tempo, creare una rete invisibile di persone che condividono un piccolo gesto di felicità.",
+        aboutUsDescription2: "Ogni sasso che vedi sulla mappa ha una storia. È stato dipinto con cura, nascosto in un luogo speciale e poi trovato da qualcuno che ha deciso di farlo viaggiare ancora. Il nostro desiderio è che queste pietre continuino il loro percorso, portando un messaggio di positività e avventura in ogni angolo del mondo. È un modo per unire le persone attraverso la curiosità e la sorpresa, dimostrando come anche le cose più piccole possano generare un impatto significativo.",
+        aboutUsDescription3: "Unisciti a noi in questa avventura! Puoi trovare una pietra, nasconderne una nuova, o semplicemente seguire il viaggio delle pietre esistenti sulla mappa. Ogni interazione contribuisce a rendere il mondo un posto un po' più magico e sorridente.",
+        instagramFollow: "Seguici su Instagram per aggiornamenti e nuove pietre:",
+        backToMap: "Torna alla Mappa"
     },
     
     en: {
@@ -153,7 +162,16 @@ const translations = {
         tutorialSkip: "Skip",
         tutorialStart: "Start!",
         tutorialClose: "Close guide",
-        tutorialHelp: "Guide"
+        tutorialHelp: "Guide",
+        
+        // About Us
+        aboutUs: "About Us",
+        aboutUsTitle: "About Us",
+        aboutUsDescription1: "Welcome to the <b>Stone Map</b> project! This project stems from a simple yet profound idea: transforming common objects, like stones, into vehicles of joy and connection. The main goal is to bring a smile to those who find one of our traveling stones and, at the same time, create an invisible network of people sharing a small gesture of happiness.",
+        aboutUsDescription2: "Every stone you see on the map has a story. It was carefully painted, hidden in a special place, and then found by someone who decided to make it travel again. Our wish is for these stones to continue their journey, carrying a message of positivity and adventure to every corner of the world. It's a way to unite people through curiosity and surprise, showing how even the smallest things can generate a significant impact.",
+        aboutUsDescription3: "Join us in this adventure! You can find a stone, hide a new one, or simply follow the journey of existing stones on the map. Every interaction contributes to making the world a little more magical and cheerful.",
+        instagramFollow: "Follow us on Instagram for updates and new stones:",
+        backToMap: "Back to Map"
     },
     
     zh: {
@@ -231,7 +249,16 @@ const translations = {
         tutorialSkip: "跳过",
         tutorialStart: "开始！",
         tutorialClose: "关闭指南",
-        tutorialHelp: "指南"
+        tutorialHelp: "指南",
+        
+        // About Us
+        aboutUs: "关于我们",
+        aboutUsTitle: "关于我们",
+        aboutUsDescription1: "欢迎来到<b>石头地图</b>项目！这个项目源于一个简单而深刻的想法：将普通物品（如石头）转化为快乐和连接的载体。主要目标是为那些找到我们旅行石头的人带来微笑，同时创建一个分享小小幸福手势的无形人际网络。",
+        aboutUsDescription2: "地图上的每一块石头都有自己的故事。它被精心绘制，藏在特殊的地方，然后被决定让它继续旅行的人发现。我们希望这些石头继续它们的旅程，将积极和冒险的信息带到世界的每一个角落。这是通过好奇心和惊喜团结人们的方式，展示了即使是最小的事物也能产生重大影响。",
+        aboutUsDescription3: "加入我们的冒险吧！你可以找到一块石头，藏一块新的，或者简单地跟随地图上现有石头的旅程。每一次互动都有助于让世界变得更加神奇和快乐。",
+        instagramFollow: "在Instagram上关注我们获取更新和新石头：",
+        backToMap: "返回地图"
     },
     
     fr: {
@@ -309,7 +336,16 @@ const translations = {
         tutorialSkip: "Passer",
         tutorialStart: "Commencer !",
         tutorialClose: "Fermer le guide",
-        tutorialHelp: "Guide"
+        tutorialHelp: "Guide",
+        
+        // About Us
+        aboutUs: "À Propos",
+        aboutUsTitle: "À Propos",
+        aboutUsDescription1: "Bienvenue dans le projet <b>Carte des Pierres</b> ! Ce projet naît d'une idée simple mais profonde : transformer des objets communs, comme les pierres, en véhicules de joie et de connexion. L'objectif principal est d'offrir un sourire à ceux qui trouvent une de nos pierres voyageuses et, en même temps, créer un réseau invisible de personnes partageant un petit geste de bonheur.",
+        aboutUsDescription2: "Chaque pierre que vous voyez sur la carte a une histoire. Elle a été peinte avec soin, cachée dans un lieu spécial puis trouvée par quelqu'un qui a décidé de la faire voyager encore. Notre souhait est que ces pierres continuent leur parcours, portant un message de positivité et d'aventure dans tous les coins du monde. C'est une façon d'unir les gens à travers la curiosité et la surprise, montrant comment même les plus petites choses peuvent générer un impact significatif.",
+        aboutUsDescription3: "Rejoignez-nous dans cette aventure ! Vous pouvez trouver une pierre, en cacher une nouvelle, ou simplement suivre le voyage des pierres existantes sur la carte. Chaque interaction contribue à rendre le monde un peu plus magique et souriant.",
+        instagramFollow: "Suivez-nous sur Instagram pour les mises à jour et nouvelles pierres :",
+        backToMap: "Retour à la Carte"
     },
     
     ru: {
@@ -387,7 +423,16 @@ const translations = {
         tutorialSkip: "Пропустить",
         tutorialStart: "Начать!",
         tutorialClose: "Закрыть руководство",
-        tutorialHelp: "Руководство"
+        tutorialHelp: "Руководство",
+        
+        // About Us
+        aboutUs: "О Нас",
+        aboutUsTitle: "О Нас",
+        aboutUsDescription1: "Добро пожаловать в проект <b>Карта Камней</b>! Этот проект родился из простой, но глубокой идеи: превратить обычные предметы, такие как камни, в носители радости и связи. Главная цель - подарить улыбку тем, кто найдет один из наших путешествующих камней, и в то же время создать невидимую сеть людей, разделяющих маленький жест счастья.",
+        aboutUsDescription2: "Каждый камень, который вы видите на карте, имеет свою историю. Он был тщательно раскрашен, спрятан в особом месте, а затем найден кем-то, кто решил заставить его путешествовать снова. Наше желание состоит в том, чтобы эти камни продолжили свой путь, неся послание позитива и приключений в каждый уголок мира. Это способ объединить людей через любопытство и удивление, показывая, как даже самые маленькие вещи могут оказать значительное влияние.",
+        aboutUsDescription3: "Присоединяйтесь к нам в этом приключении! Вы можете найти камень, спрятать новый или просто следить за путешествием существующих камней на карте. Каждое взаимодействие способствует тому, чтобы сделать мир немного более волшебным и радостным.",
+        instagramFollow: "Следите за нами в Instagram для обновлений и новых камней:",
+        backToMap: "Вернуться к Карте"
     },
     
     ar: {
@@ -465,7 +510,16 @@ const translations = {
         tutorialSkip: "تخطي",
         tutorialStart: "ابدأ!",
         tutorialClose: "إغلاق الدليل",
-        tutorialHelp: "دليل"
+        tutorialHelp: "الدليل",
+        
+        // About Us
+        aboutUs: "من نحن",
+        aboutUsTitle: "من نحن",
+        aboutUsDescription1: "مرحباً بكم في مشروع <b>خريطة الأحجار</b>! ينبع هذا المشروع من فكرة بسيطة ولكنها عميقة: تحويل الأشياء العادية، مثل الأحجار، إلى وسائل للفرح والتواصل. الهدف الرئيسي هو إدخال البسمة على وجوه من يجدون إحدى أحجارنا المسافرة، وفي نفس الوقت، إنشاء شبكة غير مرئية من الأشخاص الذين يتشاركون إيماءة صغيرة من السعادة.",
+        aboutUsDescription2: "كل حجر تراه على الخريطة له قصة. تم رسمه بعناية، وإخفاؤه في مكان خاص، ثم وجده شخص قرر أن يجعله يسافر مرة أخرى. رغبتنا هي أن تستمر هذه الأحجار في رحلتها، حاملة رسالة إيجابية ومغامرة إلى كل زاوية في العالم. إنها طريقة لتوحيد الناس من خلال الفضول والمفاجأة، مما يظهر كيف يمكن حتى للأشياء الصغيرة أن تولد تأثيراً كبيراً.",
+        aboutUsDescription3: "انضموا إلينا في هذه المغامرة! يمكنكم العثور على حجر، أو إخفاء واحد جديد، أو ببساطة متابعة رحلة الأحجار الموجودة على الخريطة. كل تفاعل يساهم في جعل العالم مكاناً أكثر سحراً وبهجة.",
+        instagramFollow: "تابعونا على إنستغرام للحصول على التحديثات والأحجار الجديدة:",
+        backToMap: "العودة إلى الخريطة"
     },
     
     de: {
@@ -543,7 +597,16 @@ const translations = {
         tutorialSkip: "Überspringen",
         tutorialStart: "Starten!",
         tutorialClose: "Anleitung schließen",
-        tutorialHelp: "Anleitung"
+        tutorialHelp: "Anleitung",
+        
+        // About Us
+        aboutUs: "Über Uns",
+        aboutUsTitle: "Über Uns",
+        aboutUsDescription1: "Willkommen beim <b>Steinkarte</b>-Projekt! Dieses Projekt entsteht aus einer einfachen, aber tiefgreifenden Idee: gewöhnliche Gegenstände wie Steine in Träger von Freude und Verbindung zu verwandeln. Das Hauptziel ist es, denjenigen ein Lächeln zu schenken, die einen unserer reisenden Steine finden, und gleichzeitig ein unsichtbares Netzwerk von Menschen zu schaffen, die eine kleine Geste des Glücks teilen.",
+        aboutUsDescription2: "Jeder Stein, den Sie auf der Karte sehen, hat eine Geschichte. Er wurde sorgfältig bemalt, an einem besonderen Ort versteckt und dann von jemandem gefunden, der beschloss, ihn wieder reisen zu lassen. Unser Wunsch ist es, dass diese Steine ihre Reise fortsetzen und eine Botschaft der Positivität und des Abenteuers in jeden Winkel der Welt tragen. Es ist ein Weg, Menschen durch Neugier und Überraschung zu vereinen und zu zeigen, wie selbst die kleinsten Dinge eine bedeutende Wirkung haben können.",
+        aboutUsDescription3: "Begleiten Sie uns auf diesem Abenteuer! Sie können einen Stein finden, einen neuen verstecken oder einfach die Reise der vorhandenen Steine auf der Karte verfolgen. Jede Interaktion trägt dazu bei, die Welt zu einem etwas magischeren und fröhlicheren Ort zu machen.",
+        instagramFollow: "Folgen Sie uns auf Instagram für Updates und neue Steine:",
+        backToMap: "Zurück zur Karte"
     },
     
     es: {
@@ -621,7 +684,16 @@ const translations = {
         tutorialSkip: "Saltar",
         tutorialStart: "¡Empezar!",
         tutorialClose: "Cerrar guía",
-        tutorialHelp: "Guía"
+        tutorialHelp: "Guía",
+        
+        // About Us
+        aboutUs: "Acerca de Nosotros",
+        aboutUsTitle: "Acerca de Nosotros",
+        aboutUsDescription1: "¡Bienvenidos al proyecto <b>Mapa de Piedras</b>! Este proyecto nace de una idea simple pero profunda: transformar objetos comunes, como las piedras, en vehículos de alegría y conexión. El objetivo principal es regalar una sonrisa a quienes encuentren una de nuestras piedras viajeras y, al mismo tiempo, crear una red invisible de personas que comparten un pequeño gesto de felicidad.",
+        aboutUsDescription2: "Cada piedra que ves en el mapa tiene una historia. Fue pintada con cuidado, escondida en un lugar especial y luego encontrada por alguien que decidió hacerla viajar de nuevo. Nuestro deseo es que estas piedras continúen su viaje, llevando un mensaje de positividad y aventura a cada rincón del mundo. Es una forma de unir a las personas a través de la curiosidad y la sorpresa, demostrando cómo incluso las cosas más pequeñas pueden generar un impacto significativo.",
+        aboutUsDescription3: "¡Únete a nosotros en esta aventura! Puedes encontrar una piedra, esconder una nueva, o simplemente seguir el viaje de las piedras existentes en el mapa. Cada interacción contribuye a hacer del mundo un lugar un poco más mágico y sonriente.",
+        instagramFollow: "Síguenos en Instagram para actualizaciones y nuevas piedras:",
+        backToMap: "Volver al Mapa"
     },
     
     pl: {
@@ -699,7 +771,16 @@ const translations = {
         tutorialSkip: "Pomiń",
         tutorialStart: "Rozpocznij!",
         tutorialClose: "Zamknij przewodnik",
-        tutorialHelp: "Przewodnik"
+        tutorialHelp: "Przewodnik",
+        
+        // About Us
+        aboutUs: "O Nas",
+        aboutUsTitle: "O Nas",
+        aboutUsDescription1: "Witajcie w projekcie <b>Mapa Kamieni</b>! Ten projekt rodzi się z prostej, ale głębokiej idei: przekształcenia zwykłych przedmiotów, takich jak kamienie, w nośniki radości i połączenia. Głównym celem jest podarowanie uśmiechu tym, którzy znajdą jeden z naszych podróżujących kamieni, a jednocześnie stworzenie niewidzialnej sieci ludzi dzielących mały gest szczęścia.",
+        aboutUsDescription2: "Każdy kamień, który widzisz na mapie, ma swoją historię. Został starannie pomalowany, ukryty w specjalnym miejscu, a następnie znaleziony przez kogoś, kto zdecydował się pozwolić mu podróżować dalej. Naszym pragnieniem jest, aby te kamienie kontynuowały swoją podróż, niosąc przesłanie pozytywności i przygody do każdego zakątka świata. To sposób na zjednoczenie ludzi poprzez ciekawość i zaskoczenie, pokazujący, jak nawet najmniejsze rzeczy mogą wywrzeć znaczący wpływ.",
+        aboutUsDescription3: "Dołączcie do nas w tej przygodzie! Możecie znaleźć kamień, ukryć nowy lub po prostu śledzić podróż istniejących kamieni na mapie. Każda interakcja przyczynia się do uczynienia świata miejscem nieco bardziej magicznym i radosnym.",
+        instagramFollow: "Śledźcie nas na Instagramie po aktualizacje i nowe kamienie:",
+        backToMap: "Powrót do Mapy"
     },
     
     pt: {
@@ -777,7 +858,16 @@ const translations = {
         tutorialSkip: "Pular",
         tutorialStart: "Começar!",
         tutorialClose: "Fechar guia",
-        tutorialHelp: "Guia"
+        tutorialHelp: "Guia",
+        
+        // About Us
+        aboutUs: "Sobre Nós",
+        aboutUsTitle: "Sobre Nós",
+        aboutUsDescription1: "Bem-vindos ao projeto <b>Mapa das Pedras</b>! Este projeto nasce de uma ideia simples mas profunda: transformar objetos comuns, como pedras, em veículos de alegria e conexão. O objetivo principal é presentear com um sorriso aqueles que encontram uma das nossas pedras viajantes e, ao mesmo tempo, criar uma rede invisível de pessoas que compartilham um pequeno gesto de felicidade.",
+        aboutUsDescription2: "Cada pedra que você vê no mapa tem uma história. Foi pintada com cuidado, escondida em um lugar especial e depois encontrada por alguém que decidiu fazê-la viajar novamente. Nosso desejo é que essas pedras continuem sua jornada, levando uma mensagem de positividade e aventura para cada canto do mundo. É uma forma de unir pessoas através da curiosidade e surpresa, mostrando como até as menores coisas podem gerar um impacto significativo.",
+        aboutUsDescription3: "Junte-se a nós nesta aventura! Você pode encontrar uma pedra, esconder uma nova, ou simplesmente acompanhar a jornada das pedras existentes no mapa. Cada interação contribui para tornar o mundo um lugar um pouco mais mágico e sorridente.",
+        instagramFollow: "Siga-nos no Instagram para atualizações e novas pedras:",
+        backToMap: "Voltar ao Mapa"
     },
     
     ja: {
