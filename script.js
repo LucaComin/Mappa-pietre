@@ -4,8 +4,7 @@ let miniMap; // La mini-mappa nel pannello storia
 let allStonesData = {}; // Oggetto per memorizzare i dati delle pietre, raggruppati per nome
 let currentMarkers = L.featureGroup(); // Gruppo di marcatori attualmente sulla mappa
 let currentPolylines = L.featureGroup(); // Gruppo di polilinee attualmente sulla mappa
-// MODIFICA: Rimuovo il clustering per le immagini per evitare i pallini piccoli
-let currentImageMarkers = L.featureGroup(); // Gruppo di marcatori per le immagini senza clustering
+let currentImageMarkers = L.markerClusterGroup(); // Gruppo di marcatori per le immagini con clustering
 
 // Variabili per la riproduzione automatica
 let autoPlayInterval = null;
@@ -318,9 +317,10 @@ function displayStonesOnMap(filterStoneName = 'all') {
                     icon: createCustomIcon(stoneColor, true)
                 }).addTo(currentMarkers);
                 
-                // MODIFICA: Formatta la data senza l'orario
+                // Formatta la data per il popup
                 const formattedDate = lastPosition.dateObj.toLocaleString('it-IT', {
-                    year: 'numeric', month: 'long', day: 'numeric'
+                    year: 'numeric', month: 'long', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
                 });
 
                 // Contenuto del popup migliorato
@@ -403,9 +403,9 @@ function addSingleImageMarker(position, stoneName, stoneColor, index) {
 
     const imageMarker = L.marker([position.lat, position.lon], { icon: imageIcon });
     
-    // MODIFICA: Formatta la data senza l'orario
     const formattedDate = position.dateObj.toLocaleString('it-IT', {
-        year: 'numeric', month: 'long', day: 'numeric'
+        year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
     });
 
     let imagePopupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
@@ -429,7 +429,6 @@ function addSingleImageMarker(position, stoneName, stoneColor, index) {
 
     imageMarker.bindPopup(imagePopupContent, { maxWidth: 250, className: 'custom-popup' });
 
-    // MODIFICA: Aggiungi direttamente al gruppo senza clustering
     currentImageMarkers.addLayer(imageMarker);
 }
 
@@ -565,9 +564,10 @@ function updateHistoryPanel() {
         historyImage.style.display = 'none';
     }
     
-    // MODIFICA: Aggiorna la caption senza l'orario
+    // Aggiorna la caption
     const formattedDate = currentPos.dateObj.toLocaleString('it-IT', {
-        year: 'numeric', month: 'long', day: 'numeric'
+        year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
     });
     document.getElementById('history-image-caption').textContent = formattedDate;
     
@@ -699,12 +699,15 @@ function startAutoPlay() {
 }
 
 function stopAutoPlay() {
+    if (!isAutoPlaying) return;
+    
+    isAutoPlaying = false;
+    updatePlayPauseButton();
+    
     if (autoPlayInterval) {
         clearInterval(autoPlayInterval);
         autoPlayInterval = null;
     }
-    isAutoPlaying = false;
-    updatePlayPauseButton();
 }
 
 function toggleAutoPlay() {
@@ -718,229 +721,348 @@ function toggleAutoPlay() {
 function updatePlayPauseButton() {
     const playPauseBtn = document.getElementById('play-pause-btn');
     if (playPauseBtn) {
-        playPauseBtn.innerHTML = isAutoPlaying ? '⏸️' : '▶️';
-        playPauseBtn.title = isAutoPlaying ? 'Pausa' : 'Riproduci automaticamente';
+        if (isAutoPlaying) {
+            playPauseBtn.innerHTML = `<span class="btn-icon">⏸️</span><span class="btn-text">${typeof t === 'function' ? t('pause') : 'Pausa'}</span>`;
+            playPauseBtn.title = typeof t === 'function' ? t('playPauseAriaLabel') : 'Metti in pausa la riproduzione automatica';
+        } else {
+            playPauseBtn.innerHTML = `<span class="btn-icon">▶️</span><span class="btn-text">${typeof t === 'function' ? t('play') : 'Play'}</span>`;
+            playPauseBtn.title = typeof t === 'function' ? t('playPauseAriaLabel') : 'Avvia la riproduzione automatica';
+        }
     }
 }
 
 // Funzioni per il fullscreen
 function openFullscreen() {
-    const modal = document.getElementById('fullscreen-modal');
-    const fullscreenImage = document.getElementById('fullscreen-image');
     const historyImage = document.getElementById('history-image');
+    const fullscreenImage = document.getElementById('fullscreen-image');
+    const fullscreenModal = document.getElementById('fullscreen-modal');
     
-    if (historyImage && historyImage.src) {
+    if (historyImage.src && fullscreenImage && fullscreenModal) {
         fullscreenImage.src = historyImage.src;
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+        fullscreenModal.classList.remove('hidden');
     }
 }
 
 function closeFullscreen() {
-    const modal = document.getElementById('fullscreen-modal');
-    modal.classList.add('hidden');
-    document.body.style.overflow = '';
+    const fullscreenModal = document.getElementById('fullscreen-modal');
+    if (fullscreenModal) {
+        fullscreenModal.classList.add('hidden');
+    }
 }
 
-// Classe per la guida interattiva
+// CSS personalizzato per i popup
+const style = document.createElement('style');
+style.textContent = `
+    .custom-popup .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        border: none;
+    }
+    .custom-popup .leaflet-popup-tip {
+        background: white;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+`;
+document.head.appendChild(style);
+
+// Sistema di Guida Interattiva
 class TutorialGuide {
     constructor() {
-        this.currentStep = 0;
-        this.steps = [
-            {
-                target: '#stone-select',
-                title: 'Seleziona una pietra',
-                content: 'Usa questo menu per filtrare le pietre sulla mappa. Puoi vedere tutte le pietre o concentrarti su una specifica.',
-                position: 'bottom'
-            },
-            {
-                target: '#image-display-select',
-                title: 'Modalità immagini',
-                content: 'Scegli come visualizzare le immagini: tutte le posizioni, solo l\'ultima o nessuna.',
-                position: 'bottom'
-            },
-            {
-                target: '.custom-marker',
-                title: 'Marcatori delle pietre',
-                content: 'Clicca sui marcatori per vedere i dettagli di ogni pietra e accedere alla sua storia.',
-                position: 'top'
-            }
-        ];
+        this.currentStep = 1;
+        this.totalSteps = 6;
         this.isActive = false;
-    }
-
-    start() {
-        if (this.isActive) return;
-        this.isActive = true;
-        this.currentStep = 0;
-        this.showStep();
-    }
-
-    showStep() {
-        if (this.currentStep >= this.steps.length) {
-            this.end();
-            return;
-        }
-
-        const step = this.steps[this.currentStep];
-        const target = document.querySelector(step.target);
+        this.hasSeenTutorial = false;
+        this.currentLanguage = 'it';
         
-        if (!target) {
-            this.nextStep();
-            return;
-        }
-
-        this.createTooltip(target, step);
+        this.init();
     }
-
-    createTooltip(target, step) {
-        // Rimuovi tooltip esistenti
-        this.removeTooltip();
-
-        const tooltip = document.createElement('div');
-        tooltip.className = 'tutorial-tooltip';
-        tooltip.innerHTML = `
-            <div class="tutorial-content">
-                <h4>${step.title}</h4>
-                <p>${step.content}</p>
-                <div class="tutorial-buttons">
-                    <button onclick="tutorialGuide.previousStep()">Indietro</button>
-                    <button onclick="tutorialGuide.nextStep()">Avanti</button>
-                    <button onclick="tutorialGuide.end()">Salta</button>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(tooltip);
-
-        // Posiziona il tooltip
-        const targetRect = target.getBoundingClientRect();
-        const tooltipRect = tooltip.getBoundingClientRect();
-
-        let top, left;
+    
+    init() {
+        // Controlla se l'utente ha già visto la guida
+        this.hasSeenTutorial = localStorage.getItem('mapTutorialSeen') === 'true';
         
-        switch (step.position) {
-            case 'bottom':
-                top = targetRect.bottom + 10;
-                left = targetRect.left + (targetRect.width - tooltipRect.width) / 2;
-                break;
-            case 'top':
-                top = targetRect.top - tooltipRect.height - 10;
-                left = targetRect.left + (targetRect.width - tooltipRect.width) / 2;
-                break;
-            case 'left':
-                top = targetRect.top + (targetRect.height - tooltipRect.height) / 2;
-                left = targetRect.left - tooltipRect.width - 10;
-                break;
-            case 'right':
-                top = targetRect.top + (targetRect.height - tooltipRect.height) / 2;
-                left = targetRect.right + 10;
-                break;
+        // Setup event listeners
+        this.setupEventListeners();
+        
+        // Mostra la guida automaticamente se è la prima volta
+        if (!this.hasSeenTutorial) {
+            setTimeout(() => {
+                this.show();
+            }, 2000); // Aspetta 2 secondi dopo il caricamento
         }
-
-        tooltip.style.top = `${top}px`;
-        tooltip.style.left = `${left}px`;
-
-        // Evidenzia l'elemento target
-        target.classList.add('tutorial-highlight');
     }
-
-    removeTooltip() {
-        const existingTooltip = document.querySelector('.tutorial-tooltip');
-        if (existingTooltip) {
-            existingTooltip.remove();
+    
+    setupEventListeners() {
+        const overlay = document.getElementById('tutorial-overlay');
+        const closeBtn = document.getElementById('tutorial-close');
+        const prevBtn = document.getElementById('tutorial-prev');
+        const nextBtn = document.getElementById('tutorial-next');
+        const skipBtn = document.getElementById('tutorial-skip');
+        const helpBtn = document.getElementById('help-button');
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.hide());
         }
-
-        // Rimuovi evidenziazione
-        document.querySelectorAll('.tutorial-highlight').forEach(el => {
-            el.classList.remove('tutorial-highlight');
+        
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => this.previousStep());
+        }
+        
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => this.nextStep());
+        }
+        
+        if (skipBtn) {
+            skipBtn.addEventListener('click', () => this.skip());
+        }
+        
+        if (helpBtn) {
+            helpBtn.addEventListener('click', () => this.show());
+        }
+        
+        if (overlay) {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    this.hide();
+                }
+            });
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (!this.isActive) return;
+            
+            switch (e.key) {
+                case 'Escape':
+                    this.hide();
+                    break;
+                case 'ArrowLeft':
+                    this.previousStep();
+                    break;
+                case 'ArrowRight':
+                    this.nextStep();
+                    break;
+            }
         });
     }
-
+    
+    show() {
+        const overlay = document.getElementById('tutorial-overlay');
+        if (overlay) {
+            // Aggiorna la lingua corrente
+            this.currentLanguage = getCurrentLanguage() || 'it';
+            
+            overlay.classList.remove('hidden');
+            this.isActive = true;
+            this.currentStep = 1;
+            this.updateStep();
+            
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    
+    hide() {
+        const overlay = document.getElementById('tutorial-overlay');
+        if (overlay) {
+            overlay.classList.add('hidden');
+            this.isActive = false;
+            
+            // Restore body scroll
+            document.body.style.overflow = '';
+            
+            // Marca come visto
+            localStorage.setItem('mapTutorialSeen', 'true');
+            this.hasSeenTutorial = true;
+        }
+    }
+    
+    skip() {
+        this.hide();
+    }
+    
     nextStep() {
-        this.currentStep++;
-        this.showStep();
+        if (this.currentStep < this.totalSteps) {
+            this.currentStep++;
+            this.updateStep();
+        } else {
+            this.hide();
+        }
     }
-
+    
     previousStep() {
-        if (this.currentStep > 0) {
+        if (this.currentStep > 1) {
             this.currentStep--;
-            this.showStep();
+            this.updateStep();
         }
     }
-
-    end() {
-        this.removeTooltip();
-        this.isActive = false;
-        this.currentStep = 0;
-    }
-}
-
-// Funzioni di utilità per l'accessibilità
-function setupAccessibility() {
-    // Aggiungi supporto per la navigazione da tastiera
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Tab') {
-            document.body.classList.add('keyboard-navigation');
+    
+    updateStep() {
+        // Nascondi tutti gli step
+        const steps = document.querySelectorAll('.tutorial-step');
+        steps.forEach(step => step.classList.add('hidden'));
+        
+        // Mostra lo step corrente
+        const currentStepElement = document.querySelector(`[data-step="${this.currentStep}"]`);
+        if (currentStepElement) {
+            currentStepElement.classList.remove('hidden');
+            this.updateStepContent(currentStepElement);
         }
-    });
-
-    document.addEventListener('mousedown', function() {
-        document.body.classList.remove('keyboard-navigation');
-    });
-
-    // Aggiungi aria-labels dinamici
-    const stoneSelect = document.getElementById('stone-select');
-    if (stoneSelect) {
-        stoneSelect.setAttribute('aria-label', 'Seleziona una pietra da visualizzare sulla mappa');
+        
+        // Aggiorna la progress bar
+        const progressFill = document.querySelector('.progress-fill');
+        const progressText = document.querySelector('.progress-text');
+        
+        if (progressFill) {
+            const percentage = (this.currentStep / this.totalSteps) * 100;
+            progressFill.style.width = `${percentage}%`;
+        }
+        
+        if (progressText) {
+            const ofText = this.getTranslation('of') || 'di';
+            progressText.textContent = `${this.currentStep} ${ofText} ${this.totalSteps}`;
+        }
+        
+        // Aggiorna i pulsanti
+        const prevBtn = document.getElementById('tutorial-prev');
+        const nextBtn = document.getElementById('tutorial-next');
+        const skipBtn = document.getElementById('tutorial-skip');
+        
+        if (prevBtn) {
+            prevBtn.disabled = this.currentStep === 1;
+            prevBtn.textContent = this.getTranslation('tutorialPrevious') || 'Precedente';
+        }
+        
+        if (nextBtn) {
+            const isLastStep = this.currentStep === this.totalSteps;
+            nextBtn.textContent = isLastStep ? 
+                (this.getTranslation('tutorialStart') || 'Inizia!') : 
+                (this.getTranslation('tutorialNext') || 'Avanti');
+        }
+        
+        if (skipBtn) {
+            skipBtn.textContent = this.getTranslation('tutorialSkip') || 'Salta';
+        }
+        
+        // Aggiorna il titolo
+        this.updateStepTitle();
     }
-
-    const imageSelect = document.getElementById('image-display-select');
-    if (imageSelect) {
-        imageSelect.setAttribute('aria-label', 'Seleziona modalità di visualizzazione delle immagini');
+    
+    updateStepContent(stepElement) {
+        const stepData = this.getStepData(this.currentStep);
+        
+        const iconElement = stepElement.querySelector('.tutorial-icon');
+        const titleElement = stepElement.querySelector('h3');
+        const descElement = stepElement.querySelector('p');
+        
+        if (iconElement) iconElement.textContent = stepData.icon;
+        if (titleElement) titleElement.textContent = stepData.title;
+        if (descElement) descElement.textContent = stepData.description;
     }
-}
-
-// Inizializza l'accessibilità quando il DOM è pronto
-document.addEventListener('DOMContentLoaded', setupAccessibility);
-
-// Funzioni per la gestione degli errori
-function handleImageError(img) {
-    img.style.display = 'none';
-    const placeholder = document.createElement('div');
-    placeholder.className = 'image-placeholder';
-    placeholder.innerHTML = '📷 Immagine non disponibile';
-    img.parentNode.insertBefore(placeholder, img.nextSibling);
-}
-
-// Funzione per ottimizzare le performance
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
+    
+    getStepData(step) {
+        const stepData = {
+            1: {
+                icon: '🗺️',
+                title: this.getTranslation('tutorialExploreMap') || 'Esplora la Mappa',
+                description: this.getTranslation('tutorialExploreMapDesc') || 'Questa mappa interattiva ti permette di seguire il viaggio delle pietre attraverso il tempo. Ogni pietra ha una sua storia unica da raccontare.'
+            },
+            2: {
+                icon: '🪨',
+                title: this.getTranslation('tutorialSelectStone') || 'Seleziona una Pietra',
+                description: this.getTranslation('tutorialSelectStoneDesc') || 'Usa il menu a tendina in alto per selezionare una pietra specifica o visualizzare tutte le pietre contemporaneamente. Ogni pietra ha un colore distintivo.'
+            },
+            3: {
+                icon: '📸',
+                title: this.getTranslation('tutorialViewImages') || 'Visualizza le Immagini',
+                description: this.getTranslation('tutorialViewImagesDesc') || 'Puoi scegliere di mostrare tutte le immagini, solo l\'ultima o nessuna immagine. Le immagini sono rappresentate da marcatori circolari sulla mappa.'
+            },
+            4: {
+                icon: '📖',
+                title: this.getTranslation('tutorialDiscoverHistory') || 'Scopri la Storia',
+                description: this.getTranslation('tutorialDiscoverHistoryDesc') || 'Clicca su una pietra per vedere il popup informativo, poi clicca su "Vedi la storia" per aprire il pannello dettagliato con timeline e galleria immagini.'
+            },
+            5: {
+                icon: '🌐',
+                title: this.getTranslation('tutorialChangeLanguage') || 'Cambia Lingua',
+                description: this.getTranslation('tutorialChangeLanguageDesc') || 'Il sito supporta multiple lingue. Usa il selettore lingua in alto per cambiare l\'interfaccia nella tua lingua preferita.'
+            },
+            6: {
+                icon: '✨',
+                title: this.getTranslation('tutorialStartExploring') || 'Inizia l\'Esplorazione!',
+                description: this.getTranslation('tutorialStartExploringDesc') || 'Ora sei pronto per esplorare la mappa! Ricorda che puoi sempre riaprire questa guida cliccando sul pulsante "?" nell\'angolo in basso a destra.'
+            }
         };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
+        
+        return stepData[step] || stepData[1];
+    }
+    
+    updateStepTitle() {
+        const titleElement = document.getElementById('tutorial-title');
+        const closeBtnElement = document.getElementById('tutorial-close');
+        
+        if (titleElement) {
+            if (this.currentStep === 1) {
+                titleElement.textContent = this.getTranslation('tutorialWelcome') || 'Benvenuto nella Mappa delle Pietre!';
+            } else {
+                const stepData = this.getStepData(this.currentStep);
+                titleElement.textContent = stepData.title;
+            }
+        }
+        
+        if (closeBtnElement) {
+            closeBtnElement.setAttribute('aria-label', this.getTranslation('tutorialClose') || 'Chiudi guida');
+        }
+    }
+    
+    getTranslation(key) {
+        if (typeof translations !== 'undefined' && translations[this.currentLanguage] && translations[this.currentLanguage][key]) {
+            return translations[this.currentLanguage][key];
+        }
+        return null;
+    }
+    
+    // Metodo per aggiornare la lingua quando cambia
+    updateLanguage(newLanguage) {
+        this.currentLanguage = newLanguage;
+        if (this.isActive) {
+            this.updateStep();
+        }
+        
+        // Aggiorna anche il pulsante di aiuto
+        const helpBtn = document.getElementById('help-button');
+        if (helpBtn) {
+            helpBtn.setAttribute('title', this.getTranslation('tutorialHelp') || 'Guida');
+            helpBtn.setAttribute('aria-label', this.getTranslation('tutorialHelp') || 'Apri guida');
+        }
+    }
+    
+    // Metodo per resettare la guida (utile per debug)
+    reset() {
+        localStorage.removeItem('mapTutorialSeen');
+        this.hasSeenTutorial = false;
+        this.currentStep = 1;
+    }
 }
 
-// Ottimizza il ridimensionamento della mappa
-const optimizedMapResize = debounce(() => {
-    if (map) {
-        map.invalidateSize();
-    }
-    if (miniMap) {
-        miniMap.invalidateSize();
-    }
-}, 250);
+// Funzione per ottenere la lingua corrente
+function getCurrentLanguage() {
+    const select = document.getElementById('language-select');
+    return select ? select.value : 'it';
+}
 
-window.addEventListener('resize', optimizedMapResize);
+// Funzione per aprire manualmente la guida (può essere chiamata da console per debug)
+function openTutorial() {
+    if (tutorialGuide) {
+        tutorialGuide.show();
+    }
+}
 
-// Esporta funzioni globali necessarie
-window.showStoneHistory = showStoneHistory;
-window.toggleAutoPlay = toggleAutoPlay;
-window.openFullscreen = openFullscreen;
-window.closeFullscreen = closeFullscreen;
+// Funzione per resettare la guida (può essere chiamata da console per debug)
+function resetTutorial() {
+    if (tutorialGuide) {
+        tutorialGuide.reset();
+    }
+}
 
