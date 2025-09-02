@@ -4,7 +4,7 @@ let miniMap; // La mini-mappa nel pannello storia
 let allStonesData = {}; // Oggetto per memorizzare i dati delle pietre, raggruppati per nome
 let currentMarkers = L.featureGroup(); // Gruppo di marcatori attualmente sulla mappa
 let currentPolylines = L.featureGroup(); // Gruppo di polilinee attualmente sulla mappa
-let currentImageMarkers = L.markerClusterGroup({ showCoverageOnHover: false, zoomToBoundsOnClick: false, spiderfyOnEveryZoom: false, disableClusteringAtZoom: 18 }); // Gruppo di marcatori per le immagini con clustering
+let currentImageMarkers = L.featureGroup(); // Gruppo di marcatori per le immagini senza clustering
 
 // Variabili per la riproduzione automatica
 let autoPlayInterval = null;
