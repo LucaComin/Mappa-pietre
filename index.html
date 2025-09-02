@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mappa Interattiva delle Pietre</title>
     <meta name="description" content="Esplora la storia e i movimenti delle pietre attraverso una mappa interattiva moderna e coinvolgente">
-
+    
     <!-- Preconnect per performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +13,7 @@
 
     <!-- Leaflet core -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- MarkerCluster plugin -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
@@ -21,7 +21,7 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
-
+    
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
 </head>
@@ -43,95 +43,232 @@
                     Mappa delle Pietre
                 </h1>
                 <p class="header-subtitle">Esplora la storia attraverso il tempo</p>
-                <div class="header-nav">
-                    <a href="about.html" id="about-us-link" class="nav-link">Chi Siamo</a>
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="language-select">
+                        <span class="control-icon">🌐</span>
+                        Seleziona lingua:
+                    </label>
+                    <div class="custom-select">
+                        <select id="language-select" aria-label="Seleziona la lingua dell'interfaccia" onchange="changeLanguage(this.value)">
+                            <option value="it">Italiano</option>
+                            <option value="en">English</option>
+                            <option value="zh">中文</option>
+                            <option value="fr">Français</option>
+                            <option value="ru">Русский</option>
+                            <option value="ar">العربية</option>
+                            <option value="de">Deutsch</option>
+                            <option value="es">Español</option>
+                            <option value="pl">Polski</option>
+                            <option value="pt">Português</option>
+                            <option value="ja">日本語</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="stone-select">
+                        <span class="control-icon">🪨</span>
+                        Seleziona una pietra:
+                    </label>
+                    <div class="custom-select">
+                        <select id="stone-select" aria-label="Seleziona una pietra da visualizzare">
+                            <option value="all">Mostra tutte</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="image-display-select">
+                        <span class="control-icon">📸</span>
+                        Mostra immagini:
+                    </label>
+                    <div class="custom-select">
+                        <select id="image-display-select" aria-label="Seleziona modalità visualizzazione immagini">
+                            <option value="last">Ultima</option>
+                            <option value="none">Nessuna</option>
+                            <option value="all">Tutte</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </header>
 
-        <div class="controls">
-            <div class="control-group">
-                <label for="language-selector">
-                    <span class="control-icon">🌐</span>
-                    Seleziona lingua:
-                </label>
-                <div class="custom-select">
-                    <select id="language-selector" aria-label="Seleziona la lingua dell'interfaccia" onchange="changeLanguage(this.value)">
-                        <option value="it">Italiano</option>
-                        <option value="en">English</option>
-                        <option value="zh">中文</option>
-                        <option value="fr">Français</option>
-                        <option value="ru">Русский</option>
-                        <option value="ar">العربية</option>
-                        <option value="de">Deutsch</option>
-                        <option value="es">Español</option>
-                        <option value="pl">Polski</option>
-                        <option value="pt">Português</option>
-                        <option value="ja">日本語</option>
-                    </select>
+        <!-- Contenitore principale per la mappa -->
+        <main id="map" role="main" aria-label="Mappa interattiva delle pietre"></main>
+    </div>
+
+    <!-- Pannello della Storia migliorato -->
+    <div id="history-panel" class="hidden" role="dialog" aria-labelledby="history-title" aria-modal="true">
+        <button id="close-history" class="close-button" aria-label="Chiudi pannello storia" title="Chiudi">
+            ✕
+        </button>
+        
+        <h2 id="history-title">Storia di...</h2>
+        
+        <div class="history-content">
+            <!-- Galleria Immagini migliorata -->
+            <div class="image-gallery">
+                <div class="image-container">
+                    <img id="history-image" src="" alt="Immagine della pietra" loading="lazy"/>
+                    <div class="image-overlay">
+                        <button id="fullscreen-btn" class="overlay-btn" aria-label="Visualizza a schermo intero" title="Schermo intero">
+                            🔍
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="image-info">
+                    <p id="history-image-caption" class="image-caption">Data e ora</p>
+                    <div class="image-meta">
+                        <span id="image-counter" class="image-counter">1 di 3</span>
+                    </div>
+                </div>
+                
+                <div class="navigation-buttons">
+                    <button id="play-pause-btn" class="nav-btn play-pause-btn" aria-label="Riproduci/Pausa automatica" onclick="toggleAutoPlay()">
+                        <span class="btn-icon">▶️</span>
+                        <span class="btn-text">Play</span>
+                    </button>
+                    <button id="prev-button" class="nav-btn prev-btn" aria-label="Immagine precedente">
+                        <span class="btn-icon">←</span>
+                        <span class="btn-text">Precedente</span>
+                    </button>
+                    <button id="next-button" class="nav-btn next-btn" aria-label="Immagine successiva">
+                        <span class="btn-text">Successiva</span>
+                        <span class="btn-icon">→</span>
+                    </button>
                 </div>
             </div>
 
-            <div class="control-group">
-                <label for="stone-selector">
-                    <span class="control-icon">🪨</span>
-                    Seleziona una pietra:
-                </label>
-                <div class="custom-select">
-                    <select id="stone-selector" aria-label="Seleziona una pietra specifica da visualizzare">
-                        <option value="Mostra tutte">Mostra tutte</option>
-                    </select>
+            <!-- Mini Mappa migliorata -->
+            <div class="mini-map-container">
+                <h3 class="mini-map-title">Percorso storico</h3>
+                <div id="mini-map" aria-label="Mini mappa del percorso"></div>
+                <div class="map-legend">
+                    <div class="legend-item">
+                        <span class="legend-dot current"></span>
+                        <span>Posizione attuale</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot path"></span>
+                        <span>Percorso storico</span>
+                    </div>
                 </div>
-            </div>
-
-            <div class="control-group">
-                <label for="show-images-selector">
-                    <span class="control-icon">📸</span>
-                    Mostra immagini:
-                </label>
-                <div class="custom-select">
-                    <select id="show-images-selector" aria-label="Controlla la visualizzazione delle immagini">
-                        <option value="Last">Ultima</option>
-                        <option value="None">Nessuna</option>
-                        <option value="All">Tutte</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Controlli di riproduzione -->
-            <div class="playback-controls">
-                <button id="prev-button" class="control-btn" aria-label="Pietra precedente">
-                    <span class="btn-icon">⏮️</span>
-                </button>
-                <button id="play-button" class="control-btn" aria-label="Avvia riproduzione automatica">
-                    <span class="btn-icon">▶️</span>
-                </button>
-                <button id="pause-button" class="control-btn" style="display: none;" aria-label="Pausa riproduzione automatica">
-                    <span class="btn-icon">⏸️</span>
-                </button>
-                <button id="next-button" class="control-btn" aria-label="Pietra successiva">
-                    <span class="btn-icon">⏭️</span>
-                </button>
             </div>
         </div>
 
-        <!-- Mappa principale -->
-        <div id="map" class="map-container" role="application" aria-label="Mappa interattiva delle pietre"></div>
+        <!-- Timeline migliorata -->
+        <div class="timeline-container">
+            <h3 class="timeline-title">Timeline degli spostamenti</h3>
+            <div id="timeline" role="slider" aria-label="Timeline degli spostamenti della pietra"></div>
+            <div class="timeline-info">
+                <span class="timeline-start">Inizio</span>
+                <span class="timeline-current" id="timeline-current-date">Data attuale</span>
+                <span class="timeline-end">Fine</span>
+            </div>
+        </div>
+    </div>
 
-        <!-- Pulsante di aiuto -->
-        <button id="help-button" class="help-button" aria-label="Mostra guida interattiva">
-            <span class="help-icon">?</span>
-        </button>
+    <!-- Fullscreen image modal -->
+    <div id="fullscreen-modal" class="fullscreen-modal hidden" role="dialog" aria-labelledby="fullscreen-image" aria-modal="true">
+        <button id="close-fullscreen" class="close-fullscreen" aria-label="Chiudi visualizzazione a schermo intero">✕</button>
+        <img id="fullscreen-image" src="" alt="Immagine a schermo intero" loading="lazy"/>
     </div>
 
     <!-- Scripts -->
+    <!-- Leaflet core -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- MarkerCluster plugin -->
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-    <script src="https://unpkg.com/leaflet-minimap@3.6.1/dist/Control.MiniMap.min.js"></script>
+
+    <!-- Translations -->
     <script src="translations.js"></script>
-    <script src="script_modified.js"></script>
-    <script src="sw.js"></script>
+    
+    <!-- App JS -->
+    <script src="script.js"></script>
+    
+    <!-- Service Worker per PWA (opzionale) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {
+                    // Service worker non disponibile, continua normalmente
+                });
+            });
+        }
+    </script>
 </body>
 </html>
+
+    <!-- Guida Interattiva -->
+    <div id="tutorial-overlay" class="tutorial-overlay hidden" role="dialog" aria-labelledby="tutorial-title" aria-modal="true">
+        <div class="tutorial-content">
+            <div class="tutorial-header">
+                <h2 id="tutorial-title">Benvenuto nella Mappa delle Pietre!</h2>
+                <button id="tutorial-close" class="tutorial-close-btn" aria-label="Chiudi guida">✕</button>
+            </div>
+            
+            <div class="tutorial-body">
+                <div class="tutorial-step" data-step="1">
+                    <div class="tutorial-icon">🗺️</div>
+                    <h3>Esplora la Mappa</h3>
+                    <p>Questa mappa interattiva ti permette di seguire il viaggio delle pietre attraverso il tempo. Ogni pietra ha una sua storia unica da raccontare.</p>
+                </div>
+                
+                <div class="tutorial-step hidden" data-step="2">
+                    <div class="tutorial-icon">🪨</div>
+                    <h3>Seleziona una Pietra</h3>
+                    <p>Usa il menu a tendina in alto per selezionare una pietra specifica o visualizzare tutte le pietre contemporaneamente. Ogni pietra ha un colore distintivo.</p>
+                </div>
+                
+                <div class="tutorial-step hidden" data-step="3">
+                    <div class="tutorial-icon">📸</div>
+                    <h3>Visualizza le Immagini</h3>
+                    <p>Puoi scegliere di mostrare tutte le immagini, solo l'ultima o nessuna immagine. Le immagini sono rappresentate da marcatori circolari sulla mappa.</p>
+                </div>
+                
+                <div class="tutorial-step hidden" data-step="4">
+                    <div class="tutorial-icon">📖</div>
+                    <h3>Scopri la Storia</h3>
+                    <p>Clicca su una pietra per vedere il popup informativo, poi clicca su "Vedi la storia" per aprire il pannello dettagliato con timeline e galleria immagini.</p>
+                </div>
+                
+                <div class="tutorial-step hidden" data-step="5">
+                    <div class="tutorial-icon">🌐</div>
+                    <h3>Cambia Lingua</h3>
+                    <p>Il sito supporta multiple lingue. Usa il selettore lingua in alto per cambiare l'interfaccia nella tua lingua preferita.</p>
+                </div>
+                
+                <div class="tutorial-step hidden" data-step="6">
+                    <div class="tutorial-icon">✨</div>
+                    <h3>Inizia l'Esplorazione!</h3>
+                    <p>Ora sei pronto per esplorare la mappa! Ricorda che puoi sempre riaprire questa guida cliccando sul pulsante "?" nell'angolo in basso a destra.</p>
+                </div>
+            </div>
+            
+            <div class="tutorial-footer">
+                <div class="tutorial-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 16.67%"></div>
+                    </div>
+                    <span class="progress-text">1 di 6</span>
+                </div>
+                
+                <div class="tutorial-buttons">
+                    <button id="tutorial-prev" class="tutorial-btn tutorial-btn-secondary" disabled>Precedente</button>
+                    <button id="tutorial-skip" class="tutorial-btn tutorial-btn-outline">Salta</button>
+                    <button id="tutorial-next" class="tutorial-btn tutorial-btn-primary">Avanti</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pulsante per riaprire la guida -->
+    <button id="help-button" class="help-button" aria-label="Apri guida" title="Guida">
+        <span class="help-icon">?</span>
+    </button>
 
