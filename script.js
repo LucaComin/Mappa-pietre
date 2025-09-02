@@ -29,39 +29,23 @@ let tutorialGuide;
 
 // Inizializzazione dell'applicazione
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM caricato, inizializzazione in corso...');
     showLoadingOverlay();
+    initMap();
+    loadData();
+    setupEventListeners();
     
-    try {
-        initMap();
-        console.log('Mappa inizializzata');
-        
-        loadData();
-        console.log('Caricamento dati avviato');
-        
-        setupEventListeners();
-        console.log('Event listeners configurati');
-        
-        // Inizializza il sistema di traduzione
-        if (typeof initializeLanguageSelector === 'function') {
-            initializeLanguageSelector();
-            console.log('Selettore lingua inizializzato');
-        }
-        
-        // Inizializza la guida interattiva
-        tutorialGuide = new TutorialGuide();
-        console.log('Guida interattiva inizializzata');
-        
-        // Nascondi loading overlay dopo l'inizializzazione
-        setTimeout(() => {
-            hideLoadingOverlay();
-            console.log('Loading overlay nascosto');
-        }, 3000); // Aumentato a 3 secondi per dare più tempo
-        
-    } catch (error) {
-        console.error('Errore durante l\'inizializzazione:', error);
-        hideLoadingOverlay();
+    // Inizializza il sistema di traduzione
+    if (typeof initializeLanguageSelector === 'function') {
+        initializeLanguageSelector();
     }
+    
+    // Inizializza la guida interattiva
+    tutorialGuide = new TutorialGuide();
+    
+    // Nascondi loading overlay dopo l'inizializzazione
+    setTimeout(() => {
+        hideLoadingOverlay();
+    }, 1500);
 });
 
 // Funzioni per il loading overlay
@@ -142,29 +126,21 @@ function initMap() {
 
 // Funzione per caricare e processare i dati dal Google Sheet
 async function loadData() {
-    console.log('Inizio caricamento dati...');
     try {
         // Per test, usiamo dati di esempio se non è configurato il Google Sheet
         if (GOOGLE_SHEET_ID === 'YOUR_GOOGLE_SHEET_ID') {
-            console.log('Caricamento dati di esempio (Google Sheet non configurato)');
             loadSampleData();
             return;
         }
 
-        console.log('Tentativo di caricamento da Google Sheet:', GOOGLE_SHEET_URL);
         const response = await fetch(GOOGLE_SHEET_URL);
-        console.log('Risposta ricevuta:', response.status);
-        
         const text = await response.text();
-        console.log('Testo ricevuto (primi 200 caratteri):', text.substring(0, 200));
         
         // Google Sheets API restituisce un JSON con un wrapper, dobbiamo estrarlo
         const jsonString = text.substring(text.indexOf('(') + 1, text.lastIndexOf(')'));
         const jsonData = JSON.parse(jsonString);
-        console.log('Dati JSON parsati:', jsonData);
 
         const rows = jsonData.table.rows;
-        console.log('Numero di righe trovate:', rows.length);
         processSheetData(rows);
 
     } catch (error) {
@@ -230,7 +206,6 @@ function processSheetData(rows) {
 
 // Funzione per caricare dati di esempio per test
 function loadSampleData() {
-    console.log('Caricamento dati di esempio...');
     const sampleData = {
         'Pietra_Rossa': [
             {
@@ -290,13 +265,8 @@ function loadSampleData() {
     };
 
     allStonesData = sampleData;
-    console.log('Dati di esempio caricati:', allStonesData);
-    
     populateStoneSelect();
-    console.log('Menu pietre popolato');
-    
     displayStonesOnMap('all');
-    console.log('Pietre visualizzate sulla mappa');
 }
 
 // Funzione per popolare il menu a tendina delle pietre
@@ -1094,58 +1064,5 @@ function resetTutorial() {
     if (tutorialGuide) {
         tutorialGuide.reset();
     }
-}
-
-
-// Funzione per aggiornare il link About Us con la traduzione corretta
-function updateAboutUsLink() {
-    const aboutUsLink = document.getElementById('about-us-link');
-    const currentLang = localStorage.getItem('selectedLanguage') || 'it';
-    
-    if (aboutUsLink && translations[currentLang] && translations[currentLang]['aboutUs']) {
-        aboutUsLink.textContent = translations[currentLang]['aboutUs'];
-    }
-}
-
-// Aggiorna la funzione di inizializzazione del selettore di lingua
-function initializeLanguageSelector() {
-    const languageSelect = document.getElementById('language-select');
-    const savedLanguage = localStorage.getItem('selectedLanguage') || 'it';
-    
-    if (languageSelect) {
-        languageSelect.value = savedLanguage;
-        updateUIText(savedLanguage);
-        updateAboutUsLink();
-    }
-}
-
-// Funzione per cambiare lingua (aggiornata)
-function changeLanguage(lang) {
-    localStorage.setItem('selectedLanguage', lang);
-    updateUIText(lang);
-    updateAboutUsLink();
-    
-    if (tutorialGuide) {
-        tutorialGuide.updateLanguage(lang);
-    }
-}
-
-// Funzione per aggiornare tutti i testi dell'interfaccia
-function updateUIText(lang) {
-    const elements = {
-        'language-label': 'selectLanguage',
-        'stone-label': 'selectStone', 
-        'image-label': 'showImages'
-    };
-    
-    Object.entries(elements).forEach(([id, key]) => {
-        const element = document.getElementById(id);
-        if (element && translations[lang] && translations[lang][key]) {
-            element.textContent = translations[lang][key];
-        }
-    });
-    
-    updateSelectOptions(lang);
-    updateHeaderSubtitle(lang);
 }
 
