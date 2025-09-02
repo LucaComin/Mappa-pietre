@@ -6,6 +6,8 @@ let currentMarkers = L.featureGroup(); // Gruppo di marcatori attualmente sulla 
 let currentPolylines = L.featureGroup(); // Gruppo di polilinee attualmente sulla mappa
 let currentImageMarkers = L.markerClusterGroup({
     showCoverageOnHover: false, // Disabilita i pallini piccoli quando si passa sopra il cluster
+    zoomToBoundsOnClick: false, // Disabilita lo zoom al click sul cluster
+    maxClusterRadius: 0, // Disabilita il raggruppamento dei marker
     spiderfyOnMaxZoom: false, // Disabilita l'espansione a ragno quando si raggiunge il massimo zoom
     removeOutsideVisibleBounds: true // Rimuove i marker fuori dalla vista per migliorare le performance
 }); // Gruppo di marcatori per le immagini con clustering
