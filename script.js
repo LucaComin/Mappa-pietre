@@ -4,7 +4,7 @@ let miniMap; // La mini-mappa nel pannello storia
 let allStonesData = {}; // Oggetto per memorizzare i dati delle pietre, raggruppati per nome
 let currentMarkers = L.featureGroup(); // Gruppo di marcatori attualmente sulla mappa
 let currentPolylines = L.featureGroup(); // Gruppo di polilinee attualmente sulla mappa
-let currentImageMarkers = L.markerClusterGroup(); // Gruppo di marcatori per le immagini con clustering
+let currentImageMarkers = L.markerClusterGroup({ showCoverageOnHover: false, zoomToBoundsOnClick: false, spiderfyOnEveryZoom: false, disableClusteringAtZoom: 18 }); // Gruppo di marcatori per le immagini con clustering
 
 // Variabili per la riproduzione automatica
 let autoPlayInterval = null;
@@ -319,8 +319,7 @@ function displayStonesOnMap(filterStoneName = 'all') {
                 
                 // Formatta la data per il popup
                 const formattedDate = lastPosition.dateObj.toLocaleString('it-IT', {
-                    year: 'numeric', month: 'long', day: 'numeric',
-                    hour: '2-digit', minute: '2-digit'
+                    year: 'numeric', month: 'long', day: 'numeric'
                 });
 
                 // Contenuto del popup migliorato
@@ -404,8 +403,7 @@ function addSingleImageMarker(position, stoneName, stoneColor, index) {
     const imageMarker = L.marker([position.lat, position.lon], { icon: imageIcon });
     
     const formattedDate = position.dateObj.toLocaleString('it-IT', {
-        year: 'numeric', month: 'long', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
+        year: 'numeric', month: 'long', day: 'numeric'
     });
 
     let imagePopupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;

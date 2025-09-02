@@ -1621,3 +1621,22 @@ select:focus-visible {
     }
 }
 
+
+/* Nascondi i pallini piccoli nei cluster */
+.marker-cluster-small div {
+    display: none !important;
+}
+
+.marker-cluster-medium div {
+    display: none !important;
+}
+
+.marker-cluster-large div {
+    display: none !important;
+}
+
+/* Nascondi completamente i cluster */
+.marker-cluster {
+    display: none !important;
+}
+
