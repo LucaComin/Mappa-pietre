@@ -1621,29 +1621,3 @@ select:focus-visible {
     }
 }
 
-
-
-/* Nasconde i cluster markers (pallini grandi e piccoli) */
-.marker-cluster-small,
-.marker-cluster-medium,
-.marker-cluster-large {
-    display: none !important;
-}
-
-/* Nasconde anche i cluster markers generici */
-.marker-cluster {
-    display: none !important;
-}
-
-/* Nasconde i pallini di copertura quando si passa sopra i cluster */
-.leaflet-marker-pane .leaflet-marker-icon.marker-cluster {
-    display: none !important;
-}
-
-/* Classe per cluster completamente invisibili */
-.invisible-cluster {
-    display: none !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-

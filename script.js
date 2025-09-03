@@ -4,19 +4,7 @@ let miniMap; // La mini-mappa nel pannello storia
 let allStonesData = {}; // Oggetto per memorizzare i dati delle pietre, raggruppati per nome
 let currentMarkers = L.featureGroup(); // Gruppo di marcatori attualmente sulla mappa
 let currentPolylines = L.featureGroup(); // Gruppo di polilinee attualmente sulla mappa
-let currentImageMarkers = L.markerClusterGroup({
-    showCoverageOnHover: false, // Disabilita i pallini piccoli quando si passa sopra il cluster
-    spiderfyOnMaxZoom: false, // Disabilita l'espansione a ragno quando si raggiunge il massimo zoom
-    removeOutsideVisibleBounds: true, // Rimuove i marker fuori dalla vista per migliorare le performance
-    iconCreateFunction: function(cluster) {
-        // Crea un'icona invisibile per i cluster
-        return L.divIcon({
-            html: '',
-            className: 'invisible-cluster',
-            iconSize: [0, 0]
-        });
-    }
-}); // Gruppo di marcatori per le immagini con clustering
+let currentImageMarkers = L.markerClusterGroup(); // Gruppo di marcatori per le immagini con clustering
 
 // Variabili per la riproduzione automatica
 let autoPlayInterval = null;
@@ -134,22 +122,6 @@ function initMap() {
     currentMarkers.addTo(map);
     currentPolylines.addTo(map);
     currentImageMarkers.addTo(map);
-    
-    // Event listeners per gestire il clustering
-    currentImageMarkers.on('clustercreate', function(e) {
-        // Quando si crea un cluster, nascondi i marker individuali
-        hideMarkersInCluster(e.layer);
-    });
-    
-    currentImageMarkers.on('clusterremove', function(e) {
-        // Quando si rimuove un cluster, mostra i marker individuali
-        showMarkersInCluster(e.layer);
-    });
-    
-    // Event listener per zoom che aggiorna la visibilità dei marker
-    map.on('zoomend', function() {
-        updateMarkerVisibility();
-    });
 }
 
 // Funzione per caricare e processare i dati dal Google Sheet
@@ -347,7 +319,8 @@ function displayStonesOnMap(filterStoneName = 'all') {
                 
                 // Formatta la data per il popup
                 const formattedDate = lastPosition.dateObj.toLocaleString('it-IT', {
-                    year: 'numeric', month: 'long', day: 'numeric'
+                    year: 'numeric', month: 'long', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
                 });
 
                 // Contenuto del popup migliorato
@@ -431,7 +404,8 @@ function addSingleImageMarker(position, stoneName, stoneColor, index) {
     const imageMarker = L.marker([position.lat, position.lon], { icon: imageIcon });
     
     const formattedDate = position.dateObj.toLocaleString('it-IT', {
-        year: 'numeric', month: 'long', day: 'numeric'
+        year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
     });
 
     let imagePopupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
@@ -592,7 +566,8 @@ function updateHistoryPanel() {
     
     // Aggiorna la caption
     const formattedDate = currentPos.dateObj.toLocaleString('it-IT', {
-        year: 'numeric', month: 'long', day: 'numeric'
+        year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
     });
     document.getElementById('history-image-caption').textContent = formattedDate;
     
@@ -1089,44 +1064,5 @@ function resetTutorial() {
     if (tutorialGuide) {
         tutorialGuide.reset();
     }
-}
-
-
-
-// Funzioni per gestire la visibilità dei marker nei cluster
-function hideMarkersInCluster(cluster) {
-    const childMarkers = cluster.getAllChildMarkers();
-    childMarkers.forEach(function(marker) {
-        if (marker._icon) {
-            marker._icon.style.display = 'none';
-        }
-    });
-}
-
-function showMarkersInCluster(cluster) {
-    const childMarkers = cluster.getAllChildMarkers();
-    childMarkers.forEach(function(marker) {
-        if (marker._icon) {
-            marker._icon.style.display = 'block';
-        }
-    });
-}
-
-function updateMarkerVisibility() {
-    // Aggiorna la visibilità di tutti i marker in base al loro stato di clustering
-    currentImageMarkers.eachLayer(function(layer) {
-        if (layer instanceof L.MarkerCluster) {
-            // È un cluster, nascondi i marker individuali
-            hideMarkersInCluster(layer);
-        } else {
-            // È un marker individuale, assicurati che sia visibile se non è in un cluster
-            const clusters = currentImageMarkers.getVisibleParent(layer);
-            if (!clusters && layer._icon) {
-                layer._icon.style.display = 'block';
-            } else if (clusters && layer._icon) {
-                layer._icon.style.display = 'none';
-            }
-        }
-    });
 }
 
