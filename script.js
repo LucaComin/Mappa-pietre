@@ -4,15 +4,7 @@ let miniMap; // La mini-mappa nel pannello storia
 let allStonesData = {}; // Oggetto per memorizzare i dati delle pietre, raggruppati per nome
 let currentMarkers = L.featureGroup(); // Gruppo di marcatori attualmente sulla mappa
 let currentPolylines = L.featureGroup(); // Gruppo di polilinee attualmente sulla mappa
-    currentImageMarkers = L.markerClusterGroup({
-        iconCreateFunction: function(cluster) {
-            return L.divIcon({
-                html: '<div><span>' + cluster.getChildCount() + '</span></div>',
-                className: 'my-cluster-icon',
-                iconSize: new L.Point(40, 40)
-            });
-        }
-    });
+let currentImageMarkers = L.markerClusterGroup(); // Gruppo di marcatori per le immagini con clustering
 
 // Variabili per la riproduzione automatica
 let autoPlayInterval = null;
