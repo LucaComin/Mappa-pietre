@@ -90,7 +90,11 @@ class ImageRecognition {
                 reject(new Error(`Impossibile caricare l'immagine: ${imageUrl}`));
             };
             
-            img.src = imageUrl;
+            // Usa l'URL locale se disponibile, altrimenti l'URL originale
+            const urlToUse = window.imageDownloader ? 
+                window.imageDownloader.getLocalImageUrl(imageUrl) : imageUrl;
+            
+            img.src = urlToUse;
         });
     }
 

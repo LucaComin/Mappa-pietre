@@ -338,19 +338,49 @@ class PhotoCapture {
                     const percentage = Math.round(result.confidence * 100);
                     const isTopResult = index === 0;
                     
+                    // Trova l'immagine della pietra per mostrarla
+                    let stoneImageUrl = null;
+                    if (window.allStonesData && window.allStonesData[result.name]) {
+                        const positions = window.allStonesData[result.name];
+                        // Prendi l'ultima immagine disponibile
+                        for (let i = positions.length - 1; i >= 0; i--) {
+                            if (positions[i].imageUrl) {
+                                // Usa l'URL locale se disponibile
+                                stoneImageUrl = window.imageDownloader ? 
+                                    window.imageDownloader.getLocalImageUrl(positions[i].imageUrl) : 
+                                    positions[i].imageUrl;
+                                break;
+                            }
+                        }
+                    }
+                    
                     html += `
                         <div class="result-item ${isTopResult ? 'top-result' : ''}">
-                            <div class="result-info">
+                            <div class="result-header">
                                 <h4>${result.name.replace(/_/g, ' ')}</h4>
+                                ${isTopResult ? '<span class="best-match-badge">Miglior corrispondenza</span>' : ''}
+                            </div>
+                            
+                            ${stoneImageUrl ? `
+                                <div class="result-image">
+                                    <img src="${stoneImageUrl}" alt="${result.name}" />
+                                </div>
+                            ` : ''}
+                            
+                            <div class="result-info">
                                 <div class="confidence-bar">
                                     <div class="confidence-fill" style="width: ${percentage}%"></div>
                                 </div>
                                 <span class="confidence-text">${percentage}% di corrispondenza</span>
                             </div>
+                            
                             ${isTopResult ? `
                                 <div class="result-actions">
                                     <button class="select-stone-btn" onclick="selectStoneFromAnalysis('${result.name}')">
                                         È questa!
+                                    </button>
+                                    <button class="cancel-btn" onclick="window.photoCapture.resetPhotoCapture()">
+                                        Non è questa
                                     </button>
                                 </div>
                             ` : ''}
