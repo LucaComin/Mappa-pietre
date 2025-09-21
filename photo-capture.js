@@ -303,28 +303,13 @@ class PhotoCapture {
 
     async performImageAnalysis(imageBlob) {
         try {
-            // Verifica lo stato del sistema usando il nuovo initializer
-            if (window.systemInitializer) {
-                const status = window.systemInitializer.checkSystemStatus();
-                
-                if (!status.fullyReady) {
-                    if (!status.openCvLoaded) {
-                        throw new Error('OpenCV non è ancora caricato. Attendi il completamento del caricamento.');
-                    } else if (!status.dataLoaded) {
-                        throw new Error('Dati delle pietre non ancora caricati. Attendi qualche secondo.');
-                    } else if (!status.imageRecognitionReady) {
-                        throw new Error('Sistema di riconoscimento non ancora pronto. Riprova tra qualche secondo.');
-                    }
-                }
-            } else {
-                // Fallback al controllo tradizionale
-                if (!window.imageRecognition) {
-                    throw new Error('Sistema di riconoscimento non inizializzato. Ricarica la pagina e riprova.');
-                }
-                
-                if (!window.imageRecognition.isOpenCvReady) {
-                    throw new Error('Sistema di riconoscimento non ancora pronto. Riprova tra qualche secondo.');
-                }
+            // Verifica se il riconoscimento immagini è disponibile
+            if (!window.imageRecognition) {
+                throw new Error('Sistema di riconoscimento non inizializzato. Ricarica la pagina e riprova.');
+            }
+            
+            if (!window.imageRecognition.isOpenCvReady) {
+                throw new Error('Sistema di riconoscimento non ancora pronto. Riprova tra qualche secondo.');
             }
 
             // Usa il vero algoritmo di riconoscimento
@@ -340,12 +325,8 @@ class PhotoCapture {
             console.error('Errore nell\'analisi:', error);
             
             // Mostra un messaggio di errore più specifico
-            if (error.message.includes('OpenCV non è ancora caricato')) {
-                this.showError('Il sistema si sta ancora caricando. Attendi il completamento e riprova.');
-            } else if (error.message.includes('Dati delle pietre non ancora caricati')) {
-                this.showError('Caricamento dati in corso. Attendi qualche secondo e riprova.');
-            } else if (error.message.includes('non ancora pronto')) {
-                this.showError('Il sistema di riconoscimento si sta ancora inizializzando. Attendi qualche secondo e riprova.');
+            if (error.message.includes('non ancora pronto')) {
+                this.showError('Il sistema di riconoscimento si sta ancora caricando. Attendi qualche secondo e riprova.');
             } else if (error.message.includes('non inizializzato')) {
                 this.showError('Errore di sistema. Ricarica la pagina e riprova.');
             } else if (error.message.includes('Nessuna pietra riconosciuta')) {
