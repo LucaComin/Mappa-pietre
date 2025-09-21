@@ -286,6 +286,21 @@ function populateStoneSelect() {
     });
 }
 
+// Funzione esposta per selezionare una pietra programmaticamente
+function selectStone(stoneName) {
+    const select = document.getElementById('stone-select');
+    if (select) {
+        select.value = stoneName;
+        displayStonesOnMap(stoneName);
+        
+        // Centra la mappa sulla pietra selezionata
+        if (allStonesData[stoneName] && allStonesData[stoneName].length > 0) {
+            const lastPosition = allStonesData[stoneName][allStonesData[stoneName].length - 1];
+            map.setView([lastPosition.lat, lastPosition.lon], 10);
+        }
+    }
+}
+
 // Funzione principale per visualizzare le pietre sulla mappa
 function displayStonesOnMap(filterStoneName = 'all') {
     currentMarkers.clearLayers();
