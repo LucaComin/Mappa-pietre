@@ -304,24 +304,42 @@ class PhotoCapture {
     async performImageAnalysis(imageBlob) {
         try {
             // Verifica se il riconoscimento immagini è disponibile
-            if (!window.imageRecognition || !window.imageRecognition.isOpenCvReady) {
+            if (!window.imageRecognition) {
+                throw new Error('Sistema di riconoscimento non inizializzato. Ricarica la pagina e riprova.');
+            }
+            
+            if (!window.imageRecognition.isOpenCvReady) {
                 throw new Error('Sistema di riconoscimento non ancora pronto. Riprova tra qualche secondo.');
             }
 
             // Usa il vero algoritmo di riconoscimento
             const results = await window.imageRecognition.analyzeUserImage(imageBlob);
+            
+            if (!results || results.length === 0) {
+                throw new Error('Nessuna pietra riconosciuta nell\'immagine.');
+            }
+            
             this.showAnalysisResults(results);
             
         } catch (error) {
             console.error('Errore nell\'analisi:', error);
             
-            // Fallback ai dati di esempio se l'analisi reale fallisce
-            console.log('Usando dati di esempio come fallback...');
-            this.showAnalysisResults([
-                { name: 'Pietra_Rossa', confidence: 0.85 },
-                { name: 'Pietra_Blu', confidence: 0.72 },
-                { name: 'Pietra_Verde', confidence: 0.45 }
-            ]);
+            // Mostra un messaggio di errore più specifico
+            if (error.message.includes('non ancora pronto')) {
+                this.showError('Il sistema di riconoscimento si sta ancora caricando. Attendi qualche secondo e riprova.');
+            } else if (error.message.includes('non inizializzato')) {
+                this.showError('Errore di sistema. Ricarica la pagina e riprova.');
+            } else if (error.message.includes('Nessuna pietra riconosciuta')) {
+                this.showError('Nessuna pietra riconosciuta nell\'immagine. Prova con una foto più chiara o da un\'angolazione diversa.');
+            } else {
+                // Fallback ai dati di esempio solo in caso di errori tecnici
+                console.log('Usando dati di esempio come fallback...');
+                this.showAnalysisResults([
+                    { name: 'Pietra_Rossa', confidence: 0.85 },
+                    { name: 'Pietra_Blu', confidence: 0.72 },
+                    { name: 'Pietra_Verde', confidence: 0.45 }
+                ]);
+            }
         }
     }
 

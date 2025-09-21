@@ -321,25 +321,7 @@ class ImageRecognition {
 // Variabile globale per l'istanza
 let imageRecognition = null;
 
-// Callback chiamata quando OpenCV.js è pronto
-function onOpenCvReady() {
-    console.log('OpenCV.js caricato con successo');
-    
-    // Inizializza il riconoscimento immagini
-    imageRecognition = new ImageRecognition();
-    
-    // Aspetta che i dati delle pietre siano caricati prima di inizializzare
-    const checkDataAndInitialize = () => {
-        if (window.allStonesData && Object.keys(window.allStonesData).length > 0) {
-            imageRecognition.initialize();
-        } else {
-            // Riprova dopo 500ms
-            setTimeout(checkDataAndInitialize, 500);
-        }
-    };
-    
-    checkDataAndInitialize();
-}
+// La funzione onOpenCvReady è ora gestita nel file index.html
 
 // Esporta per uso globale
 window.ImageRecognition = ImageRecognition;
