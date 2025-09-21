@@ -252,11 +252,9 @@
                     return;
                 }
                 
-                // Lista di URL da provare in ordine di priorità (solo CDN affidabili)
+                // Caricamento OpenCV.js dalla copia locale
                 const openCvUrls = [
-                    'https://cdn.jsdelivr.net/npm/opencv.js@4.8.0/opencv.js', // CDN JSDelivr (più affidabile)
-                    'https://unpkg.com/opencv.js@4.8.0/opencv.js', // CDN unpkg
-                    'https://cdnjs.cloudflare.com/ajax/libs/opencv.js/4.8.0/opencv.js' // Cloudflare CDN
+                    './opencv.js', // File locale
                 ];
                 
                 let currentUrlIndex = 0;
