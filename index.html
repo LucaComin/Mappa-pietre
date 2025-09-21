@@ -95,8 +95,8 @@
                 </div>
                 
                 <div class="control-group">
-                    <button id="find-stone-btn" class="find-stone-button" aria-label="Trova la mia pietra usando una foto">
-                        <span class="control-icon">📷</span>
+                    <button id="find-stone-btn" class="find-stone-button" aria-label="Trova la mia pietra">
+                        <span class="control-icon">🔍</span>
                         Trova la mia pietra
                     </button>
                 </div>
@@ -179,14 +179,8 @@
         </div>
     </div>
 
-    <!-- Fullscreen image modal -->
-    <div id="fullscreen-modal" class="fullscreen-modal hidden" role="dialog" aria-labelledby="fullscreen-image" aria-modal="true">
-        <button id="close-fullscreen" class="close-fullscreen" aria-label="Chiudi visualizzazione a schermo intero">✕</button>
-        <img id="fullscreen-image" src="" alt="Immagine a schermo intero" loading="lazy"/>
-    </div>
-
-    <!-- Modal per cattura/selezione immagine -->
-    <div id="photo-capture-modal" class="photo-modal hidden" role="dialog" aria-labelledby="photo-modal-title" aria-modal="true">
+    <!-- Photo capture/selection modal -->
+    <div id="photo-modal" class="photo-modal hidden" role="dialog" aria-labelledby="photo-modal-title" aria-modal="true">
         <div class="photo-modal-content">
             <div class="photo-modal-header">
                 <h2 id="photo-modal-title">Trova la tua pietra</h2>
@@ -199,72 +193,46 @@
                         <span class="photo-icon">📷</span>
                         <span class="photo-text">Scatta una foto</span>
                     </button>
+                    
                     <button id="gallery-btn" class="photo-option-btn">
                         <span class="photo-icon">🖼️</span>
                         <span class="photo-text">Seleziona dalla galleria</span>
                     </button>
                 </div>
                 
-                <div id="camera-container" class="camera-container hidden">
-                    <video id="camera-video" autoplay playsinline></video>
-                    <canvas id="camera-canvas" class="hidden"></canvas>
-                    <div class="camera-controls">
-                        <button id="capture-btn" class="capture-btn">📸 Scatta</button>
-                        <button id="cancel-camera-btn" class="cancel-btn">❌ Annulla</button>
+                <div id="photo-preview" class="photo-preview hidden">
+                    <img id="preview-image" src="" alt="Anteprima foto" />
+                    <div class="photo-actions">
+                        <button id="analyze-btn" class="analyze-btn">
+                            <span class="btn-icon">🔍</span>
+                            Analizza foto
+                        </button>
+                        <button id="retake-btn" class="retake-btn">
+                            <span class="btn-icon">🔄</span>
+                            Riprova
+                        </button>
                     </div>
                 </div>
                 
-                <div id="image-preview-container" class="image-preview-container hidden">
-                    <img id="preview-image" src="" alt="Anteprima immagine"/>
-                    <div class="preview-controls">
-                        <button id="analyze-btn" class="analyze-btn">🔍 Analizza</button>
-                        <button id="retake-btn" class="retake-btn">🔄 Riprova</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Input nascosto per file -->
-        <input type="file" id="file-input" accept="image/*" capture="environment" class="hidden">
-    </div>
-
-    <!-- Modal per risultati del confronto -->
-    <div id="results-modal" class="results-modal hidden" role="dialog" aria-labelledby="results-title" aria-modal="true">
-        <div class="results-modal-content">
-            <div class="results-modal-header">
-                <h2 id="results-title">Risultato della ricerca</h2>
-                <button id="close-results-modal" class="close-button" aria-label="Chiudi">✕</button>
-            </div>
-            
-            <div class="results-modal-body">
-                <div class="comparison-container">
-                    <div class="comparison-item">
-                        <h3>La tua immagine</h3>
-                        <img id="user-image" src="" alt="Immagine dell'utente"/>
-                    </div>
-                    <div class="comparison-arrow">➡️</div>
-                    <div class="comparison-item">
-                        <h3>Pietra trovata</h3>
-                        <img id="found-stone-image" src="" alt="Immagine della pietra trovata"/>
-                        <p id="found-stone-name" class="stone-name"></p>
-                        <p id="similarity-score" class="similarity-score"></p>
-                    </div>
-                </div>
-                
-                <div class="results-actions">
-                    <button id="confirm-match-btn" class="confirm-btn">✅ È questa!</button>
-                    <button id="cancel-match-btn" class="cancel-btn">❌ Annulla</button>
+                <div id="analysis-results" class="analysis-results hidden">
+                    <h3>Risultati dell'analisi</h3>
+                    <div id="results-content"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Loading overlay per l'analisi -->
-    <div id="analysis-loading" class="analysis-loading hidden">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <p>Analizzando l'immagine...</p>
-        </div>
+    <!-- Hidden file input for gallery selection -->
+    <input type="file" id="file-input" accept="image/*" style="display: none;">
+    
+    <!-- Hidden video element for camera capture -->
+    <video id="camera-video" style="display: none;" autoplay playsinline></video>
+    <canvas id="camera-canvas" style="display: none;"></canvas>
+
+    <!-- Fullscreen image modal -->
+    <div id="fullscreen-modal" class="fullscreen-modal hidden" role="dialog" aria-labelledby="fullscreen-image" aria-modal="true">
+        <button id="close-fullscreen" class="close-fullscreen" aria-label="Chiudi visualizzazione a schermo intero">✕</button>
+        <img id="fullscreen-image" src="" alt="Immagine a schermo intero" loading="lazy"/>
     </div>
 
     <!-- Scripts -->
@@ -273,15 +241,24 @@
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <!-- MarkerCluster plugin -->
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    
+    <!-- OpenCV.js -->
+    <script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
 
     <!-- Translations -->
     <script src="translations.js"></script>
     
+    <!-- Notification system -->
+    <script src="notifications.js"></script>
+    
+    <!-- Image recognition functionality -->
+    <script src="image-recognition.js"></script>
+    
+    <!-- Photo capture functionality -->
+    <script src="photo-capture.js"></script>
+    
     <!-- App JS -->
     <script src="script.js"></script>
-    
-    <!-- Photo Recognition System -->
-    <script src="photo-recognition.js"></script>
     
     <!-- Service Worker per PWA (opzionale) -->
     <script>
