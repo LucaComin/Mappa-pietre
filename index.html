@@ -244,7 +244,7 @@
     
     <!-- OpenCV.js -->
     <script type="text/javascript">
-        // Caricamento OpenCV.js con gestione migliorata
+        // Caricamento OpenCV.js con gestione migliorata e fallback
         function loadOpenCV() {
             return new Promise((resolve, reject) => {
                 if (typeof cv !== 'undefined' && cv.Mat) {
@@ -252,30 +252,55 @@
                     return;
                 }
                 
-                const script = document.createElement('script');
-                script.src = 'opencv.js';
-                script.type = 'text/javascript';
-                script.async = true;
+                // Lista di URL da provare in ordine di priorità
+                const openCvUrls = [
+                    './opencv.js', // File locale
+                    'https://cdn.jsdelivr.net/npm/opencv.js@4.8.0/opencv.js', // CDN JSDelivr
+                    'https://unpkg.com/opencv.js@4.8.0/opencv.js', // CDN unpkg
+                    'https://docs.opencv.org/4.8.0/opencv.js' // URL originale come ultimo fallback
+                ];
                 
-                script.onload = () => {
-                    // Aspetta che OpenCV.js sia completamente inizializzato
-                    const checkOpenCV = () => {
-                        if (typeof cv !== 'undefined' && cv.Mat) {
-                            console.log('OpenCV.js caricato con successo');
-                            resolve();
-                        } else {
-                            setTimeout(checkOpenCV, 100);
-                        }
+                let currentUrlIndex = 0;
+                
+                function tryLoadFromUrl(urlIndex) {
+                    if (urlIndex >= openCvUrls.length) {
+                        reject(new Error('Impossibile caricare OpenCV.js da nessun URL'));
+                        return;
+                    }
+                    
+                    const script = document.createElement('script');
+                    script.src = openCvUrls[urlIndex];
+                    script.type = 'text/javascript';
+                    script.async = true;
+                    
+                    script.onload = () => {
+                        // Aspetta che OpenCV.js sia completamente inizializzato
+                        const checkOpenCV = () => {
+                            if (typeof cv !== 'undefined' && cv.Mat) {
+                                console.log('OpenCV.js caricato con successo da:', openCvUrls[urlIndex]);
+                                resolve();
+                            } else {
+                                setTimeout(checkOpenCV, 100);
+                            }
+                        };
+                        checkOpenCV();
                     };
-                    checkOpenCV();
-                };
+                    
+                    script.onerror = (error) => {
+                        console.warn(`Errore nel caricamento di OpenCV.js da ${openCvUrls[urlIndex]}:`, error);
+                        // Rimuovi lo script fallito
+                        if (script.parentNode) {
+                            script.parentNode.removeChild(script);
+                        }
+                        // Prova il prossimo URL
+                        tryLoadFromUrl(urlIndex + 1);
+                    };
+                    
+                    document.head.appendChild(script);
+                }
                 
-                script.onerror = (error) => {
-                    console.error('Errore nel caricamento di OpenCV.js:', error);
-                    reject(error);
-                };
-                
-                document.head.appendChild(script);
+                // Inizia con il primo URL
+                tryLoadFromUrl(0);
             });
         }
         
