@@ -93,13 +93,6 @@
                         </select>
                     </div>
                 </div>
-                
-                <div class="control-group">
-                    <button id="find-stone-btn" class="find-stone-button" aria-label="Trova la mia pietra">
-                        <span class="control-icon">🔍</span>
-                        Trova la mia pietra
-                    </button>
-                </div>
             </div>
         </header>
 
@@ -179,56 +172,6 @@
         </div>
     </div>
 
-    <!-- Photo capture/selection modal -->
-    <div id="photo-modal" class="photo-modal hidden" role="dialog" aria-labelledby="photo-modal-title" aria-modal="true">
-        <div class="photo-modal-content">
-            <div class="photo-modal-header">
-                <h2 id="photo-modal-title">Trova la tua pietra</h2>
-                <button id="close-photo-modal" class="close-button" aria-label="Chiudi">✕</button>
-            </div>
-            
-            <div class="photo-modal-body">
-                <div class="photo-options">
-                    <button id="camera-btn" class="photo-option-btn">
-                        <span class="photo-icon">📷</span>
-                        <span class="photo-text">Scatta una foto</span>
-                    </button>
-                    
-                    <button id="gallery-btn" class="photo-option-btn">
-                        <span class="photo-icon">🖼️</span>
-                        <span class="photo-text">Seleziona dalla galleria</span>
-                    </button>
-                </div>
-                
-                <div id="photo-preview" class="photo-preview hidden">
-                    <img id="preview-image" src="" alt="Anteprima foto" />
-                    <div class="photo-actions">
-                        <button id="analyze-btn" class="analyze-btn">
-                            <span class="btn-icon">🔍</span>
-                            Analizza foto
-                        </button>
-                        <button id="retake-btn" class="retake-btn">
-                            <span class="btn-icon">🔄</span>
-                            Riprova
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="analysis-results" class="analysis-results hidden">
-                    <h3>Risultati dell'analisi</h3>
-                    <div id="results-content"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Hidden file input for gallery selection -->
-    <input type="file" id="file-input" accept="image/*" style="display: none;">
-    
-    <!-- Hidden video element for camera capture -->
-    <video id="camera-video" style="display: none;" autoplay playsinline></video>
-    <canvas id="camera-canvas" style="display: none;"></canvas>
-
     <!-- Fullscreen image modal -->
     <div id="fullscreen-modal" class="fullscreen-modal hidden" role="dialog" aria-labelledby="fullscreen-image" aria-modal="true">
         <button id="close-fullscreen" class="close-fullscreen" aria-label="Chiudi visualizzazione a schermo intero">✕</button>
@@ -241,119 +184,9 @@
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <!-- MarkerCluster plugin -->
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-    
-    <!-- OpenCV.js -->
-    <script type="text/javascript">
-        // Caricamento OpenCV.js con gestione migliorata e fallback
-        function loadOpenCV() {
-            return new Promise((resolve, reject) => {
-                if (typeof cv !== 'undefined' && cv.Mat) {
-                    resolve();
-                    return;
-                }
-                
-                // Caricamento OpenCV.js dalla copia locale
-                const openCvUrls = [
-                    './opencv.js', // File locale
-                ];
-                
-                let currentUrlIndex = 0;
-                
-                function tryLoadFromUrl(urlIndex) {
-                    if (urlIndex >= openCvUrls.length) {
-                        reject(new Error('Impossibile caricare OpenCV.js da nessun CDN'));
-                        return;
-                    }
-                    
-                    const script = document.createElement('script');
-                    script.src = openCvUrls[urlIndex];
-                    script.type = 'text/javascript';
-                    script.async = true;
-                    
-                    script.onload = () => {
-                        // Aspetta che OpenCV.js sia completamente inizializzato
-                        const checkOpenCV = () => {
-                            if (typeof cv !== 'undefined' && cv.Mat) {
-                                console.log('OpenCV.js caricato con successo da:', openCvUrls[urlIndex]);
-                                resolve();
-                            } else {
-                                setTimeout(checkOpenCV, 100);
-                            }
-                        };
-                        checkOpenCV();
-                    };
-                    
-                    script.onerror = (error) => {
-                        console.warn(`Errore nel caricamento di OpenCV.js da ${openCvUrls[urlIndex]}:`, error);
-                        // Rimuovi lo script fallito
-                        if (script.parentNode) {
-                            script.parentNode.removeChild(script);
-                        }
-                        // Prova il prossimo URL
-                        tryLoadFromUrl(urlIndex + 1);
-                    };
-                    
-                    document.head.appendChild(script);
-                }
-                
-                // Inizia con il primo URL
-                tryLoadFromUrl(0);
-            });
-        }
-        
-        // Funzione chiamata quando OpenCV è pronto
-        function onOpenCvReady() {
-            console.log('OpenCV.js caricato con successo');
-            
-            // Inizializza il riconoscimento immagini
-            if (window.ImageRecognition) {
-                window.imageRecognition = new window.ImageRecognition();
-                
-                // Aspetta che i dati delle pietre siano caricati prima di inizializzare
-                const checkDataAndInitialize = () => {
-                    if (window.allStonesData && Object.keys(window.allStonesData).length > 0) {
-                        const success = window.imageRecognition.initialize();
-                        if (success) {
-                            console.log('Sistema di riconoscimento immagini inizializzato con successo');
-                        } else {
-                            console.error('Errore nell\'inizializzazione del sistema di riconoscimento');
-                        }
-                    } else {
-                        // Riprova dopo 500ms
-                        setTimeout(checkDataAndInitialize, 500);
-                    }
-                };
-                
-                checkDataAndInitialize();
-            } else {
-                console.error('Classe ImageRecognition non trovata');
-            }
-        }
-        
-        // Carica OpenCV quando il DOM è pronto
-        document.addEventListener('DOMContentLoaded', () => {
-            loadOpenCV().then(() => {
-                onOpenCvReady();
-            }).catch((error) => {
-                console.error('Impossibile caricare OpenCV.js:', error);
-            });
-        });
-    </script>
 
     <!-- Translations -->
     <script src="translations.js"></script>
-    
-    <!-- Notification system -->
-    <script src="notifications.js"></script>
-    
-    <!-- Image downloader -->
-    <script src="image-downloader.js"></script>
-    
-    <!-- Image recognition functionality -->
-    <script src="image-recognition.js"></script>
-    
-    <!-- Photo capture functionality -->
-    <script src="photo-capture.js"></script>
     
     <!-- App JS -->
     <script src="script.js"></script>
