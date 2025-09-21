@@ -242,81 +242,11 @@
     <!-- MarkerCluster plugin -->
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     
-    <!-- OpenCV.js -->
-    <script type="text/javascript">
-        // Caricamento OpenCV.js con gestione migliorata
-        function loadOpenCV() {
-            return new Promise((resolve, reject) => {
-                if (typeof cv !== 'undefined' && cv.Mat) {
-                    resolve();
-                    return;
-                }
-                
-                const script = document.createElement('script');
-                script.src = 'https://docs.opencv.org/4.8.0/opencv.js';
-                script.type = 'text/javascript';
-                script.async = true;
-                
-                script.onload = () => {
-                    // Aspetta che OpenCV.js sia completamente inizializzato
-                    const checkOpenCV = () => {
-                        if (typeof cv !== 'undefined' && cv.Mat) {
-                            console.log('OpenCV.js caricato con successo');
-                            resolve();
-                        } else {
-                            setTimeout(checkOpenCV, 100);
-                        }
-                    };
-                    checkOpenCV();
-                };
-                
-                script.onerror = (error) => {
-                    console.error('Errore nel caricamento di OpenCV.js:', error);
-                    reject(error);
-                };
-                
-                document.head.appendChild(script);
-            });
-        }
-        
-        // Funzione chiamata quando OpenCV è pronto
-        function onOpenCvReady() {
-            console.log('OpenCV.js caricato con successo');
-            
-            // Inizializza il riconoscimento immagini
-            if (window.ImageRecognition) {
-                window.imageRecognition = new window.ImageRecognition();
-                
-                // Aspetta che i dati delle pietre siano caricati prima di inizializzare
-                const checkDataAndInitialize = () => {
-                    if (window.allStonesData && Object.keys(window.allStonesData).length > 0) {
-                        const success = window.imageRecognition.initialize();
-                        if (success) {
-                            console.log('Sistema di riconoscimento immagini inizializzato con successo');
-                        } else {
-                            console.error('Errore nell\'inizializzazione del sistema di riconoscimento');
-                        }
-                    } else {
-                        // Riprova dopo 500ms
-                        setTimeout(checkDataAndInitialize, 500);
-                    }
-                };
-                
-                checkDataAndInitialize();
-            } else {
-                console.error('Classe ImageRecognition non trovata');
-            }
-        }
-        
-        // Carica OpenCV quando il DOM è pronto
-        document.addEventListener('DOMContentLoaded', () => {
-            loadOpenCV().then(() => {
-                onOpenCvReady();
-            }).catch((error) => {
-                console.error('Impossibile caricare OpenCV.js:', error);
-            });
-        });
-    </script>
+    <!-- Sistema di inizializzazione robusto -->
+    <script src="system-initializer.js"></script>
+    
+    <!-- Indicatore di stato -->
+    <script src="status-indicator.js"></script>
 
     <!-- Translations -->
     <script src="translations.js"></script>
