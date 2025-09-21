@@ -308,6 +308,16 @@ class PhotoCapture {
                 throw new Error('Sistema di riconoscimento non inizializzato. Ricarica la pagina e riprova.');
             }
             
+            // Aspetta che il sistema sia completamente pronto
+            let attempts = 0;
+            const maxAttempts = 30; // 15 secondi di attesa massima
+            
+            while (!window.imageRecognition.isOpenCvReady && attempts < maxAttempts) {
+                console.log('Aspettando che il sistema di riconoscimento sia pronto...');
+                await new Promise(resolve => setTimeout(resolve, 500));
+                attempts++;
+            }
+            
             if (!window.imageRecognition.isOpenCvReady) {
                 throw new Error('Sistema di riconoscimento non ancora pronto. Riprova tra qualche secondo.');
             }

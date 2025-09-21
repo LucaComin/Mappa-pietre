@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Sistema Riconoscimento - Mappa Pietre</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.loading {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .test-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background-color: #0056b3;
+        }
+        .test-button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test Sistema Riconoscimento Immagini</h1>
+        
+        <div id="opencv-status" class="status loading">
+            ⏳ Caricamento OpenCV.js...
+        </div>
+        
+        <div id="recognition-status" class="status loading">
+            ⏳ Inizializzazione sistema riconoscimento...
+        </div>
+        
+        <div id="data-status" class="status loading">
+            ⏳ Caricamento dati pietre...
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <button id="test-system" class="test-button" disabled>
+                🔍 Testa Sistema
+            </button>
+            <button id="reload-page" class="test-button">
+                🔄 Ricarica Pagina
+            </button>
+        </div>
+        
+        <div id="log" class="log"></div>
+    </div>
+
+    <!-- Script di test -->
+    <script>
+        let logElement = document.getElementById('log');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus(elementId, status, message) {
+            const element = document.getElementById(elementId);
+            element.className = `status ${status}`;
+            element.innerHTML = message;
+        }
+        
+        // Test del caricamento OpenCV
+        function testOpenCV() {
+            return new Promise((resolve, reject) => {
+                if (typeof cv !== 'undefined' && cv.Mat) {
+                    updateStatus('opencv-status', 'success', '✅ OpenCV.js caricato correttamente');
+                    log('OpenCV.js è disponibile e funzionante');
+                    resolve();
+                    return;
+                }
+                
+                log('Caricamento OpenCV.js...');
+                const script = document.createElement('script');
+                script.src = 'https://docs.opencv.org/4.8.0/opencv.js';
+                script.type = 'text/javascript';
+                script.async = true;
+                
+                script.onload = () => {
+                    const checkOpenCV = () => {
+                        if (typeof cv !== 'undefined' && cv.Mat) {
+                            updateStatus('opencv-status', 'success', '✅ OpenCV.js caricato correttamente');
+                            log('OpenCV.js caricato con successo');
+                            resolve();
+                        } else {
+                            setTimeout(checkOpenCV, 100);
+                        }
+                    };
+                    checkOpenCV();
+                };
+                
+                script.onerror = (error) => {
+                    updateStatus('opencv-status', 'error', '❌ Errore nel caricamento di OpenCV.js');
+                    log('Errore nel caricamento di OpenCV.js: ' + error);
+                    reject(error);
+                };
+                
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Test del sistema di riconoscimento
+        function testRecognitionSystem() {
+            return new Promise((resolve) => {
+                // Simula i dati delle pietre
+                window.allStonesData = {
+                    'Pietra_Test': [{
+                        timestamp: Date.now(),
+                        imageUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
+                    }]
+                };
+                
+                updateStatus('data-status', 'success', '✅ Dati pietre caricati (simulati)');
+                log('Dati pietre simulati caricati');
+                
+                // Carica il sistema di riconoscimento
+                const script = document.createElement('script');
+                script.src = 'image-recognition.js';
+                script.onload = () => {
+                    log('Script image-recognition.js caricato');
+                    
+                    if (window.ImageRecognition) {
+                        window.imageRecognition = new window.ImageRecognition();
+                        const success = window.imageRecognition.initialize();
+                        
+                        if (success) {
+                            updateStatus('recognition-status', 'success', '✅ Sistema riconoscimento inizializzato');
+                            log('Sistema di riconoscimento inizializzato con successo');
+                            document.getElementById('test-system').disabled = false;
+                        } else {
+                            updateStatus('recognition-status', 'error', '❌ Errore inizializzazione sistema');
+                            log('Errore nell\'inizializzazione del sistema di riconoscimento');
+                        }
+                    } else {
+                        updateStatus('recognition-status', 'error', '❌ Classe ImageRecognition non trovata');
+                        log('Classe ImageRecognition non trovata');
+                    }
+                    resolve();
+                };
+                
+                script.onerror = () => {
+                    updateStatus('recognition-status', 'error', '❌ Errore caricamento script');
+                    log('Errore nel caricamento di image-recognition.js');
+                    resolve();
+                };
+                
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Test completo del sistema
+        function runSystemTest() {
+            log('=== INIZIO TEST SISTEMA ===');
+            
+            if (!window.imageRecognition || !window.imageRecognition.isOpenCvReady) {
+                log('❌ Sistema non pronto per il test');
+                return;
+            }
+            
+            // Crea un'immagine di test
+            const canvas = document.createElement('canvas');
+            canvas.width = 100;
+            canvas.height = 100;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ff0000';
+            ctx.fillRect(0, 0, 100, 100);
+            
+            canvas.toBlob(async (blob) => {
+                try {
+                    log('Testando analisi immagine...');
+                    const results = await window.imageRecognition.analyzeUserImage(blob);
+                    log('✅ Test completato. Risultati: ' + JSON.stringify(results));
+                } catch (error) {
+                    log('❌ Errore nel test: ' + error.message);
+                }
+            });
+        }
+        
+        // Event listeners
+        document.getElementById('test-system').addEventListener('click', runSystemTest);
+        document.getElementById('reload-page').addEventListener('click', () => {
+            window.location.reload();
+        });
+        
+        // Avvia i test
+        log('=== AVVIO TEST AUTOMATICI ===');
+        testOpenCV().then(() => {
+            return testRecognitionSystem();
+        }).catch((error) => {
+            log('❌ Test fallito: ' + error);
+        });
+    </script>
+</body>
+</html>
