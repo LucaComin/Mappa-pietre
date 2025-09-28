@@ -2328,3 +2328,6 @@ select:focus-visible {
     }
 }
 
+
+/* Import degli stili per la gestione errori migliorata */
+@import url('error-styles.css');
