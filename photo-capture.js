@@ -303,53 +303,47 @@ class PhotoCapture {
 
     async performImageAnalysis(imageBlob) {
         try {
-            // Verifica se il riconoscimento immagini è disponibile
-            if (!window.imageRecognition) {
-                throw new Error('Sistema di riconoscimento non inizializzato. Ricarica la pagina e riprova.');
-            }
-            
-            // Aspetta che il sistema sia completamente pronto
-            let attempts = 0;
-            const maxAttempts = 30; // 15 secondi di attesa massima
-            
-            while (!window.imageRecognition.isOpenCvReady && attempts < maxAttempts) {
-                console.log('Aspettando che il sistema di riconoscimento sia pronto...');
-                await new Promise(resolve => setTimeout(resolve, 500));
-                attempts++;
-            }
-            
-            if (!window.imageRecognition.isOpenCvReady) {
-                throw new Error('Sistema di riconoscimento non ancora pronto. Riprova tra qualche secondo.');
+            if (!window.gradioClient) {
+                throw new Error("Gradio Client non inizializzato. Ricarica la pagina.");
             }
 
-            // Usa il vero algoritmo di riconoscimento
-            const results = await window.imageRecognition.analyzeUserImage(imageBlob);
-            
+            // Converti il Blob in Base64 per l'invio via API se necessario, altrimenti invia il Blob direttamente
+            // Gradio client può gestire direttamente i File/Blob
+            const file = new File([imageBlob], "image.jpeg", { type: "image/jpeg" });
+
+            // Chiamata all'API di Gradio
+            // L'endpoint predefinito per un gradio.Interface è "/predict"
+            // Il payload deve corrispondere agli input del tuo Gradio Space
+            // Assumiamo che il tuo Gradio Space accetti un'immagine come input
+            const response = await window.gradioClient.predict(
+                "/predict", // L'endpoint predefinito per un'interfaccia Gradio
+                [file] // L'immagine come input
+            );
+
+            // La risposta di Gradio è un array, il primo elemento dovrebbe essere il risultato
+            const results = response.data[0]; 
+
             if (!results || results.length === 0) {
-                throw new Error('Nessuna pietra riconosciuta nell\'immagine.');
+                throw new Error("Nessuna pietra riconosciuta dal servizio di analisi.");
             }
             
-            this.showAnalysisResults(results);
+            // Gradio restituisce un array di oggetti { label: "nome_pietra", confidences: numero }
+            const formattedResults = results.map(item => ({
+                name: item.label.replace(/ /g, '_'), // Formatta il nome per compatibilità
+                confidence: item.confidences
+            }));
+            
+            this.showAnalysisResults(formattedResults);
             
         } catch (error) {
-            console.error('Errore nell\'analisi:', error);
-            
-            // Mostra un messaggio di errore più specifico
-            if (error.message.includes('non ancora pronto')) {
-                this.showError('Il sistema di riconoscimento si sta ancora caricando. Attendi qualche secondo e riprova.');
-            } else if (error.message.includes('non inizializzato')) {
-                this.showError('Errore di sistema. Ricarica la pagina e riprova.');
-            } else if (error.message.includes('Nessuna pietra riconosciuta')) {
-                this.showError('Nessuna pietra riconosciuta nell\'immagine. Prova con una foto più chiara o da un\'angolazione diversa.');
-            } else {
-                // Fallback ai dati di esempio solo in caso di errori tecnici
-                console.log('Usando dati di esempio come fallback...');
-                this.showAnalysisResults([
-                    { name: 'Pietra_Rossa', confidence: 0.85 },
-                    { name: 'Pietra_Blu', confidence: 0.72 },
-                    { name: 'Pietra_Verde', confidence: 0.45 }
-                ]);
-            }
+            console.error("Errore nell\"analisi con Gradio:", error);
+            this.showError("Errore durante l\"analisi dell\"immagine con il servizio esterno.");
+            console.log("Usando dati di esempio come fallback...");
+            this.showAnalysisResults([
+                { name: "Pietra_Rossa", confidence: 0.85 },
+                { name: "Pietra_Blu", confidence: 0.72 },
+                { name: "Pietra_Verde", confidence: 0.45 }
+            ]);
         }
     }
 

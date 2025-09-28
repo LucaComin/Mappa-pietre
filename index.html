@@ -93,6 +93,13 @@
                         </select>
                     </div>
                 </div>
+                
+                <div class="control-group">
+                    <button id="find-stone-btn" class="find-stone-button" aria-label="Trova la mia pietra">
+                        <span class="control-icon">🔍</span>
+                        Trova la mia pietra
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -172,6 +179,56 @@
         </div>
     </div>
 
+    <!-- Photo capture/selection modal -->
+    <div id="photo-modal" class="photo-modal hidden" role="dialog" aria-labelledby="photo-modal-title" aria-modal="true">
+        <div class="photo-modal-content">
+            <div class="photo-modal-header">
+                <h2 id="photo-modal-title">Trova la tua pietra</h2>
+                <button id="close-photo-modal" class="close-button" aria-label="Chiudi">✕</button>
+            </div>
+            
+            <div class="photo-modal-body">
+                <div class="photo-options">
+                    <button id="camera-btn" class="photo-option-btn">
+                        <span class="photo-icon">📷</span>
+                        <span class="photo-text">Scatta una foto</span>
+                    </button>
+                    
+                    <button id="gallery-btn" class="photo-option-btn">
+                        <span class="photo-icon">🖼️</span>
+                        <span class="photo-text">Seleziona dalla galleria</span>
+                    </button>
+                </div>
+                
+                <div id="photo-preview" class="photo-preview hidden">
+                    <img id="preview-image" src="" alt="Anteprima foto" />
+                    <div class="photo-actions">
+                        <button id="analyze-btn" class="analyze-btn">
+                            <span class="btn-icon">🔍</span>
+                            Analizza foto
+                        </button>
+                        <button id="retake-btn" class="retake-btn">
+                            <span class="btn-icon">🔄</span>
+                            Riprova
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="analysis-results" class="analysis-results hidden">
+                    <h3>Risultati dell'analisi</h3>
+                    <div id="results-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for gallery selection -->
+    <input type="file" id="file-input" accept="image/*" style="display: none;">
+    
+    <!-- Hidden video element for camera capture -->
+    <video id="camera-video" style="display: none;" autoplay playsinline></video>
+    <canvas id="camera-canvas" style="display: none;"></canvas>
+
     <!-- Fullscreen image modal -->
     <div id="fullscreen-modal" class="fullscreen-modal hidden" role="dialog" aria-labelledby="fullscreen-image" aria-modal="true">
         <button id="close-fullscreen" class="close-fullscreen" aria-label="Chiudi visualizzazione a schermo intero">✕</button>
@@ -184,9 +241,46 @@
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <!-- MarkerCluster plugin -->
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    
+    <!-- Gradio Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js"></script>
+
+    <script type="text/javascript">
+        // Variabili globali per il client Gradio e il token
+        window.gradioClient = null;
+        window.hf_token = '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'; // Il tuo token di accesso
+        window.gradioSpaceUrl = 'llllluuuuucccccaaaaa/AnalisiPietre'; // L'URL del tuo spazio Hugging Face
+
+        // Funzione per inizializzare il client Gradio
+        async function initializeGradioClient() {
+            try {
+                window.gradioClient = await GradioClient.Client.connect(window.gradioSpaceUrl, { hf_token: window.hf_token });
+                console.log('Gradio Client connesso con successo allo spazio:', window.gradioSpaceUrl);
+            } catch (error) {
+                console.error('Errore nella connessione al Gradio Client:', error);
+            }
+        }
+
+        // Inizializza il client Gradio quando il DOM è pronto
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeGradioClient();
+        });
+    </script>
 
     <!-- Translations -->
     <script src="translations.js"></script>
+    
+    <!-- Notification system -->
+    <script src="notifications.js"></script>
+    
+    <!-- Image downloader -->
+    <script src="image-downloader.js"></script>
+    
+    <!-- Image recognition functionality -->
+    <script src="image-recognition.js"></script>
+    
+    <!-- Photo capture functionality -->
+    <script src="photo-capture.js"></script>
     
     <!-- App JS -->
     <script src="script.js"></script>
