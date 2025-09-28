@@ -93,350 +93,182 @@
                         </select>
                     </div>
                 </div>
-                
-                <div class="control-group">
-                    <button id="find-stone-btn" class="find-stone-button" aria-label="Trova la mia pietra">
-                        <span class="control-icon">🔍</span>
-                        Trova la mia pietra
-                    </button>
-                </div>
-                
-                <div class="control-group">
-                    <button id="help-btn" class="help-button" aria-label="Mostra guida">
-                        <span class="control-icon">❓</span>
-                        Guida
-                    </button>
-                </div>
             </div>
         </header>
 
-        <!-- Mappa principale -->
-        <main>
-            <div id="map" class="map-container" aria-label="Mappa interattiva delle pietre"></div>
-        </main>
-
-        <!-- Pannello laterale per la storia della pietra -->
-        <aside id="stone-history-panel" class="stone-history-panel hidden">
-            <div class="panel-header">
-                <h2 id="stone-title">Storia della Pietra</h2>
-                <button id="close-history" class="close-btn" aria-label="Chiudi pannello storia">✕</button>
-            </div>
-            
-            <div class="panel-content">
-                <div id="stone-info" class="stone-info">
-                    <!-- Contenuto dinamico -->
-                </div>
-                
-                <div class="mini-map-container">
-                    <h3>Percorso della pietra</h3>
-                    <div id="mini-map" class="mini-map"></div>
-                </div>
-                
-                <div class="timeline-controls">
-                    <button id="play-timeline" class="timeline-btn">
-                        <span class="btn-icon">▶️</span>
-                        Riproduci percorso
-                    </button>
-                    <div class="speed-control">
-                        <label for="speed-slider">Velocità:</label>
-                        <input type="range" id="speed-slider" min="500" max="5000" value="2000" step="500">
-                        <span id="speed-display">2s</span>
-                    </div>
-                </div>
-            </div>
-        </aside>
+        <!-- Contenitore principale per la mappa -->
+        <main id="map" role="main" aria-label="Mappa interattiva delle pietre"></main>
     </div>
 
-    <!-- Modal per cattura foto -->
-    <div id="photo-capture-modal" class="modal hidden">
-        <div class="modal-content photo-modal">
-            <div class="modal-header">
-                <h2>Trova la tua pietra</h2>
-                <button id="close-photo-modal" class="close-btn">✕</button>
-            </div>
-            
-            <div class="modal-body">
-                <!-- Opzioni iniziali -->
-                <div class="photo-options">
-                    <div class="option-card">
-                        <button id="camera-btn" class="option-btn">
-                            <span class="option-icon">📷</span>
-                            <span class="option-text">Scatta una foto</span>
-                        </button>
-                    </div>
-                    <div class="option-card">
-                        <button id="gallery-btn" class="option-btn">
-                            <span class="option-icon">🖼️</span>
-                            <span class="option-text">Seleziona dalla galleria</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Container fotocamera -->
-                <div id="camera-container" class="camera-container hidden">
-                    <video id="camera-video" autoplay playsinline></video>
-                    <canvas id="camera-canvas" style="display: none;"></canvas>
-                    <div class="camera-controls">
-                        <button id="capture-btn" class="capture-btn">
-                            <span class="btn-icon">📸</span>
-                            Cattura
-                        </button>
-                        <button id="cancel-camera-btn" class="cancel-btn">
-                            <span class="btn-icon">❌</span>
-                            Annulla
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Anteprima immagine -->
-                <div id="image-preview-container" class="image-preview-container hidden">
-                    <div class="preview-image-wrapper">
-                        <img id="preview-image" alt="Anteprima immagine selezionata">
-                    </div>
-                    <div class="preview-controls">
-                        <button id="analyze-btn" class="analyze-btn">
-                            <span class="btn-icon">🔍</span>
-                            Analizza foto
-                        </button>
-                        <button id="retake-btn" class="retake-btn">
-                            <span class="btn-icon">🔄</span>
-                            Riprova
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Risultati analisi -->
-                <div id="analysis-results" class="analysis-results hidden">
-                    <!-- Contenuto dinamico -->
-                </div>
-            </div>
-        </div>
+    <!-- Pannello della Storia migliorato -->
+    <div id="history-panel" class="hidden" role="dialog" aria-labelledby="history-title" aria-modal="true">
+        <button id="close-history" class="close-button" aria-label="Chiudi pannello storia" title="Chiudi">
+            ✕
+        </button>
         
-        <!-- Input file nascosto -->
-        <input type="file" id="file-input" accept="image/*" style="display: none;">
-    </div>
+        <h2 id="history-title">Storia di...</h2>
+        
+        <div class="history-content">
+            <!-- Galleria Immagini migliorata -->
+            <div class="image-gallery">
+                <div class="image-container">
+                    <img id="history-image" src="" alt="Immagine della pietra" loading="lazy"/>
+                    <div class="image-overlay">
+                        <button id="fullscreen-btn" class="overlay-btn" aria-label="Visualizza a schermo intero" title="Schermo intero">
+                            🔍
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="image-info">
+                    <p id="history-image-caption" class="image-caption">Data e ora</p>
+                    <div class="image-meta">
+                        <span id="image-counter" class="image-counter">1 di 3</span>
+                    </div>
+                </div>
+                
+                <div class="navigation-buttons">
+                    <button id="play-pause-btn" class="nav-btn play-pause-btn" aria-label="Riproduci/Pausa automatica" onclick="toggleAutoPlay()">
+                        <span class="btn-icon">▶️</span>
+                        <span class="btn-text">Play</span>
+                    </button>
+                    <button id="prev-button" class="nav-btn prev-btn" aria-label="Immagine precedente">
+                        <span class="btn-icon">←</span>
+                        <span class="btn-text">Precedente</span>
+                    </button>
+                    <button id="next-button" class="nav-btn next-btn" aria-label="Immagine successiva">
+                        <span class="btn-text">Successiva</span>
+                        <span class="btn-icon">→</span>
+                    </button>
+                </div>
+            </div>
 
-    <!-- Modal fullscreen per immagini -->
-    <div id="fullscreen-modal" class="fullscreen-modal hidden">
-        <div class="fullscreen-content">
-            <button id="close-fullscreen" class="close-fullscreen-btn">✕</button>
-            <img id="fullscreen-image" alt="Immagine a schermo intero">
-            <div class="fullscreen-info">
-                <h3 id="fullscreen-title"></h3>
-                <p id="fullscreen-date"></p>
+            <!-- Mini Mappa migliorata -->
+            <div class="mini-map-container">
+                <h3 class="mini-map-title">Percorso storico</h3>
+                <div id="mini-map" aria-label="Mini mappa del percorso"></div>
+                <div class="map-legend">
+                    <div class="legend-item">
+                        <span class="legend-dot current"></span>
+                        <span>Posizione attuale</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot path"></span>
+                        <span>Percorso storico</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline migliorata -->
+        <div class="timeline-container">
+            <h3 class="timeline-title">Timeline degli spostamenti</h3>
+            <div id="timeline" role="slider" aria-label="Timeline degli spostamenti della pietra"></div>
+            <div class="timeline-info">
+                <span class="timeline-start">Inizio</span>
+                <span class="timeline-current" id="timeline-current-date">Data attuale</span>
+                <span class="timeline-end">Fine</span>
             </div>
         </div>
     </div>
 
-    <!-- Sistema di notifiche -->
-    <div id="notification-container" class="notification-container"></div>
+    <!-- Fullscreen image modal -->
+    <div id="fullscreen-modal" class="fullscreen-modal hidden" role="dialog" aria-labelledby="fullscreen-image" aria-modal="true">
+        <button id="close-fullscreen" class="close-fullscreen" aria-label="Chiudi visualizzazione a schermo intero">✕</button>
+        <img id="fullscreen-image" src="" alt="Immagine a schermo intero" loading="lazy"/>
+    </div>
 
     <!-- Scripts -->
-    <!-- OpenCV.js -->
-    <script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="onOpenCvReady()"></script>
-    
     <!-- Leaflet core -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <!-- MarkerCluster plugin -->
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-    
-    <!-- Gradio Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js"></script>
-
-    <script type="text/javascript">
-        // Variabili globali per il client Gradio e il token
-        window.gradioClient = null;
-        window.hf_token = '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'; // Token aggiornato fornito dall'utente
-        window.gradioSpaceUrl = 'llllluuuuucccccaaaaa/AnalisiPietre'; // L'URL del tuo spazio Hugging Face
-        window.gradioConnectionStatus = 'disconnected'; // Stato della connessione
-
-        // Funzione per inizializzare il client Gradio con gestione errori migliorata
-        async function initializeGradioClient() {
-            try {
-                console.log('Tentativo di connessione al servizio Gradio...');
-                window.gradioConnectionStatus = 'connecting';
-                
-                // Test di connettività di base
-                const testResponse = await fetch(`https://huggingface.co/spaces/${window.gradioSpaceUrl}`, {
-                    method: 'HEAD',
-                    mode: 'no-cors'
-                });
-                
-                // Connessione al client Gradio con timeout
-                const connectionPromise = GradioClient.Client.connect(window.gradioSpaceUrl, { 
-                    hf_token: window.hf_token 
-                });
-                
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('CONNECTION_TIMEOUT')), 15000)
-                );
-                
-                window.gradioClient = await Promise.race([connectionPromise, timeoutPromise]);
-                window.gradioConnectionStatus = 'connected';
-                
-                console.log('✅ Gradio Client connesso con successo allo spazio:', window.gradioSpaceUrl);
-                
-                // Notifica di successo
-                if (window.notificationSystem) {
-                    window.notificationSystem.success('Servizio di riconoscimento pietre attivo', 3000);
-                }
-                
-            } catch (error) {
-                window.gradioConnectionStatus = 'error';
-                console.error('❌ Errore nella connessione al Gradio Client:', error);
-                
-                // Gestione specifica degli errori
-                let errorMessage = '';
-                let errorType = '';
-                
-                if (error.message === 'CONNECTION_TIMEOUT') {
-                    errorType = 'TIMEOUT';
-                    errorMessage = 'Timeout nella connessione al servizio di analisi';
-                } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-                    errorType = 'AUTH_ERROR';
-                    errorMessage = 'Token di autenticazione non valido';
-                } else if (error.message.includes('404') || error.message.includes('Not Found')) {
-                    errorType = 'SPACE_NOT_FOUND';
-                    errorMessage = 'Spazio Hugging Face non trovato';
-                } else if (error.message.includes('fetch') || error.message.includes('network')) {
-                    errorType = 'NETWORK_ERROR';
-                    errorMessage = 'Errore di connessione di rete';
-                } else {
-                    errorType = 'UNKNOWN_ERROR';
-                    errorMessage = 'Errore sconosciuto nella connessione';
-                }
-                
-                // Salva informazioni sull'errore per uso futuro
-                window.gradioConnectionError = {
-                    type: errorType,
-                    message: errorMessage,
-                    originalError: error
-                };
-                
-                // Notifica di errore
-                if (window.notificationSystem) {
-                    window.notificationSystem.error(
-                        `Servizio di riconoscimento non disponibile: ${errorMessage}`, 
-                        5000
-                    );
-                }
-            }
-        }
-
-        // Funzione per verificare lo stato della connessione
-        function checkGradioConnection() {
-            return {
-                isConnected: window.gradioConnectionStatus === 'connected',
-                status: window.gradioConnectionStatus,
-                client: window.gradioClient,
-                error: window.gradioConnectionError || null
-            };
-        }
-
-        // Funzione per ottenere un messaggio di errore dettagliato
-        function getDetailedErrorMessage(errorType) {
-            const errorMessages = {
-                'GRADIO_NOT_INITIALIZED': {
-                    icon: '🔄',
-                    title: 'Servizio non inizializzato',
-                    message: 'Il servizio di analisi non è ancora pronto. Ricarica la pagina e riprova.',
-                    suggestion: 'Verifica la tua connessione internet e ricarica la pagina.'
-                },
-                'AUTH_ERROR': {
-                    icon: '🔐',
-                    title: 'Errore di autenticazione',
-                    message: 'Token di accesso non valido o scaduto.',
-                    suggestion: 'Contatta l\'amministratore per aggiornare il token di accesso.'
-                },
-                'SPACE_NOT_FOUND': {
-                    icon: '🔍',
-                    title: 'Servizio non trovato',
-                    message: 'Lo spazio Hugging Face non è stato trovato o non è accessibile.',
-                    suggestion: 'Verifica che lo spazio sia pubblico e accessibile.'
-                },
-                'NETWORK_ERROR': {
-                    icon: '🌐',
-                    title: 'Errore di rete',
-                    message: 'Impossibile raggiungere il servizio di analisi.',
-                    suggestion: 'Verifica la tua connessione internet e riprova.'
-                },
-                'TIMEOUT': {
-                    icon: '⏱️',
-                    title: 'Timeout della connessione',
-                    message: 'Il servizio sta impiegando troppo tempo a rispondere.',
-                    suggestion: 'Il servizio potrebbe essere sovraccarico. Riprova tra qualche minuto.'
-                },
-                'SERVICE_UNREACHABLE': {
-                    icon: '🚫',
-                    title: 'Servizio non raggiungibile',
-                    message: 'Il servizio di analisi non è attualmente disponibile.',
-                    suggestion: 'Il servizio potrebbe essere in manutenzione. Riprova più tardi.'
-                },
-                'NO_STONES_DETECTED': {
-                    icon: '🔍',
-                    title: 'Nessuna pietra rilevata',
-                    message: 'Non sono state riconosciute pietre nell\'immagine fornita.',
-                    suggestion: 'Prova con una foto più chiara o da un\'angolazione diversa.'
-                },
-                'SERVICE_ERROR': {
-                    icon: '⚠️',
-                    title: 'Errore del servizio',
-                    message: 'Si è verificato un errore interno nel servizio di analisi.',
-                    suggestion: 'Riprova tra qualche minuto. Se il problema persiste, contatta il supporto.'
-                },
-                'UNKNOWN_ERROR': {
-                    icon: '❌',
-                    title: 'Errore sconosciuto',
-                    message: 'Si è verificato un errore imprevisto.',
-                    suggestion: 'Riprova o contatta il supporto se il problema persiste.'
-                }
-            };
-            
-            return errorMessages[errorType] || errorMessages['UNKNOWN_ERROR'];
-        }
-
-        // Esporta funzioni per uso globale
-        window.checkGradioConnection = checkGradioConnection;
-        window.getDetailedErrorMessage = getDetailedErrorMessage;
-
-        // Inizializza il client Gradio quando il DOM è pronto
-        document.addEventListener('DOMContentLoaded', () => {
-            // Ritarda l'inizializzazione per permettere il caricamento completo
-            setTimeout(() => {
-                initializeGradioClient();
-            }, 1000);
-        });
-    </script>
 
     <!-- Translations -->
     <script src="translations.js"></script>
     
-    <!-- Notification system -->
-    <script src="notifications.js"></script>
-    
-    <!-- Image downloader -->
-    <script src="image-downloader.js"></script>
-    
-    <!-- Image recognition functionality -->
-    <script src="image-recognition.js"></script>
-    
-    <!-- Photo capture system -->
-    <script src="photo-capture.js"></script>
-    
-    <!-- Photo recognition system -->
-    <script src="photo-recognition.js"></script>
-    
-    <!-- Status indicator -->
-    <script src="status-indicator.js"></script>
-    
-    <!-- System initializer -->
-    <script src="system-initializer.js"></script>
-    
-    <!-- Tutorial system -->
-    <script src="tutorial.js"></script>
-    
-    <!-- Main application script -->
+    <!-- App JS -->
     <script src="script.js"></script>
+    
+    <!-- Service Worker per PWA (opzionale) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {
+                    // Service worker non disponibile, continua normalmente
+                });
+            });
+        }
+    </script>
 </body>
 </html>
+
+    <!-- Guida Interattiva -->
+    <div id="tutorial-overlay" class="tutorial-overlay hidden" role="dialog" aria-labelledby="tutorial-title" aria-modal="true">
+        <div class="tutorial-content">
+            <div class="tutorial-header">
+                <h2 id="tutorial-title">Benvenuto nella Mappa delle Pietre!</h2>
+                <button id="tutorial-close" class="tutorial-close-btn" aria-label="Chiudi guida">✕</button>
+            </div>
+            
+            <div class="tutorial-body">
+                <div class="tutorial-step" data-step="1">
+                    <div class="tutorial-icon">🗺️</div>
+                    <h3>Esplora la Mappa</h3>
+                    <p>Questa mappa interattiva ti permette di seguire il viaggio delle pietre attraverso il tempo. Ogni pietra ha una sua storia unica da raccontare.</p>
+                </div>
+                
+                <div class="tutorial-step hidden" data-step="2">
+                    <div class="tutorial-icon">🪨</div>
+                    <h3>Seleziona una Pietra</h3>
+                    <p>Usa il menu a tendina in alto per selezionare una pietra specifica o visualizzare tutte le pietre contemporaneamente. Ogni pietra ha un colore distintivo.</p>
+                </div>
+                
+                <div class="tutorial-step hidden" data-step="3">
+                    <div class="tutorial-icon">📸</div>
+                    <h3>Visualizza le Immagini</h3>
+                    <p>Puoi scegliere di mostrare tutte le immagini, solo l'ultima o nessuna immagine. Le immagini sono rappresentate da marcatori circolari sulla mappa.</p>
+                </div>
+                
+                <div class="tutorial-step hidden" data-step="4">
+                    <div class="tutorial-icon">📖</div>
+                    <h3>Scopri la Storia</h3>
+                    <p>Clicca su una pietra per vedere il popup informativo, poi clicca su "Vedi la storia" per aprire il pannello dettagliato con timeline e galleria immagini.</p>
+                </div>
+                
+                <div class="tutorial-step hidden" data-step="5">
+                    <div class="tutorial-icon">🌐</div>
+                    <h3>Cambia Lingua</h3>
+                    <p>Il sito supporta multiple lingue. Usa il selettore lingua in alto per cambiare l'interfaccia nella tua lingua preferita.</p>
+                </div>
+                
+                <div class="tutorial-step hidden" data-step="6">
+                    <div class="tutorial-icon">✨</div>
+                    <h3>Inizia l'Esplorazione!</h3>
+                    <p>Ora sei pronto per esplorare la mappa! Ricorda che puoi sempre riaprire questa guida cliccando sul pulsante "?" nell'angolo in basso a destra.</p>
+                </div>
+            </div>
+            
+            <div class="tutorial-footer">
+                <div class="tutorial-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 16.67%"></div>
+                    </div>
+                    <span class="progress-text">1 di 6</span>
+                </div>
+                
+                <div class="tutorial-buttons">
+                    <button id="tutorial-prev" class="tutorial-btn tutorial-btn-secondary" disabled>Precedente</button>
+                    <button id="tutorial-skip" class="tutorial-btn tutorial-btn-outline">Salta</button>
+                    <button id="tutorial-next" class="tutorial-btn tutorial-btn-primary">Avanti</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pulsante per riaprire la guida -->
+    <button id="help-button" class="help-button" aria-label="Apri guida" title="Guida">
+        <span class="help-icon">?</span>
+    </button>
+
