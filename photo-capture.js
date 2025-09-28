@@ -303,47 +303,102 @@ class PhotoCapture {
 
     async performImageAnalysis(imageBlob) {
         try {
+            // Mostra un indicatore di caricamento
+            this.showLoadingState();
+            
             if (!window.gradioClient) {
-                throw new Error("Gradio Client non inizializzato. Ricarica la pagina.");
+                throw new Error("GRADIO_NOT_INITIALIZED");
             }
 
             // Converti il Blob in Base64 per l'invio via API se necessario, altrimenti invia il Blob direttamente
             // Gradio client può gestire direttamente i File/Blob
             const file = new File([imageBlob], "image.jpeg", { type: "image/jpeg" });
 
-            // Chiamata all'API di Gradio
-            // L'endpoint predefinito per un gradio.Interface è "/predict"
-            // Il payload deve corrispondere agli input del tuo Gradio Space
-            // Assumiamo che il tuo Gradio Space accetti un'immagine come input
-            const response = await window.gradioClient.predict(
-                "/predict", // L'endpoint predefinito per un'interfaccia Gradio
-                [file] // L'immagine come input
-            );
+            // Test di connettività al servizio
+            try {
+                // Chiamata all'API di Gradio con timeout
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error("TIMEOUT")), 30000)
+                );
+                
+                const response = await Promise.race([
+                    window.gradioClient.predict("/predict", [file]),
+                    timeoutPromise
+                ]);
 
-            // La risposta di Gradio è un array, il primo elemento dovrebbe essere il risultato
-            const results = response.data[0]; 
+                // La risposta di Gradio è un array, il primo elemento dovrebbe essere il risultato
+                const results = response.data[0]; 
 
-            if (!results || results.length === 0) {
-                throw new Error("Nessuna pietra riconosciuta dal servizio di analisi.");
+                if (!results || results.length === 0) {
+                    throw new Error("NO_STONES_DETECTED");
+                }
+                
+                // Gradio restituisce un array di oggetti { label: "nome_pietra", confidences: numero }
+                const formattedResults = results.map(item => ({
+                    name: item.label.replace(/ /g, '_'), // Formatta il nome per compatibilità
+                    confidence: item.confidences
+                }));
+                
+                this.showAnalysisResults(formattedResults);
+                
+            } catch (networkError) {
+                if (networkError.message === "TIMEOUT") {
+                    throw new Error("SERVICE_TIMEOUT");
+                } else if (networkError.name === "TypeError" || networkError.message.includes("fetch")) {
+                    throw new Error("SERVICE_UNREACHABLE");
+                } else {
+                    throw new Error("SERVICE_ERROR");
+                }
             }
             
-            // Gradio restituisce un array di oggetti { label: "nome_pietra", confidences: numero }
-            const formattedResults = results.map(item => ({
-                name: item.label.replace(/ /g, '_'), // Formatta il nome per compatibilità
-                confidence: item.confidences
-            }));
-            
-            this.showAnalysisResults(formattedResults);
-            
         } catch (error) {
-            console.error("Errore nell\"analisi con Gradio:", error);
-            this.showError("Errore durante l\"analisi dell\"immagine con il servizio esterno.");
-            console.log("Usando dati di esempio come fallback...");
-            this.showAnalysisResults([
-                { name: "Pietra_Rossa", confidence: 0.85 },
-                { name: "Pietra_Blu", confidence: 0.72 },
-                { name: "Pietra_Verde", confidence: 0.45 }
-            ]);
+            console.error("Errore nell'analisi con Gradio:", error);
+            this.hideLoadingState();
+            
+            // Gestione specifica degli errori
+            switch (error.message) {
+                case "GRADIO_NOT_INITIALIZED":
+                    this.showError(
+                        "Il servizio di analisi non è ancora pronto. Ricarica la pagina e riprova.",
+                        "🔄"
+                    );
+                    break;
+                    
+                case "SERVICE_UNREACHABLE":
+                    this.showError(
+                        "Impossibile raggiungere il servizio di analisi. Verifica la tua connessione internet e riprova.",
+                        "🌐"
+                    );
+                    break;
+                    
+                case "SERVICE_TIMEOUT":
+                    this.showError(
+                        "Il servizio di analisi sta impiegando troppo tempo a rispondere. Riprova tra qualche minuto.",
+                        "⏱️"
+                    );
+                    break;
+                    
+                case "NO_STONES_DETECTED":
+                    this.showError(
+                        "Nessuna pietra riconosciuta nell'immagine. Prova con una foto più chiara o da un'angolazione diversa.",
+                        "🔍"
+                    );
+                    break;
+                    
+                case "SERVICE_ERROR":
+                    this.showError(
+                        "Si è verificato un errore nel servizio di analisi. Riprova tra qualche minuto.",
+                        "⚠️"
+                    );
+                    break;
+                    
+                default:
+                    this.showError(
+                        "Si è verificato un errore imprevisto durante l'analisi. Riprova o contatta il supporto se il problema persiste.",
+                        "❌"
+                    );
+                    break;
+            }
         }
     }
 
@@ -422,17 +477,49 @@ class PhotoCapture {
     showError(message) {
         // Mostra un messaggio di errore
         const resultsContainer = document.getElementById('analysis-results');
-        const resultsContent = document.getElementById('results-content');
-        
-        if (resultsContainer && resultsContent) {
-            resultsContent.innerHTML = `
-                <div class="error-message">
-                    <span class="error-icon">⚠️</span>
-                    <p>${message}</p>
-                </div>
-            `;
-            resultsContainer.classList.remove('hidden');
+        resultsContainer.innerHTML = `
+            <div class="error-message">
+                <p>${message}</p>
+            </div>
+        `;
+        resultsContainer.classList.remove('hidden');
+    }
+
+    showLoadingState() {
+        const resultsContainer = document.getElementById('analysis-results');
+        resultsContainer.classList.remove('hidden');
+        resultsContainer.innerHTML = `
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <h3>Analisi in corso...</h3>
+                <p>Il servizio sta analizzando la tua immagine. Questo potrebbe richiedere alcuni secondi.</p>
+            </div>
+        `;
+    }
+
+    hideLoadingState() {
+        const loadingState = document.querySelector('.loading-state');
+        if (loadingState) {
+            loadingState.remove();
         }
+    }
+
+    showError(message, icon = "⚠️") {
+        const resultsContainer = document.getElementById('analysis-results');
+        resultsContainer.classList.remove('hidden');
+        resultsContainer.innerHTML = `
+            <div class="error-message">
+                <div class="error-icon">${icon}</div>
+                <div class="error-content">
+                    <h3>Errore durante l'analisi</h3>
+                    <p>${message}</p>
+                    <button class="retry-btn" onclick="document.getElementById('close-photo-modal').click()">
+                        <span class="btn-icon">🔄</span>
+                        Riprova
+                    </button>
+                </div>
+            </div>
+        `;
     }
 }
 
