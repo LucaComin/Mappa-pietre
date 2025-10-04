@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Image Upload</title>
+</head>
+<body>
+    <h1>Test Image for Stone Recognition</h1>
+    <p>This is a test page to simulate image upload functionality.</p>
+    
+    <script>
+        // Simula il caricamento di un'immagine di test
+        function createTestImage() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 300;
+            canvas.height = 300;
+            const ctx = canvas.getContext('2d');
+            
+            // Disegna una pietra di test
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(50, 50, 200, 200);
+            
+            ctx.fillStyle = '#A0522D';
+            ctx.fillRect(75, 75, 150, 150);
+            
+            ctx.fillStyle = '#CD853F';
+            ctx.fillRect(100, 100, 100, 100);
+            
+            return canvas.toDataURL('image/png');
+        }
+        
+        // Crea un file blob dall'immagine di test
+        function createTestFile() {
+            const dataURL = createTestImage();
+            const arr = dataURL.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while(n--){
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new File([u8arr], 'test-stone.png', {type: mime});
+        }
+        
+        // Esponi la funzione globalmente per il test
+        window.createTestFile = createTestFile;
+    </script>
+</body>
+</html>

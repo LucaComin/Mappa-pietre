@@ -93,6 +93,13 @@
                         </select>
                     </div>
                 </div>
+                
+                <div class="control-group">
+                    <button id="find-stone-btn" class="find-stone-button" aria-label="Trova la mia pietra tramite foto">
+                        <span class="control-icon">🔍</span>
+                        Trova la mia pietra
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -191,6 +198,9 @@
     <!-- App JS -->
     <script src="script.js"></script>
     
+    <!-- Stone Finder JS -->
+    <script src="stone-finder.js"></script>
+    
     <!-- Service Worker per PWA (opzionale) -->
     <script>
         if ('serviceWorker' in navigator) {
@@ -203,6 +213,72 @@
     </script>
 </body>
 </html>
+
+    <!-- Modal per la ricerca pietra -->
+    <div id="stone-finder-modal" class="stone-finder-modal hidden" role="dialog" aria-labelledby="stone-finder-title" aria-modal="true">
+        <div class="stone-finder-content">
+            <div class="stone-finder-header">
+                <h2 id="stone-finder-title">🔍 Trova la tua pietra</h2>
+                <button id="stone-finder-close" class="close-button" aria-label="Chiudi ricerca pietra">✕</button>
+            </div>
+            
+            <div class="stone-finder-body">
+                <!-- Sezione caricamento foto -->
+                <div class="photo-upload-section">
+                    <div class="upload-area" id="upload-area">
+                        <div class="upload-icon">📤</div>
+                        <div class="upload-text">Clicca per caricare o trascina una foto qui</div>
+                        <div class="upload-subtext">Oppure scatta una foto con la fotocamera</div>
+                        <input type="file" id="photo-input" accept="image/*" capture="environment" style="display: none;">
+                    </div>
+                    
+                    <div class="camera-controls">
+                        <button id="camera-btn" class="camera-button">
+                            <span class="btn-icon">📷</span>
+                            Scatta foto
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Anteprima foto -->
+                <div class="photo-preview-section hidden" id="photo-preview-section">
+                    <div class="preview-container">
+                        <img id="preview-image" class="preview-image" alt="Anteprima foto">
+                    </div>
+                    <div class="preview-actions">
+                        <button id="analyze-photo-btn" class="analyze-button">
+                            <span class="btn-icon">🔍</span>
+                            Analizza foto
+                        </button>
+                        <button id="retake-photo-btn" class="retake-button">
+                            <span class="btn-icon">🔄</span>
+                            Scatta di nuovo
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Loading analisi -->
+                <div class="analysis-loading hidden" id="analysis-loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Analisi in corso...</div>
+                </div>
+                
+                <!-- Risultati ricerca -->
+                <div class="search-results-section hidden" id="search-results-section">
+                    <h3 class="results-title">Pietre simili trovate:</h3>
+                    <div class="results-list" id="results-list">
+                        <!-- I risultati verranno inseriti dinamicamente qui -->
+                    </div>
+                </div>
+                
+                <!-- Messaggio di errore -->
+                <div class="error-message hidden" id="stone-finder-error">
+                    <span class="error-icon">⚠️</span>
+                    <span class="error-text">Errore durante l'analisi. Riprova.</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Guida Interattiva -->
     <div id="tutorial-overlay" class="tutorial-overlay hidden" role="dialog" aria-labelledby="tutorial-title" aria-modal="true">
