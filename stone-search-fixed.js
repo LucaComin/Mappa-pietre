@@ -1,0 +1,618 @@
+// Stone Search Module - Fixed Version
+import { Client, handle_file } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+
+class StoneSearchManager {
+    constructor() {
+        this.modal = null;
+        this.currentStep = 'capture';
+        this.capturedPhoto = null;
+        this.searchResults = [];
+        this.selectedStone = null;
+        this.cameraStream = null;
+        
+        this.init();
+    }
+    
+    init() {
+        // Aspetta che il DOM sia caricato
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.setupElements());
+        } else {
+            this.setupElements();
+        }
+    }
+    
+    setupElements() {
+        // Riferimenti agli elementi
+        this.modal = document.getElementById('stone-search-modal');
+        this.openBtn = document.getElementById('open-search-btn');
+        this.closeBtn = document.getElementById('close-search-modal');
+        
+        // Steps
+        this.captureStep = document.getElementById('capture-step');
+        this.loadingStep = document.getElementById('loading-step');
+        this.resultsStep = document.getElementById('results-step');
+        this.confirmStep = document.getElementById('confirm-step');
+        
+        // Capture elements
+        this.takePhotoBtn = document.getElementById('take-photo-btn');
+        this.uploadPhotoBtn = document.getElementById('upload-photo-btn');
+        this.photoInput = document.getElementById('photo-input');
+        this.cameraContainer = document.getElementById('camera-container');
+        this.cameraVideo = document.getElementById('camera-video');
+        this.cameraCanvas = document.getElementById('camera-canvas');
+        this.capturePhotoBtn = document.getElementById('capture-photo-btn');
+        this.cancelCameraBtn = document.getElementById('cancel-camera-btn');
+        
+        // Preview elements
+        this.photoPreviewContainer = document.getElementById('photo-preview-container');
+        this.photoPreview = document.getElementById('photo-preview');
+        this.analyzePhotoBtn = document.getElementById('analyze-photo-btn');
+        this.retakePhotoBtn = document.getElementById('retake-photo-btn');
+        
+        // Results elements
+        this.resultsContainer = document.getElementById('results-container');
+        
+        // Confirm elements
+        this.confirmStoneName = document.getElementById('confirm-stone-name');
+        this.confirmStoneImage = document.getElementById('confirm-stone-image');
+        this.viewStoneBtn = document.getElementById('view-stone-btn');
+        
+        // Error elements
+        this.errorMessage = document.getElementById('error-message');
+        this.errorText = document.getElementById('error-text');
+        
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        // Open/Close modal
+        if (this.openBtn) {
+            this.openBtn.addEventListener('click', () => this.openModal());
+        }
+        
+        if (this.closeBtn) {
+            this.closeBtn.addEventListener('click', () => this.closeModal());
+        }
+        
+        // Capture options
+        if (this.takePhotoBtn) {
+            this.takePhotoBtn.addEventListener('click', () => this.startCamera());
+        }
+        
+        if (this.uploadPhotoBtn) {
+            this.uploadPhotoBtn.addEventListener('click', () => this.photoInput.click());
+        }
+        
+        if (this.photoInput) {
+            this.photoInput.addEventListener('change', (e) => this.handleFileUpload(e));
+        }
+        
+        // Camera controls
+        if (this.capturePhotoBtn) {
+            this.capturePhotoBtn.addEventListener('click', () => this.capturePhoto());
+        }
+        
+        if (this.cancelCameraBtn) {
+            this.cancelCameraBtn.addEventListener('click', () => this.stopCamera());
+        }
+        
+        // Preview actions
+        if (this.analyzePhotoBtn) {
+            this.analyzePhotoBtn.addEventListener('click', () => this.analyzePhoto());
+        }
+        
+        if (this.retakePhotoBtn) {
+            this.retakePhotoBtn.addEventListener('click', () => this.resetCapture());
+        }
+        
+        // View stone button
+        if (this.viewStoneBtn) {
+            this.viewStoneBtn.addEventListener('click', () => this.viewStoneOnMap());
+        }
+    }
+    
+    openModal() {
+        if (this.modal) {
+            this.modal.classList.remove('hidden');
+            this.resetToCapture();
+        }
+    }
+    
+    closeModal() {
+        if (this.modal) {
+            this.modal.classList.add('hidden');
+            this.stopCamera();
+            this.resetToCapture();
+        }
+    }
+    
+    showStep(stepName) {
+        // Nascondi tutti gli step
+        this.captureStep?.classList.add('hidden');
+        this.loadingStep?.classList.add('hidden');
+        this.resultsStep?.classList.add('hidden');
+        this.confirmStep?.classList.add('hidden');
+        
+        // Mostra lo step richiesto
+        switch(stepName) {
+            case 'capture':
+                this.captureStep?.classList.remove('hidden');
+                break;
+            case 'loading':
+                this.loadingStep?.classList.remove('hidden');
+                break;
+            case 'results':
+                this.resultsStep?.classList.remove('hidden');
+                break;
+            case 'confirm':
+                this.confirmStep?.classList.remove('hidden');
+                break;
+        }
+        
+        this.currentStep = stepName;
+    }
+    
+    showError(message) {
+        if (this.errorMessage && this.errorText) {
+            this.errorText.textContent = message;
+            this.errorMessage.classList.remove('hidden');
+            
+            setTimeout(() => {
+                this.errorMessage.classList.add('hidden');
+            }, 5000);
+        }
+    }
+    
+    async startCamera() {
+        try {
+            this.cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'environment' } 
+            });
+            
+            if (this.cameraVideo) {
+                this.cameraVideo.srcObject = this.cameraStream;
+                this.cameraContainer?.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Errore accesso camera:', error);
+            this.showError('Impossibile accedere alla fotocamera. Verifica i permessi.');
+        }
+    }
+    
+    stopCamera() {
+        if (this.cameraStream) {
+            this.cameraStream.getTracks().forEach(track => track.stop());
+            this.cameraStream = null;
+        }
+        
+        if (this.cameraVideo) {
+            this.cameraVideo.srcObject = null;
+        }
+        
+        this.cameraContainer?.classList.add('hidden');
+    }
+    
+    capturePhoto() {
+        if (!this.cameraVideo || !this.cameraCanvas) return;
+        
+        const canvas = this.cameraCanvas;
+        const video = this.cameraVideo;
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        
+        canvas.toBlob((blob) => {
+            this.capturedPhoto = new File([blob], 'captured-photo.jpg', { type: 'image/jpeg' });
+            this.showPhotoPreview(URL.createObjectURL(blob));
+            this.stopCamera();
+        }, 'image/jpeg', 0.9);
+    }
+    
+    handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            this.capturedPhoto = file;
+            this.showPhotoPreview(URL.createObjectURL(file));
+        } else {
+            this.showError('Seleziona un file immagine valido (JPG, PNG, ecc.)');
+        }
+    }
+    
+    showPhotoPreview(imageUrl) {
+        if (this.photoPreview) {
+            this.photoPreview.src = imageUrl;
+            this.photoPreviewContainer?.classList.remove('hidden');
+        }
+    }
+    
+    resetCapture() {
+        this.capturedPhoto = null;
+        this.photoPreviewContainer?.classList.add('hidden');
+        if (this.photoInput) {
+            this.photoInput.value = '';
+        }
+    }
+    
+    resetToCapture() {
+        this.resetCapture();
+        this.showStep('capture');
+        this.searchResults = [];
+        this.selectedStone = null;
+    }
+    
+    async analyzePhoto() {
+        if (!this.capturedPhoto) {
+            this.showError('Nessuna foto da analizzare');
+            return;
+        }
+        
+        this.showStep('loading');
+        
+        try {
+            // Connetti al client Gradio
+            const client = await Client.connect("llllluuuuucccccaaaaa/AnalisiPietre");
+            
+            // Invia la richiesta
+            const result = await client.predict("/analizza_immagine", {
+                template_img_input: handle_file(this.capturedPhoto)
+            });
+            
+            // Processa i risultati
+            this.processResults(result.data);
+            
+        } catch (error) {
+            console.error('Errore analisi:', error);
+            this.showError(`Errore durante l'analisi: ${error.message}`);
+            this.showStep('capture');
+        }
+    }
+    
+    processResults(data) {
+        if (!data || data.length < 1) {
+            this.showError('Nessun risultato ricevuto dal server');
+            this.showStep('capture');
+            return;
+        }
+        
+        // Il primo elemento contiene il testo con i risultati
+        const resultsText = data[0];
+        
+        // Parse dei risultati (formato: "File: 215 ST216 (Accuratezza: 92.9%)")
+        const lines = resultsText.split('\n').filter(line => line.trim());
+        this.searchResults = [];
+        
+        for (const line of lines) {
+            // Estrai il nome della pietra e l'accuratezza
+            const stoneMatch = line.match(/ST\d+/);
+            const accuracyMatch = line.match(/Accuratezza:\s*([\d.]+)%/);
+            
+            if (stoneMatch && accuracyMatch) {
+                this.searchResults.push({
+                    name: stoneMatch[0],
+                    accuracy: parseFloat(accuracyMatch[1]),
+                    rawLine: line
+                });
+            }
+        }
+        
+        if (this.searchResults.length === 0) {
+            this.showError('Nessuna pietra trovata nei risultati');
+            this.showStep('capture');
+            return;
+        }
+        
+        // Mostra i risultati
+        this.displayResults();
+    }
+    
+    displayResults() {
+        if (!this.resultsContainer) return;
+        
+        this.resultsContainer.innerHTML = '';
+        
+        this.searchResults.forEach((result, index) => {
+            // Ottieni l'immagine della pietra con metodi multipli
+            const stoneImage = this.getStoneImageMultipleWays(result.name);
+            
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+            
+            // Crea l'HTML con l'immagine se disponibile, altrimenti usa un placeholder
+            let imageHtml = '';
+            if (stoneImage) {
+                imageHtml = `
+                    <div class="result-image-container">
+                        <img src="${stoneImage}" alt="${result.name}" class="result-image" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="result-image-placeholder" style="display: none;">
+                            <div class="stone-icon">🪨</div>
+                            <div class="stone-code">${result.name}</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Placeholder con il codice della pietra
+                imageHtml = `
+                    <div class="result-image-container">
+                        <div class="result-image-placeholder">
+                            <div class="stone-icon">🪨</div>
+                            <div class="stone-code">${result.name}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            resultItem.innerHTML = `
+                ${imageHtml}
+                <div class="result-info">
+                    <div class="result-name">${result.name}</div>
+                    <div class="result-accuracy">Accuratezza: ${result.accuracy.toFixed(1)}%</div>
+                </div>
+                <button class="result-action" data-index="${index}">È questa</button>
+            `;
+            
+            resultItem.querySelector('.result-action').addEventListener('click', () => {
+                this.selectStone(result);
+            });
+            
+            this.resultsContainer.appendChild(resultItem);
+        });
+        
+        this.showStep('results');
+    }
+    
+    async selectStone(stoneResult) {
+        this.selectedStone = stoneResult;
+        
+        // Seleziona immediatamente la pietra nel selettore
+        this.selectStoneInDropdown(stoneResult.name);
+        
+        // Chiudi il modale
+        this.closeModal();
+        
+        // Attendi un momento per permettere alla mappa di aggiornarsi
+        setTimeout(() => {
+            // Apri il pannello della storia
+            if (typeof window.showStoneHistory === 'function') {
+                window.showStoneHistory(this.getMatchingStoneName(stoneResult.name));
+            }
+        }, 300);
+    }
+    
+    selectStoneInDropdown(stoneName) {
+        const stoneSelect = document.getElementById('stone-select');
+        if (!stoneSelect) return;
+        
+        // Cerca il valore corretto nel select (potrebbe avere underscore o spazi)
+        const options = Array.from(stoneSelect.options);
+        const matchingOption = options.find(opt => 
+            opt.value === stoneName || 
+            opt.value.replace(/_/g, ' ') === stoneName ||
+            opt.value === stoneName.replace(/ /g, '_') ||
+            opt.value.includes(stoneName) ||
+            stoneName.includes(opt.value)
+        );
+        
+        if (matchingOption) {
+            stoneSelect.value = matchingOption.value;
+            
+            // Trigger change event per aggiornare la mappa
+            const event = new Event('change', { bubbles: true });
+            stoneSelect.dispatchEvent(event);
+            
+            return matchingOption.value;
+        }
+        
+        return stoneName;
+    }
+    
+    getMatchingStoneName(stoneName) {
+        const stoneSelect = document.getElementById('stone-select');
+        if (!stoneSelect) return stoneName;
+        
+        const options = Array.from(stoneSelect.options);
+        const matchingOption = options.find(opt => 
+            opt.value === stoneName || 
+            opt.value.replace(/_/g, ' ') === stoneName ||
+            opt.value === stoneName.replace(/ /g, '_') ||
+            opt.value.includes(stoneName) ||
+            stoneName.includes(opt.value)
+        );
+        
+        return matchingOption ? matchingOption.value : stoneName;
+    }
+    
+    /**
+     * Metodo migliorato per ottenere l'immagine della pietra
+     * Prova diversi approcci per trovare l'immagine
+     */
+    getStoneImageMultipleWays(stoneName) {
+        // Metodo 1: Cerca nei dati globali con il nome esatto
+        let image = this.getStoneImageFromGlobalData(stoneName);
+        if (image) return image;
+        
+        // Metodo 2: Cerca con variazioni del nome
+        const variations = this.generateStoneNameVariations(stoneName);
+        for (const variation of variations) {
+            image = this.getStoneImageFromGlobalData(variation);
+            if (image) return image;
+        }
+        
+        // Metodo 3: Cerca usando il numero della pietra
+        const stoneNumber = stoneName.match(/\d+/);
+        if (stoneNumber) {
+            image = this.getStoneImageByNumber(stoneNumber[0]);
+            if (image) return image;
+        }
+        
+        // Metodo 4: Cerca in tutte le pietre disponibili
+        image = this.searchImageInAllStones(stoneName);
+        if (image) return image;
+        
+        // Metodo 5: Genera URL immagine basato su pattern comuni
+        image = this.generateImageUrlFromPattern(stoneName);
+        if (image) return image;
+        
+        return null;
+    }
+    
+    /**
+     * Cerca l'immagine nei dati globali delle pietre
+     */
+    getStoneImageFromGlobalData(stoneName) {
+        if (typeof window.allStonesData !== 'undefined' && window.allStonesData[stoneName]) {
+            const stoneData = window.allStonesData[stoneName];
+            if (stoneData.length > 0) {
+                // Prova diversi nomi di campo per l'immagine
+                return stoneData[0].imageUrl || 
+                       stoneData[0].image || 
+                       stoneData[0].img || 
+                       stoneData[0].photo || 
+                       stoneData[0].picture || null;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Genera variazioni del nome della pietra per la ricerca
+     */
+    generateStoneNameVariations(stoneName) {
+        const variations = [];
+        
+        // Variazioni con underscore e spazi
+        variations.push(stoneName.replace(/ /g, '_'));
+        variations.push(stoneName.replace(/_/g, ' '));
+        variations.push(stoneName.toLowerCase());
+        variations.push(stoneName.toUpperCase());
+        
+        // Variazioni con "Pietra_" prefix
+        variations.push(`Pietra_${stoneName}`);
+        variations.push(`pietra_${stoneName.toLowerCase()}`);
+        
+        // Variazioni senza prefissi
+        const withoutPrefix = stoneName.replace(/^(Pietra_|pietra_|ST)/i, '');
+        if (withoutPrefix !== stoneName) {
+            variations.push(withoutPrefix);
+            variations.push(`ST${withoutPrefix}`);
+        }
+        
+        return [...new Set(variations)]; // Rimuovi duplicati
+    }
+    
+    /**
+     * Cerca l'immagine usando il numero della pietra
+     */
+    getStoneImageByNumber(stoneNumber) {
+        if (typeof window.allStonesData !== 'undefined') {
+            for (const stoneName in window.allStonesData) {
+                if (stoneName.includes(stoneNumber)) {
+                    const stoneData = window.allStonesData[stoneName];
+                    if (stoneData.length > 0) {
+                        return stoneData[0].imageUrl || 
+                               stoneData[0].image || 
+                               stoneData[0].img || null;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Cerca l'immagine in tutte le pietre disponibili
+     */
+    searchImageInAllStones(targetStoneName) {
+        if (typeof window.allStonesData !== 'undefined') {
+            for (const stoneName in window.allStonesData) {
+                // Cerca corrispondenze parziali
+                if (stoneName.toLowerCase().includes(targetStoneName.toLowerCase()) ||
+                    targetStoneName.toLowerCase().includes(stoneName.toLowerCase())) {
+                    const stoneData = window.allStonesData[stoneName];
+                    if (stoneData.length > 0) {
+                        const image = stoneData[0].imageUrl || 
+                                     stoneData[0].image || 
+                                     stoneData[0].img || null;
+                        if (image) return image;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Genera URL immagine basato su pattern comuni
+     */
+    generateImageUrlFromPattern(stoneName) {
+        // Pattern comuni per le immagini delle pietre
+        const patterns = [
+            `images/stones/${stoneName.toLowerCase()}.jpg`,
+            `images/stones/${stoneName.toLowerCase()}.png`,
+            `assets/stones/${stoneName}.jpg`,
+            `assets/stones/${stoneName}.png`,
+            `stones/${stoneName.toLowerCase()}.jpg`,
+            `stones/${stoneName.toLowerCase()}.png`
+        ];
+        
+        // Per ora ritorniamo null, ma in futuro si potrebbe verificare
+        // se questi URL esistono effettivamente
+        return null;
+    }
+    
+    async getStoneFirstImage(stoneName) {
+        // Versione asincrona che può fare verifiche più approfondite
+        return this.getStoneImageMultipleWays(stoneName);
+    }
+    
+    viewStoneOnMap() {
+        if (!this.selectedStone) return;
+        
+        // Chiudi il modale
+        this.closeModal();
+        
+        // Seleziona la pietra nel selettore principale
+        const stoneSelect = document.getElementById('stone-select');
+        if (stoneSelect) {
+            // Cerca il valore corretto nel select (potrebbe avere underscore)
+            const options = Array.from(stoneSelect.options);
+            const matchingOption = options.find(opt => 
+                opt.value === this.selectedStone.name || 
+                opt.value.replace(/_/g, ' ') === this.selectedStone.name ||
+                opt.value === this.selectedStone.name.replace(/ /g, '_')
+            );
+            
+            if (matchingOption) {
+                stoneSelect.value = matchingOption.value;
+                
+                // Trigger change event per aggiornare la mappa
+                const event = new Event('change', { bubbles: true });
+                stoneSelect.dispatchEvent(event);
+                
+                // Attendi un momento per permettere alla mappa di aggiornarsi
+                setTimeout(() => {
+                    // Apri il pannello della storia se disponibile
+                    if (typeof window.showStoneHistory === 'function') {
+                        window.showStoneHistory(matchingOption.value);
+                    }
+                }, 500);
+            }
+        }
+    }
+}
+
+// Inizializza il manager quando il DOM è pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        window.stoneSearchManager = new StoneSearchManager();
+    });
+} else {
+    window.stoneSearchManager = new StoneSearchManager();
+}
+
+// Esporta la classe per uso esterno
+export default StoneSearchManager;
