@@ -321,10 +321,20 @@ class StoneSearchManager {
             const resultItem = document.createElement('div');
             resultItem.className = 'result-item';
             
-            // Crea l'HTML con l'immagine se disponibile
+            // Crea l'HTML con l'immagine se disponibile, altrimenti usa un placeholder
             let imageHtml = '';
             if (stoneImage) {
-                imageHtml = `<img src="${stoneImage}" alt="${result.name}" class="result-image">`;
+                imageHtml = `<img src="${stoneImage}" alt="${result.name}" class="result-image" 
+                            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0zNSAzNUg0NVY0NUgzNVYzNVoiIGZpbGw9IiM5Q0E0QUYiLz4KPHBhdGggZD0iTTI1IDI1SDU1VjU1SDI1VjI1WiIgc3Ryb2tlPSIjOUNBNEFGIiBzdHJva2Utd2lkdGg9IjIiIGZpbGw9Im5vbmUiLz4KPC9zdmc+'; this.onerror=null;">`;
+            } else {
+                // Placeholder SVG per quando non c'è immagine
+                imageHtml = `<div class="result-image result-placeholder">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="40" height="40" fill="#F3F4F6"/>
+                        <path d="M17.5 17.5H22.5V22.5H17.5V17.5Z" fill="#9CA4AF"/>
+                        <path d="M12.5 12.5H27.5V27.5H12.5V12.5Z" stroke="#9CA4AF" stroke-width="1" fill="none"/>
+                    </svg>
+                </div>`;
             }
             
             resultItem.innerHTML = `
@@ -409,12 +419,35 @@ class StoneSearchManager {
     
     getStoneFirstImageSync(stoneName) {
         // Versione sincrona per uso immediato nella UI
-        if (typeof window.allStonesData !== 'undefined' && window.allStonesData[stoneName]) {
-            const stoneData = window.allStonesData[stoneName];
-            if (stoneData.length > 0) {
-                // Prova diversi nomi di campo per l'immagine
-                return stoneData[0].imageUrl || stoneData[0].image || stoneData[0].img || null;
+        if (typeof window.allStonesData !== 'undefined') {
+            // Prova diverse varianti del nome della pietra
+            const stoneVariants = [
+                stoneName,
+                stoneName.replace(/ /g, '_'),
+                stoneName.replace(/_/g, ' '),
+                stoneName.replace(/ST/g, 'ST'),
+                'ST' + stoneName.replace(/ST/g, ''),
+                stoneName.toLowerCase(),
+                stoneName.toUpperCase()
+            ];
+            
+            for (const variant of stoneVariants) {
+                if (window.allStonesData[variant] && window.allStonesData[variant].length > 0) {
+                    const stoneData = window.allStonesData[variant];
+                    // Prova diversi nomi di campo per l'immagine
+                    const imageUrl = stoneData[0].imageUrl || stoneData[0].image || stoneData[0].img || null;
+                    if (imageUrl) {
+                        console.log(`Immagine trovata per ${stoneName} (variante: ${variant}):`, imageUrl);
+                        return imageUrl;
+                    }
+                }
             }
+            
+            // Debug: mostra tutti i nomi delle pietre disponibili
+            console.log('Pietre disponibili in allStonesData:', Object.keys(window.allStonesData));
+            console.log(`Nessuna immagine trovata per: ${stoneName}`);
+        } else {
+            console.warn('window.allStonesData non è definito');
         }
         return null;
     }

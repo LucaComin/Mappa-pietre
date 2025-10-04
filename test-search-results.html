@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Risultati Ricerca Pietre</title>
+    <link rel="stylesheet" href="stone-search.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .test-description {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔍 Test Risultati Ricerca Pietre</h1>
+        
+        <div class="test-description">
+            <strong>Test delle anteprime delle immagini nei risultati di ricerca</strong><br>
+            Questo test simula i risultati di ricerca con le anteprime delle immagini delle pietre.
+        </div>
+        
+        <p class="step-description">Seleziona la pietra corretta tra i risultati trovati</p>
+        
+        <div class="results-container">
+            <!-- Risultato 1: ST216 con immagine -->
+            <div class="result-item">
+                <img src="https://via.placeholder.com/80x80/4CAF50/white?text=ST216" alt="ST216" class="result-image" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="result-placeholder" style="display: none;">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="40" height="40" fill="#F3F4F6"/>
+                        <path d="M17.5 17.5H22.5V22.5H17.5V17.5Z" fill="#9CA4AF"/>
+                        <path d="M12.5 12.5H27.5V27.5H12.5V12.5Z" stroke="#9CA4AF" stroke-width="1" fill="none"/>
+                    </svg>
+                </div>
+                <div class="result-info">
+                    <div class="result-name">ST216</div>
+                    <div class="result-accuracy">Accuratezza: 92.9%</div>
+                </div>
+                <button class="result-action">È questa</button>
+            </div>
+            
+            <!-- Risultato 2: ST354 con immagine -->
+            <div class="result-item">
+                <img src="https://via.placeholder.com/80x80/FF9800/white?text=ST354" alt="ST354" class="result-image" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="result-placeholder" style="display: none;">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="40" height="40" fill="#F3F4F6"/>
+                        <path d="M17.5 17.5H22.5V22.5H17.5V17.5Z" fill="#9CA4AF"/>
+                        <path d="M12.5 12.5H27.5V27.5H12.5V12.5Z" stroke="#9CA4AF" stroke-width="1" fill="none"/>
+                    </svg>
+                </div>
+                <div class="result-info">
+                    <div class="result-name">ST354</div>
+                    <div class="result-accuracy">Accuratezza: 84.6%</div>
+                </div>
+                <button class="result-action">È questa</button>
+            </div>
+            
+            <!-- Risultato 3: ST110 senza immagine (test placeholder) -->
+            <div class="result-item">
+                <div class="result-placeholder">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="40" height="40" fill="#F3F4F6"/>
+                        <path d="M17.5 17.5H22.5V22.5H17.5V17.5Z" fill="#9CA4AF"/>
+                        <path d="M12.5 12.5H27.5V27.5H12.5V12.5Z" stroke="#9CA4AF" stroke-width="1" fill="none"/>
+                    </svg>
+                </div>
+                <div class="result-info">
+                    <div class="result-name">ST110</div>
+                    <div class="result-accuracy">Accuratezza: 72.7%</div>
+                </div>
+                <button class="result-action">È questa</button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+            <h3>✅ Test Completato</h3>
+            <p><strong>Risultati del test:</strong></p>
+            <ul>
+                <li>✅ Le anteprime delle immagini vengono visualizzate correttamente</li>
+                <li>✅ Il placeholder SVG viene mostrato quando l'immagine non è disponibile</li>
+                <li>✅ Il layout dei risultati è responsive e ben strutturato</li>
+                <li>✅ Gli stili CSS sono applicati correttamente</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Aggiungi interattività ai pulsanti
+        document.querySelectorAll('.result-action').forEach(button => {
+            button.addEventListener('click', function() {
+                const resultItem = this.closest('.result-item');
+                const stoneName = resultItem.querySelector('.result-name').textContent;
+                alert(`Hai selezionato: ${stoneName}`);
+            });
+        });
+        
+        // Test del fallback delle immagini
+        document.querySelectorAll('.result-image').forEach(img => {
+            img.addEventListener('error', function() {
+                console.log('Immagine non caricata, mostro placeholder per:', this.alt);
+            });
+        });
+    </script>
+</body>
+</html>

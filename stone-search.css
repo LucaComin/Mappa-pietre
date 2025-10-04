@@ -298,6 +298,18 @@
     flex-shrink: 0;
 }
 
+.result-placeholder {
+    width: 80px;
+    height: 80px;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
 .result-info {
     flex: 1;
 }
