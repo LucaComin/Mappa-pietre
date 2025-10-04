@@ -21,6 +21,7 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="stone-search.css">
     
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
@@ -92,13 +93,6 @@
                             <option value="all">Tutte</option>
                         </select>
                     </div>
-                </div>
-                
-                <div class="control-group">
-                    <button id="find-stone-btn" class="find-stone-button" aria-label="Trova la mia pietra tramite foto">
-                        <span class="control-icon">🔍</span>
-                        Trova la mia pietra
-                    </button>
                 </div>
             </div>
         </header>
@@ -198,8 +192,8 @@
     <!-- App JS -->
     <script src="script.js"></script>
     
-    <!-- Stone Finder JS -->
-    <script src="stone-finder.js"></script>
+    <!-- Stone Search Module -->
+    <script type="module" src="stone-search.js"></script>
     
     <!-- Service Worker per PWA (opzionale) -->
     <script>
@@ -213,72 +207,6 @@
     </script>
 </body>
 </html>
-
-    <!-- Modal per la ricerca pietra -->
-    <div id="stone-finder-modal" class="stone-finder-modal hidden" role="dialog" aria-labelledby="stone-finder-title" aria-modal="true">
-        <div class="stone-finder-content">
-            <div class="stone-finder-header">
-                <h2 id="stone-finder-title">🔍 Trova la tua pietra</h2>
-                <button id="stone-finder-close" class="close-button" aria-label="Chiudi ricerca pietra">✕</button>
-            </div>
-            
-            <div class="stone-finder-body">
-                <!-- Sezione caricamento foto -->
-                <div class="photo-upload-section">
-                    <div class="upload-area" id="upload-area">
-                        <div class="upload-icon">📤</div>
-                        <div class="upload-text">Clicca per caricare o trascina una foto qui</div>
-                        <div class="upload-subtext">Oppure scatta una foto con la fotocamera</div>
-                        <input type="file" id="photo-input" accept="image/*" capture="environment" style="display: none;">
-                    </div>
-                    
-                    <div class="camera-controls">
-                        <button id="camera-btn" class="camera-button">
-                            <span class="btn-icon">📷</span>
-                            Scatta foto
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Anteprima foto -->
-                <div class="photo-preview-section hidden" id="photo-preview-section">
-                    <div class="preview-container">
-                        <img id="preview-image" class="preview-image" alt="Anteprima foto">
-                    </div>
-                    <div class="preview-actions">
-                        <button id="analyze-photo-btn" class="analyze-button">
-                            <span class="btn-icon">🔍</span>
-                            Analizza foto
-                        </button>
-                        <button id="retake-photo-btn" class="retake-button">
-                            <span class="btn-icon">🔄</span>
-                            Scatta di nuovo
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Loading analisi -->
-                <div class="analysis-loading hidden" id="analysis-loading">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">Analisi in corso...</div>
-                </div>
-                
-                <!-- Risultati ricerca -->
-                <div class="search-results-section hidden" id="search-results-section">
-                    <h3 class="results-title">Pietre simili trovate:</h3>
-                    <div class="results-list" id="results-list">
-                        <!-- I risultati verranno inseriti dinamicamente qui -->
-                    </div>
-                </div>
-                
-                <!-- Messaggio di errore -->
-                <div class="error-message hidden" id="stone-finder-error">
-                    <span class="error-icon">⚠️</span>
-                    <span class="error-text">Errore durante l'analisi. Riprova.</span>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Guida Interattiva -->
     <div id="tutorial-overlay" class="tutorial-overlay hidden" role="dialog" aria-labelledby="tutorial-title" aria-modal="true">
@@ -346,5 +274,108 @@
     <!-- Pulsante per riaprire la guida -->
     <button id="help-button" class="help-button" aria-label="Apri guida" title="Guida">
         <span class="help-icon">?</span>
+    </button>
+
+    <!-- Modale per la ricerca della pietra -->
+    <div id="stone-search-modal" class="search-modal hidden">
+        <div class="search-modal-content">
+            <div class="search-header">
+                <h2>🔍 Cerca la tua Pietra</h2>
+                <button id="close-search-modal" class="close-button" aria-label="Chiudi">✕</button>
+            </div>
+            
+            <div class="search-body">
+                <!-- Step 1: Cattura/Caricamento foto -->
+                <div id="capture-step" class="search-step">
+                    <p class="step-description">Scatta una foto della pietra o caricala dal tuo dispositivo</p>
+                    
+                    <div class="capture-options">
+                        <button id="take-photo-btn" class="capture-btn">
+                            <span class="btn-icon">📷</span>
+                            <span class="btn-text">Scatta Foto</span>
+                        </button>
+                        <button id="upload-photo-btn" class="capture-btn">
+                            <span class="btn-icon">📁</span>
+                            <span class="btn-text">Carica Foto</span>
+                        </button>
+                    </div>
+                    
+                    <input type="file" id="photo-input" accept="image/*" style="display: none;">
+                    
+                    <!-- Video per la fotocamera -->
+                    <div id="camera-container" class="camera-container hidden">
+                        <video id="camera-video" autoplay playsinline></video>
+                        <canvas id="camera-canvas" style="display: none;"></canvas>
+                        <div class="camera-controls">
+                            <button id="capture-photo-btn" class="camera-action-btn">
+                                <span class="btn-icon">📸</span>
+                                <span class="btn-text">Scatta</span>
+                            </button>
+                            <button id="cancel-camera-btn" class="camera-action-btn secondary">
+                                <span class="btn-icon">✕</span>
+                                <span class="btn-text">Annulla</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Anteprima foto -->
+                    <div id="photo-preview-container" class="photo-preview hidden">
+                        <img id="photo-preview" src="" alt="Anteprima foto">
+                        <div class="preview-actions">
+                            <button id="analyze-photo-btn" class="action-btn primary">
+                                <span class="btn-icon">🔍</span>
+                                <span class="btn-text">Analizza</span>
+                            </button>
+                            <button id="retake-photo-btn" class="action-btn secondary">
+                                <span class="btn-icon">🔄</span>
+                                <span class="btn-text">Riprova</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Loading -->
+                <div id="loading-step" class="search-step hidden">
+                    <div class="loading-animation">
+                        <div class="spinner"></div>
+                        <p class="loading-text">Analisi in corso...</p>
+                        <p class="loading-subtext">Stiamo cercando le pietre più simili</p>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Risultati -->
+                <div id="results-step" class="search-step hidden">
+                    <p class="step-description">Seleziona la pietra corretta tra i risultati trovati</p>
+                    <div id="results-container" class="results-container">
+                        <!-- I risultati verranno inseriti qui dinamicamente -->
+                    </div>
+                </div>
+                
+                <!-- Step 4: Conferma -->
+                <div id="confirm-step" class="search-step hidden">
+                    <div class="confirm-content">
+                        <div class="success-icon">✓</div>
+                        <h3>Pietra trovata!</h3>
+                        <p id="confirm-stone-name" class="confirm-stone-name"></p>
+                        <img id="confirm-stone-image" class="confirm-stone-image" src="" alt="Immagine pietra">
+                        <button id="view-stone-btn" class="action-btn primary large">
+                            <span class="btn-icon">🗺️</span>
+                            <span class="btn-text">Visualizza sulla Mappa</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Messaggio di errore -->
+                <div id="error-message" class="error-message hidden">
+                    <span class="error-icon">⚠️</span>
+                    <span id="error-text" class="error-text"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pulsante per aprire la ricerca -->
+    <button id="open-search-btn" class="floating-search-btn" aria-label="Cerca la tua pietra" title="Cerca la tua pietra">
+        <span class="search-icon">🔍</span>
     </button>
 

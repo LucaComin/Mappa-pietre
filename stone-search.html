@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cerca la tua Pietra</title>
+    <link rel="stylesheet" href="stone-search.css">
+</head>
+<body>
+    <!-- Modale per la ricerca della pietra -->
+    <div id="stone-search-modal" class="search-modal hidden">
+        <div class="search-modal-content">
+            <div class="search-header">
+                <h2>🔍 Cerca la tua Pietra</h2>
+                <button id="close-search-modal" class="close-button" aria-label="Chiudi">✕</button>
+            </div>
+            
+            <div class="search-body">
+                <!-- Step 1: Cattura/Caricamento foto -->
+                <div id="capture-step" class="search-step">
+                    <p class="step-description">Scatta una foto della pietra o caricala dal tuo dispositivo</p>
+                    
+                    <div class="capture-options">
+                        <button id="take-photo-btn" class="capture-btn">
+                            <span class="btn-icon">📷</span>
+                            <span class="btn-text">Scatta Foto</span>
+                        </button>
+                        <button id="upload-photo-btn" class="capture-btn">
+                            <span class="btn-icon">📁</span>
+                            <span class="btn-text">Carica Foto</span>
+                        </button>
+                    </div>
+                    
+                    <input type="file" id="photo-input" accept="image/*" style="display: none;">
+                    
+                    <!-- Video per la fotocamera -->
+                    <div id="camera-container" class="camera-container hidden">
+                        <video id="camera-video" autoplay playsinline></video>
+                        <canvas id="camera-canvas" style="display: none;"></canvas>
+                        <div class="camera-controls">
+                            <button id="capture-photo-btn" class="camera-action-btn">
+                                <span class="btn-icon">📸</span>
+                                <span class="btn-text">Scatta</span>
+                            </button>
+                            <button id="cancel-camera-btn" class="camera-action-btn secondary">
+                                <span class="btn-icon">✕</span>
+                                <span class="btn-text">Annulla</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Anteprima foto -->
+                    <div id="photo-preview-container" class="photo-preview hidden">
+                        <img id="photo-preview" src="" alt="Anteprima foto">
+                        <div class="preview-actions">
+                            <button id="analyze-photo-btn" class="action-btn primary">
+                                <span class="btn-icon">🔍</span>
+                                <span class="btn-text">Analizza</span>
+                            </button>
+                            <button id="retake-photo-btn" class="action-btn secondary">
+                                <span class="btn-icon">🔄</span>
+                                <span class="btn-text">Riprova</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Loading -->
+                <div id="loading-step" class="search-step hidden">
+                    <div class="loading-animation">
+                        <div class="spinner"></div>
+                        <p class="loading-text">Analisi in corso...</p>
+                        <p class="loading-subtext">Stiamo cercando le pietre più simili</p>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Risultati -->
+                <div id="results-step" class="search-step hidden">
+                    <p class="step-description">Seleziona la pietra corretta tra i risultati trovati</p>
+                    <div id="results-container" class="results-container">
+                        <!-- I risultati verranno inseriti qui dinamicamente -->
+                    </div>
+                </div>
+                
+                <!-- Step 4: Conferma -->
+                <div id="confirm-step" class="search-step hidden">
+                    <div class="confirm-content">
+                        <div class="success-icon">✓</div>
+                        <h3>Pietra trovata!</h3>
+                        <p id="confirm-stone-name" class="confirm-stone-name"></p>
+                        <img id="confirm-stone-image" class="confirm-stone-image" src="" alt="Immagine pietra">
+                        <button id="view-stone-btn" class="action-btn primary large">
+                            <span class="btn-icon">🗺️</span>
+                            <span class="btn-text">Visualizza sulla Mappa</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Messaggio di errore -->
+                <div id="error-message" class="error-message hidden">
+                    <span class="error-icon">⚠️</span>
+                    <span id="error-text" class="error-text"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pulsante per aprire la ricerca -->
+    <button id="open-search-btn" class="floating-search-btn" aria-label="Cerca la tua pietra" title="Cerca la tua pietra">
+        <span class="search-icon">🔍</span>
+    </button>
+    
+    <script type="module" src="stone-search.js"></script>
+</body>
+</html>
