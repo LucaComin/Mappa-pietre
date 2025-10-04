@@ -425,37 +425,45 @@ class StoneSearchManager {
     }
     
     getStoneFirstImageSync(stoneName) {
-        // Versione sincrona per uso immediato nella UI
-        if (typeof window.allStonesData !== 'undefined') {
-            // Prova diverse varianti del nome della pietra
-            const stoneVariants = [
-                stoneName,
-                stoneName.replace(/ /g, '_'),
-                stoneName.replace(/_/g, ' '),
-                stoneName.replace(/ST/g, 'ST'),
-                'ST' + stoneName.replace(/ST/g, ''),
-                stoneName.toLowerCase(),
-                stoneName.toUpperCase()
-            ];
+        console.log('Cercando immagine per:', stoneName);
+        console.log('Dati disponibili:', window.allStonesData);
+        
+        if (typeof window.allStonesData === 'undefined' || !window.allStonesData) {
+            console.warn('allStonesData non disponibile');
+            return null;
+        }
+        
+        // Prova diverse varianti del nome della pietra
+        const stoneVariants = [
+            stoneName,
+            stoneName.replace(/ /g, '_'),
+            stoneName.replace(/_/g, ' '),
+            stoneName.replace(/ST/g, 'ST'),
+            'ST' + stoneName.replace(/ST/g, ''),
+            stoneName.toLowerCase(),
+            stoneName.toUpperCase()
+        ];
+        
+        for (const variant of stoneVariants) {
+            console.log('Provando variante:', variant);
             
-            for (const variant of stoneVariants) {
-                if (window.allStonesData[variant] && window.allStonesData[variant].length > 0) {
-                    const stoneData = window.allStonesData[variant];
-                    // Prova diversi nomi di campo per l'immagine
-                    const imageUrl = stoneData[0].imageUrl || stoneData[0].image || stoneData[0].img || null;
-                    if (imageUrl) {
-                        console.log(`Immagine trovata per ${stoneName} (variante: ${variant}):`, imageUrl);
-                        return imageUrl;
+            if (window.allStonesData[variant] && Array.isArray(window.allStonesData[variant]) && window.allStonesData[variant].length > 0) {
+                const stoneData = window.allStonesData[variant];
+                console.log('Dati pietra trovati:', stoneData);
+                
+                // Cerca la prima immagine disponibile nelle posizioni della pietra
+                for (const position of stoneData) {
+                    if (position && position.imageUrl && position.imageUrl.trim() !== '') {
+                        console.log(`Immagine trovata per ${stoneName} (variante: ${variant}):`, position.imageUrl);
+                        return position.imageUrl;
                     }
                 }
+                
+                console.log(`Pietra ${variant} trovata ma senza immagini valide`);
             }
-            
-            // Debug: mostra tutti i nomi delle pietre disponibili
-            console.log('Pietre disponibili in allStonesData:', Object.keys(window.allStonesData));
-            console.log(`Nessuna immagine trovata per: ${stoneName}`);
-        } else {
-            console.warn('window.allStonesData non è definito');
         }
+        
+        console.warn(`Nessuna immagine trovata per la pietra: ${stoneName}`);
         return null;
     }
     
