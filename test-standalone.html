@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Anteprime Pietre - Standalone</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .search-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            margin: -30px -30px 20px -30px;
+            text-align: center;
+        }
+        
+        .step-description {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .result-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            background: white;
+        }
+        
+        .result-item:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateX(5px);
+        }
+        
+        .result-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+        
+        .result-placeholder {
+            width: 80px;
+            height: 80px;
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .result-info {
+            flex: 1;
+        }
+        
+        .result-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .result-accuracy {
+            color: #667eea;
+            font-size: 1em;
+            font-weight: 500;
+        }
+        
+        .result-action {
+            padding: 10px 20px;
+            border: 2px solid #10b981;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            color: #10b981;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .result-action:hover {
+            background: #10b981;
+            color: white;
+        }
+        
+        .test-info {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .test-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .test-btn.primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .test-btn.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="search-header">
+            <h2>🔍 Test Anteprime Pietre</h2>
+        </div>
+        
+        <div class="test-info">
+            <strong>Test delle anteprime delle immagini nei risultati di ricerca</strong><br>
+            Questo test verifica la corretta visualizzazione delle anteprime delle pietre con diversi scenari.
+        </div>
+        
+        <div class="test-buttons">
+            <button class="test-btn primary" onclick="testWithImages()">Test con Immagini</button>
+            <button class="test-btn secondary" onclick="testWithPlaceholders()">Test con Placeholder</button>
+            <button class="test-btn secondary" onclick="testMixed()">Test Misto</button>
+        </div>
+        
+        <p class="step-description">Seleziona la pietra corretta tra i risultati trovati</p>
+        
+        <div id="results-container" class="results-container">
+            <!-- I risultati verranno inseriti qui dinamicamente -->
+        </div>
+    </div>
+    
+    <script>
+        function createResultItem(stone, hasImage = true) {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+            
+            let imageHtml = '';
+            if (hasImage) {
+                // Usa un'immagine placeholder colorata
+                const colors = ['4CAF50', 'FF9800', '2196F3', 'E91E63', '9C27B0'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                imageHtml = `<img src="https://via.placeholder.com/80x80/${color}/white?text=${encodeURIComponent(stone.name)}" alt="${stone.name}" class="result-image">`;
+            } else {
+                // Usa il placeholder SVG
+                imageHtml = `
+                    <div class="result-placeholder">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="40" height="40" fill="#F3F4F6"/>
+                            <path d="M17.5 17.5H22.5V22.5H17.5V17.5Z" fill="#9CA4AF"/>
+                            <path d="M12.5 12.5H27.5V27.5H12.5V12.5Z" stroke="#9CA4AF" stroke-width="1" fill="none"/>
+                        </svg>
+                    </div>
+                `;
+            }
+            
+            resultItem.innerHTML = `
+                ${imageHtml}
+                <div class="result-info">
+                    <div class="result-name">${stone.name}</div>
+                    <div class="result-accuracy">Accuratezza: ${stone.accuracy.toFixed(1)}%</div>
+                </div>
+                <button class="result-action" onclick="selectStone('${stone.name}')">È questa</button>
+            `;
+            
+            return resultItem;
+        }
+        
+        function testWithImages() {
+            const stones = [
+                { name: 'ST216', accuracy: 92.9 },
+                { name: 'ST354', accuracy: 84.6 },
+                { name: 'ST110', accuracy: 72.7 }
+            ];
+            
+            const container = document.getElementById('results-container');
+            container.innerHTML = '';
+            
+            stones.forEach(stone => {
+                const resultItem = createResultItem(stone, true);
+                container.appendChild(resultItem);
+            });
+        }
+        
+        function testWithPlaceholders() {
+            const stones = [
+                { name: 'ST216', accuracy: 92.9 },
+                { name: 'ST354', accuracy: 84.6 },
+                { name: 'ST110', accuracy: 72.7 }
+            ];
+            
+            const container = document.getElementById('results-container');
+            container.innerHTML = '';
+            
+            stones.forEach(stone => {
+                const resultItem = createResultItem(stone, false);
+                container.appendChild(resultItem);
+            });
+        }
+        
+        function testMixed() {
+            const stones = [
+                { name: 'ST216', accuracy: 92.9 },
+                { name: 'ST354', accuracy: 84.6 },
+                { name: 'ST110', accuracy: 72.7 }
+            ];
+            
+            const container = document.getElementById('results-container');
+            container.innerHTML = '';
+            
+            stones.forEach((stone, index) => {
+                const hasImage = index !== 2; // L'ultimo non ha immagine
+                const resultItem = createResultItem(stone, hasImage);
+                container.appendChild(resultItem);
+            });
+        }
+        
+        function selectStone(stoneName) {
+            alert(`Hai selezionato: ${stoneName}`);
+        }
+        
+        // Inizializza con il test delle immagini
+        testWithImages();
+    </script>
+</body>
+</html>
