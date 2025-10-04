@@ -315,14 +315,25 @@ class StoneSearchManager {
         this.resultsContainer.innerHTML = '';
         
         this.searchResults.forEach((result, index) => {
+            // Ottieni la prima immagine della pietra
+            const stoneImage = this.getStoneFirstImageSync(result.name);
+            
             const resultItem = document.createElement('div');
             resultItem.className = 'result-item';
+            
+            // Crea l'HTML con l'immagine se disponibile
+            let imageHtml = '';
+            if (stoneImage) {
+                imageHtml = `<img src="${stoneImage}" alt="${result.name}" class="result-image">`;
+            }
+            
             resultItem.innerHTML = `
+                ${imageHtml}
                 <div class="result-info">
                     <div class="result-name">${result.name}</div>
                     <div class="result-accuracy">Accuratezza: ${result.accuracy.toFixed(1)}%</div>
                 </div>
-                <button class="result-action" data-index="${index}">Seleziona</button>
+                <button class="result-action" data-index="${index}">È questa</button>
             `;
             
             resultItem.querySelector('.result-action').addEventListener('click', () => {
@@ -338,28 +349,74 @@ class StoneSearchManager {
     async selectStone(stoneResult) {
         this.selectedStone = stoneResult;
         
-        // Mostra lo step di conferma
-        this.showStep('loading');
+        // Seleziona immediatamente la pietra nel selettore
+        this.selectStoneInDropdown(stoneResult.name);
         
-        try {
-            // Ottieni la prima immagine della pietra dal sistema
-            const stoneImage = await this.getStoneFirstImage(stoneResult.name);
-            
-            if (this.confirmStoneName) {
-                this.confirmStoneName.textContent = stoneResult.name;
+        // Chiudi il modale
+        this.closeModal();
+        
+        // Attendi un momento per permettere alla mappa di aggiornarsi
+        setTimeout(() => {
+            // Apri il pannello della storia
+            if (typeof window.showStoneHistory === 'function') {
+                window.showStoneHistory(this.getMatchingStoneName(stoneResult.name));
             }
+        }, 300);
+    }
+    
+    selectStoneInDropdown(stoneName) {
+        const stoneSelect = document.getElementById('stone-select');
+        if (!stoneSelect) return;
+        
+        // Cerca il valore corretto nel select (potrebbe avere underscore o spazi)
+        const options = Array.from(stoneSelect.options);
+        const matchingOption = options.find(opt => 
+            opt.value === stoneName || 
+            opt.value.replace(/_/g, ' ') === stoneName ||
+            opt.value === stoneName.replace(/ /g, '_') ||
+            opt.value.includes(stoneName) ||
+            stoneName.includes(opt.value)
+        );
+        
+        if (matchingOption) {
+            stoneSelect.value = matchingOption.value;
             
-            if (this.confirmStoneImage && stoneImage) {
-                this.confirmStoneImage.src = stoneImage;
-            }
+            // Trigger change event per aggiornare la mappa
+            const event = new Event('change', { bubbles: true });
+            stoneSelect.dispatchEvent(event);
             
-            this.showStep('confirm');
-            
-        } catch (error) {
-            console.error('Errore recupero immagine:', error);
-            this.showError('Errore nel recupero dell\'immagine della pietra');
-            this.showStep('results');
+            return matchingOption.value;
         }
+        
+        return stoneName;
+    }
+    
+    getMatchingStoneName(stoneName) {
+        const stoneSelect = document.getElementById('stone-select');
+        if (!stoneSelect) return stoneName;
+        
+        const options = Array.from(stoneSelect.options);
+        const matchingOption = options.find(opt => 
+            opt.value === stoneName || 
+            opt.value.replace(/_/g, ' ') === stoneName ||
+            opt.value === stoneName.replace(/ /g, '_') ||
+            opt.value.includes(stoneName) ||
+            stoneName.includes(opt.value)
+        );
+        
+        return matchingOption ? matchingOption.value : stoneName;
+    }
+    
+    getStoneFirstImageSync(stoneName) {
+        // Versione sincrona per uso immediato nella UI
+        if (typeof window.allStonesData !== 'undefined' && window.allStonesData[stoneName]) {
+            const stoneData = window.allStonesData[stoneName];
+            if (stoneData.length > 0) {
+                // Prova diversi nomi di campo per l'immagine
+                return stoneData[0].imageUrl || stoneData[0].image || stoneData[0].img || null;
+            }
+        }
+        return null;
     }
     
     async getStoneFirstImage(stoneName) {
