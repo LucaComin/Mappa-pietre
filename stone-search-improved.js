@@ -324,8 +324,10 @@ class StoneSearchManager {
         const topResults = this.searchResults.slice(0, 3);
         
         topResults.forEach((result, index) => {
-            // Ottieni la prima immagine della pietra
-            const stoneImage = this.getStoneFirstImageSync(result.name);
+            // Ottieni la prima immagine della pietra con metodi multipli
+            const stoneImage = this.getStoneFirstImageSync(result.name) || 
+                              this.getStoneImageByNumber(result.number) ||
+                              this.getStoneImageFromGlobalData(result.name);
             
             const resultItem = document.createElement('div');
             resultItem.className = 'result-item';
@@ -333,7 +335,14 @@ class StoneSearchManager {
             // Crea l'HTML con l'immagine se disponibile, altrimenti usa un placeholder
             let imageHtml = '';
             if (stoneImage) {
-                imageHtml = `<img src="${stoneImage}" alt="${result.name}" class="result-image">`;
+                imageHtml = `<img src="${stoneImage}" alt="${result.name}" class="result-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
+                // Aggiungi anche il placeholder come fallback
+                imageHtml += `
+                    <div class="result-image-placeholder" style="display: none;">
+                        <div class="stone-number">${result.number}</div>
+                        <div class="stone-label">ST</div>
+                    </div>
+                `;
             } else {
                 // Placeholder con il numero della pietra
                 imageHtml = `
@@ -345,7 +354,9 @@ class StoneSearchManager {
             }
             
             resultItem.innerHTML = `
-                ${imageHtml}
+                <div class="result-image-container">
+                    ${imageHtml}
+                </div>
                 <div class="result-info">
                     <div class="result-name">Pietra ${result.number}</div>
                     <div class="result-code">${result.name}</div>
@@ -408,6 +419,46 @@ class StoneSearchManager {
             if (stoneData.length > 0) {
                 // Prova diversi nomi di campo per l'immagine
                 return stoneData[0].imageUrl || stoneData[0].image || stoneData[0].img || null;
+            }
+        }
+        return null;
+    }
+    
+    getStoneImageByNumber(stoneNumber) {
+        // Cerca l'immagine usando il numero della pietra
+        if (typeof window.allStonesData !== 'undefined') {
+            // Cerca tra tutte le pietre quella che corrisponde al numero
+            for (const stoneName in window.allStonesData) {
+                if (stoneName.includes(stoneNumber) || stoneName === `ST${stoneNumber}`) {
+                    const stoneData = window.allStonesData[stoneName];
+                    if (stoneData.length > 0) {
+                        return stoneData[0].imageUrl || stoneData[0].image || stoneData[0].img || null;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
+    getStoneImageFromGlobalData(stoneName) {
+        // Metodo alternativo per cercare l'immagine nei dati globali
+        if (typeof window.allStonesData !== 'undefined') {
+            // Cerca con variazioni del nome
+            const variations = [
+                stoneName,
+                stoneName.replace('ST', ''),
+                `ST${stoneName.replace('ST', '')}`,
+                stoneName.toLowerCase(),
+                stoneName.toUpperCase()
+            ];
+            
+            for (const variation of variations) {
+                if (window.allStonesData[variation]) {
+                    const stoneData = window.allStonesData[variation];
+                    if (stoneData.length > 0) {
+                        return stoneData[0].imageUrl || stoneData[0].image || stoneData[0].img || null;
+                    }
+                }
             }
         }
         return null;
