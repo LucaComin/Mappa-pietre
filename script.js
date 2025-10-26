@@ -27,7 +27,7 @@ const STONE_COLORS = [
 let tutorialGuide;
 
 // Inizializzazione dell'applicazione
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function( ) {
     console.log('DOM caricato, inizializzazione in corso...');
     showLoadingOverlay();
 
@@ -77,7 +77,7 @@ function initMap() {
     // Aggiungi il tile layer di OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+    } ).addTo(map);
 
     // Aggiungi i controlli di zoom personalizzati
     L.control.zoom({
@@ -248,7 +248,10 @@ function setupEventListeners() {
         // già in `allStonesData`. Dobbiamo solo forzare un aggiornamento
         // della mappa con la pietra attualmente selezionata.
         const currentSelection = document.getElementById('stone-selector').value;
-        updateMapForSelectedStone(currentSelection);\n\n        // Aggiorna anche i marcatori immagine, che dipendono dalla lingua per il popup\n        updateImageMarkers(document.getElementById('image-selector').value);
+        updateMapForSelectedStone(currentSelection);
+
+        // Aggiorna anche i marcatori immagine, che dipendono dalla lingua per il popup
+        updateImageMarkers(document.getElementById('image-selector').value);
     });
 
     // Listener per il selettore delle immagini
@@ -336,7 +339,10 @@ function updateMapForSelectedStone(stoneId) {
             fillOpacity: 0.8
         }).bindPopup(popupContent);
 
-        // Salva stoneData nel marcatore per l'aggiornamento del popup in translations.js\n        marker.stoneData = stoneData;\n\n        currentMarkers.addLayer(marker);
+        // Salva stoneData nel marcatore per l'aggiornamento del popup in translations.js
+        marker.stoneData = stoneData;
+
+        currentMarkers.addLayer(marker);
 
         // Prepara i dati per la polilinea (solo se non è un filtro 'Show all' o 'movedStones')
         if (isFiltered && stoneId !== 'Show all' && stoneId !== 'movedStones') {
@@ -390,17 +396,17 @@ function createPopupContent(stoneData) {
 
     let content = `
         <div class="popup-content">
-            <h3>${t('Stone ID')}: ${stoneData.stoneId}</h3>
-            ${stoneData.name ? `<p><strong>${t('Name')}:</strong> ${stoneData.name}</p>` : ''}
-            ${stoneData.date ? `<p><strong>${t('Date')}:</strong> ${stoneData.date}</p>` : ''}
-            ${stoneData.category ? `<p><strong>${t('Category')}:</strong> ${stoneData.category}</p>` : ''}
-            ${stoneData.description ? `<p><strong>${t('Description')}:</strong> ${stoneData.description}</p>` : ''}
-            <p><strong>${t('Coordinates')}:</strong> ${stoneData.lat.toFixed(4)}, ${stoneData.lon.toFixed(4)}</p>
-            ${stoneData.link ? `<p><a href="${stoneData.link}" target="_blank">${t('More Info')}</a></p>` : ''}
+            <h3>${t('stoneID')}: ${stoneData.stoneId}</h3>
+            ${stoneData.name ? `<p><strong>${t('name')}:</strong> ${stoneData.name}</p>` : ''}
+            ${stoneData.date ? `<p><strong>${t('date')}:</strong> ${stoneData.date}</p>` : ''}
+            ${stoneData.category ? `<p><strong>${t('category')}:</strong> ${stoneData.category}</p>` : ''}
+            ${stoneData.description ? `<p><strong>${t('description')}:</strong> ${stoneData.description}</p>` : ''}
+            <p><strong>${t('coordinates')}:</strong> ${stoneData.lat.toFixed(4)}, ${stoneData.lon.toFixed(4)}</p>
+            ${stoneData.link ? `<p><a href="${stoneData.link}" target="_blank">${t('moreInfo')}</a></p>` : ''}
     `;
 
     if (stoneData.image) {
-        content += `<img src="${stoneData.image}" alt="${t('Stone Image')}" style="max-width: 100%; height: auto; margin-top: 10px;">`;
+        content += `<img src="${stoneData.image}" alt="${t('stoneImage')}" style="max-width: 100%; height: auto; margin-top: 10px;">`;
     }
 
     content += `</div>`;
@@ -502,4 +508,3 @@ function hideSearchPanel() { /* ... */ }
 // getTranslationFunction(lang)
 // setLanguage(lang)
 // initializeLanguageSelector()
-
