@@ -926,23 +926,7 @@ function updatePageTexts() {
     if (languageLabel) {
         languageLabel.innerHTML = `<span class="control-icon">🌐</span>${t('selectLanguage')}`;
     }
-    
-	        // Select options
-	        const stoneSelect = document.getElementById('stone-select');
-	        if (stoneSelect) {
-	            // Traduzione delle opzioni del selettore pietra
-	            // Nota: Queste opzioni sono hardcoded in index.html, quindi le traduciamo qui.
-	            const movedOption = stoneSelect.querySelector('option[value="moved"]');
-	            const allOption = stoneSelect.querySelector('option[value="all"]');
-	            
-	            if (movedOption) {
-	                movedOption.textContent = t('movedStones');
-	            }
-	            if (allOption) {
-	                allOption.textContent = t('showAll');
-	            }
-	        }
-    
+
     const imageSelect = document.getElementById('image-display-select');
     if (imageSelect) {
         imageSelect.options[0].textContent = t('lastImage');
