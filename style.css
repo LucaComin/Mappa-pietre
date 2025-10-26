@@ -1621,34 +1621,3 @@ select:focus-visible {
     }
 }
 
-
-/* Stili per il link About Us */
-.header-nav {
-    margin-top: var(--space-sm);
-}
-
-.nav-link {
-    color: var(--white);
-    text-decoration: none;
-    font-size: 0.875rem;
-    font-weight: 500;
-    padding: var(--space-xs) var(--space-sm);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-fast);
-    display: inline-block;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-}
-
-.nav-link:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.nav-link:active {
-    transform: translateY(0);
-}
-
