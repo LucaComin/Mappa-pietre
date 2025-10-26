@@ -276,6 +276,8 @@ function populateStoneSelect() {
     const select = document.getElementById('stone-select');
 
     // Aggiungiamo le opzioni speciali all'inizio
+    // L'utente ha chiesto che "Pietre con spostamenti" sia selezionata di default e che non si inverta l'ordine.
+    // Manteniamo l'ordine: Pietre con spostamenti (default) e poi Mostra tutte.
     select.innerHTML = `
         <option value="moved">${typeof t === 'function' ? t('movedStones') : 'Pietre con spostamenti'}</option>
         <option value="all">${typeof t === 'function' ? t('showAll') : 'Mostra tutte'}</option>

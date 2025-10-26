@@ -7,6 +7,7 @@ const translations = {
         
         // Controls
         selectStone: "Seleziona una pietra:",
+        movedStones: "Pietre con spostamenti",
         showAll: "Mostra tutte",
         showImages: "Mostra immagini:",
         lastImage: "Ultima",
@@ -85,6 +86,7 @@ const translations = {
         
         // Controls
         selectStone: "Select a stone:",
+        movedStones: "Stones with movements",
         showAll: "Show all",
         showImages: "Show images:",
         lastImage: "Last",
@@ -163,6 +165,7 @@ const translations = {
         
         // Controls
         selectStone: "选择石头：",
+        movedStones: "移动的石头",
         showAll: "显示全部",
         showImages: "显示图片：",
         lastImage: "最后",
@@ -241,6 +244,7 @@ const translations = {
         
         // Controls
         selectStone: "Sélectionnez une pierre :",
+        movedStones: "Pierres avec déplacements",
         showAll: "Afficher toutes",
         showImages: "Afficher les images :",
         lastImage: "Dernière",
@@ -319,6 +323,7 @@ const translations = {
         
         // Controls
         selectStone: "Выберите камень:",
+        movedStones: "Камни с перемещениями",
         showAll: "Показать все",
         showImages: "Показать изображения:",
         lastImage: "Последнее",
@@ -397,7 +402,8 @@ const translations = {
         
         // Controls
         selectStone: "اختر حجراً:",
-        showAll: "إظهار الكل",
+        movedStones: "أحجار متحركة",
+        showAll: "عرض الكل",
         showImages: "إظهار الصور:",
         lastImage: "الأخيرة",
         noImages: "لا شيء",
@@ -475,6 +481,7 @@ const translations = {
         
         // Controls
         selectStone: "Stein auswählen:",
+        movedStones: "Steine mit Bewegungen",
         showAll: "Alle anzeigen",
         showImages: "Bilder anzeigen:",
         lastImage: "Letztes",
@@ -552,9 +559,10 @@ const translations = {
         subtitle: "Explora la historia a través del tiempo",
         
         // Controls
-        selectStone: "Selecciona una piedra:",
-        showAll: "Mostrar todas",
-        showImages: "Mostrar imágenes:",
+        selectStone: "Selecione uma pedra:",
+        movedStones: "Pedras com movimentos",
+        showAll: "Mostrar todos",
+        showImages: "Mostrar imagens:",
         lastImage: "Última",
         noImages: "Ninguna",
         allImages: "Todas",
@@ -631,7 +639,8 @@ const translations = {
         
         // Controls
         selectStone: "Wybierz kamień:",
-        showAll: "Pokaż wszystkie",
+        movedStones: "Kamienie z przemieszczeniami",
+        showAll: "Pokaż wszystko",
         showImages: "Pokaż obrazy:",
         lastImage: "Ostatni",
         noImages: "Żaden",
@@ -707,11 +716,10 @@ const translations = {
         title: "Mapa das Pedras",
         subtitle: "Explore a história através do tempo",
         
-        // Controls
-        selectStone: "Selecione uma pedra:",
+        // Controls        selectStone: "Selecciona una piedra:",
+        movedStones: "Piedras con movimientos",
         showAll: "Mostrar todas",
-        showImages: "Mostrar imagens:",
-        lastImage: "Última",
+        showImages: "Mostrar imágenes:",       lastImage: "Última",
         noImages: "Nenhuma",
         allImages: "Todas",
         
@@ -787,6 +795,7 @@ const translations = {
         
         // Controls
         selectStone: "石を選択:",
+        movedStones: "移動した石",
         showAll: "すべて表示",
         showImages: "画像を表示:",
         lastImage: "最後",
