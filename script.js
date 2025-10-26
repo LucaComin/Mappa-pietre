@@ -34,10 +34,10 @@ document.addEventListener('DOMContentLoaded', function() {
     loadData();
     setupEventListeners();
     
-    // Inizializza il sistema di traduzione
-    if (typeof initializeLanguageSelector === 'function') {
-        initializeLanguageSelector();
-    }
+    // La logica di inizializzazione della lingua (inclusa la selezione della lingua del browser/salvata)
+    // è gestita in `translations.js` che viene caricato prima.
+    // Non è necessaria una chiamata esplicita qui.
+    // La funzione `updatePageTexts()` viene chiamata all'interno di `translations.js`.
     
     // Inizializza la guida interattiva
     tutorialGuide = new TutorialGuide();

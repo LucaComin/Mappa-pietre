@@ -1028,18 +1028,11 @@ function initializeLanguageSelector() {
 window.t = t;
 
 window.updatePageTexts = updatePageTexts;
+window.changeLanguage = changeLanguage;
 window.initializeLanguageSelector = initializeLanguageSelector;
 
 window.availableLanguages = availableLanguages;
 window.currentLanguage = currentLanguage;
 
-// Funzione per cambiare lingua
-function changeLanguage(lang) {
-    currentLanguage = lang;
-    localStorage.setItem('selectedLanguage', lang);
-    updatePageTexts();
-    
-    if (typeof tutorialGuide !== 'undefined' && tutorialGuide) {
-        tutorialGuide.updateLanguage(lang);
-    }
-}
+// Funzione per cambiare lingua (definizione completa)
+// La funzione è definita sopra (riga 865) e non deve essere duplicata qui.
