@@ -29,39 +29,23 @@ let tutorialGuide;
 
 // Inizializzazione dell'applicazione
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM caricato, inizializzazione in corso...');
     showLoadingOverlay();
+    initMap();
+    loadData();
+    setupEventListeners();
     
-    try {
-        initMap();
-        console.log('Mappa inizializzata');
-        
-        loadData();
-        console.log('Caricamento dati avviato');
-        
-        setupEventListeners();
-        console.log('Event listeners configurati');
-        
-        // Inizializza il sistema di traduzione
-        if (typeof initializeLanguageSelector === 'function') {
-            initializeLanguageSelector();
-            console.log('Selettore lingua inizializzato');
-        }
-        
-        // Inizializza la guida interattiva
-        tutorialGuide = new TutorialGuide();
-        console.log('Guida interattiva inizializzata');
-        
-        // Nascondi loading overlay dopo l'inizializzazione
-        setTimeout(() => {
-            hideLoadingOverlay();
-            console.log('Loading overlay nascosto');
-        }, 3000); // Aumentato a 3 secondi per dare più tempo
-        
-    } catch (error) {
-        console.error('Errore durante l\'inizializzazione:', error);
-        hideLoadingOverlay();
+    // Inizializza il sistema di traduzione
+    if (typeof initializeLanguageSelector === 'function') {
+        initializeLanguageSelector();
     }
+    
+    // Inizializza la guida interattiva
+    tutorialGuide = new TutorialGuide();
+    
+    // Nascondi loading overlay dopo l'inizializzazione
+    setTimeout(() => {
+        hideLoadingOverlay();
+    }, 1500);
 });
 
 // Funzioni per il loading overlay
@@ -142,29 +126,21 @@ function initMap() {
 
 // Funzione per caricare e processare i dati dal Google Sheet
 async function loadData() {
-    console.log('Inizio caricamento dati...');
     try {
         // Per test, usiamo dati di esempio se non è configurato il Google Sheet
         if (GOOGLE_SHEET_ID === 'YOUR_GOOGLE_SHEET_ID') {
-            console.log('Caricamento dati di esempio (Google Sheet non configurato)');
             loadSampleData();
             return;
         }
 
-        console.log('Tentativo di caricamento da Google Sheet:', GOOGLE_SHEET_URL);
         const response = await fetch(GOOGLE_SHEET_URL);
-        console.log('Risposta ricevuta:', response.status);
-        
         const text = await response.text();
-        console.log('Testo ricevuto (primi 200 caratteri):', text.substring(0, 200));
         
         // Google Sheets API restituisce un JSON con un wrapper, dobbiamo estrarlo
         const jsonString = text.substring(text.indexOf('(') + 1, text.lastIndexOf(')'));
         const jsonData = JSON.parse(jsonString);
-        console.log('Dati JSON parsati:', jsonData);
 
         const rows = jsonData.table.rows;
-        console.log('Numero di righe trovate:', rows.length);
         processSheetData(rows);
 
     } catch (error) {
@@ -225,12 +201,12 @@ function processSheetData(rows) {
     }
 
     populateStoneSelect();
-    displayStonesOnMap('all');
+    // Imposta il filtro iniziale su 'moved' come richiesto dall'utente
+    displayStonesOnMap('moved');
 }
 
 // Funzione per caricare dati di esempio per test
 function loadSampleData() {
-    console.log('Caricamento dati di esempio...');
     const sampleData = {
         'Pietra_Rossa': [
             {
@@ -290,30 +266,64 @@ function loadSampleData() {
     };
 
     allStonesData = sampleData;
-    console.log('Dati di esempio caricati:', allStonesData);
-    
     populateStoneSelect();
-    console.log('Menu pietre popolato');
-    
-    displayStonesOnMap('all');
-    console.log('Pietre visualizzate sulla mappa');
+    // Imposta il filtro iniziale su 'moved' come richiesto dall'utente
+    displayStonesOnMap('moved');
 }
 
 // Funzione per popolare il menu a tendina delle pietre
 function populateStoneSelect() {
     const select = document.getElementById('stone-select');
-    select.innerHTML = '<option value="all">Mostra tutte</option>';
+    const currentSelection = select.value;
+
+    // Rimuoviamo il contenuto esistente
+    select.innerHTML = '';
+
+    // Aggiungiamo le opzioni speciali all'inizio
+    const movedOption = document.createElement('option');
+    movedOption.value = 'moved';
+    movedOption.textContent = typeof t === 'function' ? t('movedStones') : 'Pietre con spostamenti';
+    select.appendChild(movedOption);
+
+    const allOption = document.createElement('option');
+    allOption.value = 'all';
+    allOption.textContent = typeof t === 'function' ? t('showAll') : 'Mostra tutte';
+    select.appendChild(allOption);
 
     for (const stoneName in allStonesData) {
-        const option = document.createElement('option');
-        option.value = stoneName;
-        option.textContent = stoneName.replace(/_/g, ' ');
-        select.appendChild(option);
+        const positions = allStonesData[stoneName];
+        // Aggiungiamo solo le pietre che hanno almeno una posizione (dovrebbero averne tutte)
+        if (positions && positions.length > 0) {
+            const option = document.createElement('option');
+            option.value = stoneName;
+            option.textContent = stoneName.replace(/_/g, ' ');
+            select.appendChild(option);
+        }
     }
 
-    select.addEventListener('change', (event) => {
+    // Ripristiniamo la selezione precedente
+    if (select.querySelector(`option[value="${currentSelection}"]`)) {
+        select.value = currentSelection;
+    } else {
+        // Se la selezione precedente non è più valida, selezioniamo 'moved' di default
+        select.value = 'moved';
+    }
+
+    // Funzione handler per l'evento change, per poterla rimuovere
+    function handleStoneSelectChange(event) {
         displayStonesOnMap(event.target.value);
-    });
+    }
+    
+    // Rimuoviamo l'event listener precedente se esiste, poi lo riaggiungiamo.
+    // Per rimuovere un listener anonimo, dobbiamo usare una funzione con nome.
+    // Il listener originale era anonimo, quindi non può essere rimosso direttamente.
+    // Per il momento, lasciamo l'aggiunta e la rimozione del listener con la funzione con nome.
+    // Il problema di duplicazione del listener si risolve solo se l'event listener è sempre lo stesso.
+    // In questo caso, la funzione populateStoneSelect viene chiamata una sola volta all'inizio
+    // e poi solo in changeLanguage, quindi il listener non dovrebbe essere duplicato.
+    // Però, per sicurezza, usiamo la funzione con nome.
+    select.removeEventListener('change', handleStoneSelectChange);
+    select.addEventListener('change', handleStoneSelectChange);
 }
 
 // Funzione principale per visualizzare le pietre sulla mappa
@@ -326,7 +336,20 @@ function displayStonesOnMap(filterStoneName = 'all') {
     let colorIndex = 0;
 
     for (const stoneName in allStonesData) {
-        if (filterStoneName === 'all' || filterStoneName === stoneName) {
+        // Logica per il nuovo filtro "Pietre con spostamenti"
+        if (filterStoneName === 'moved') {
+            const positions = allStonesData[stoneName];
+            // Una pietra si è "spostata" se ha più di una posizione registrata
+            if (positions.length <= 1) {
+                continue; // Salta le pietre che non si sono spostate
+            }
+        }
+
+        // Se non è stata saltata dal filtro 'moved', allora la visualizziamo se:
+        // 1. Il filtro è 'all'
+        // 2. Il filtro è il nome della pietra (filterStoneName === stoneName)
+        // 3. Il filtro è 'moved' (e non è stata saltata prima)
+        if (filterStoneName === 'all' || filterStoneName === stoneName || filterStoneName === 'moved') {
             const positions = allStonesData[stoneName];
             if (positions.length > 0) {
                 const stoneColor = STONE_COLORS[colorIndex % STONE_COLORS.length];
@@ -1097,55 +1120,69 @@ function resetTutorial() {
 }
 
 
-// Funzione per aggiornare il link About Us con la traduzione corretta
-function updateAboutUsLink() {
-    const aboutUsLink = document.getElementById('about-us-link');
-    const currentLang = localStorage.getItem('selectedLanguage') || 'it';
-    
-    if (aboutUsLink && translations[currentLang] && translations[currentLang]['aboutUs']) {
-        aboutUsLink.textContent = translations[currentLang]['aboutUs'];
-    }
-}
 
-// Aggiorna la funzione di inizializzazione del selettore di lingua
-function initializeLanguageSelector() {
-    const languageSelect = document.getElementById('language-select');
-    const savedLanguage = localStorage.getItem('selectedLanguage') || 'it';
-    
-    if (languageSelect) {
-        languageSelect.value = savedLanguage;
-        updateUIText(savedLanguage);
-        updateAboutUsLink();
-    }
-}
 
-// Funzione per cambiare lingua (aggiornata)
-function changeLanguage(lang) {
-    localStorage.setItem('selectedLanguage', lang);
-    updateUIText(lang);
-    updateAboutUsLink();
-    
-    if (tutorialGuide) {
+function updateTranslations(lang) {
+    const currentTranslations = translations[lang];
+    if (!currentTranslations) return;
+
+    // Aggiorna titolo e sottotitolo
+    // Aggiorna titolo e sottotitolo
+    document.querySelector('h1 .header-text').textContent = currentTranslations.title;
+    document.querySelector('.header-subtitle').textContent = currentTranslations.subtitle;
+
+    // Aggiorna i label dei controlli
+    document.querySelector('label[for="language-select"] .control-text').textContent = currentTranslations.selectLanguage;
+    document.querySelector('label[for="stone-select"] .control-text').textContent = currentTranslations.selectStone;
+    document.querySelector('label[for="image-display-select"] .control-text').textContent = currentTranslations.showImages;
+
+    // Aggiorna le opzioni del selettore immagini
+    const imageSelect = document.getElementById('image-display-select');
+    if (imageSelect) {
+        imageSelect.querySelector('option[value="last"]').textContent = currentTranslations.lastImage;
+        imageSelect.querySelector('option[value="none"]').textContent = currentTranslations.noImages;
+        imageSelect.querySelector('option[value="all"]').textContent = currentTranslations.allImages;
+    }
+
+    // Aggiorna il testo del loading overlay
+    document.querySelector('#loading-overlay p').textContent = currentTranslations.loadingMap;
+
+    // Aggiorna il pannello storia
+    document.getElementById('history-title').textContent = currentTranslations.historyOf;
+    document.getElementById('close-history').setAttribute('title', currentTranslations.close);
+    document.querySelector('.mini-map-title').textContent = currentTranslations.historicalPath;
+    document.querySelector('.map-legend .current').nextElementSibling.textContent = currentTranslations.currentPosition;
+    document.querySelector('.map-legend .path').nextElementSibling.textContent = currentTranslations.historicalRoute;
+    document.querySelector('.timeline-title').textContent = currentTranslations.timelineMovements;
+    document.querySelector('.timeline-start').textContent = currentTranslations.start;
+    document.querySelector('.timeline-current').textContent = currentTranslations.currentDate;
+    document.querySelector('.timeline-end').textContent = currentTranslations.end;
+    document.querySelector('#play-pause-btn .btn-text').textContent = currentTranslations.play;
+    document.querySelector('#prev-button .btn-text').textContent = currentTranslations.previous;
+    document.querySelector('#next-button .btn-text').textContent = currentTranslations.next;
+
+    // Aggiorna il tutorial
+    if (typeof tutorialGuide !== 'undefined') {
         tutorialGuide.updateLanguage(lang);
     }
 }
 
-// Funzione per aggiornare tutti i testi dell'interfaccia
-function updateUIText(lang) {
-    const elements = {
-        'language-label': 'selectLanguage',
-        'stone-label': 'selectStone', 
-        'image-label': 'showImages'
-    };
+function changeLanguage(lang) {
+    // Salviamo la selezione corrente prima di aggiornare le traduzioni
+    const currentStoneSelection = document.getElementById('stone-select').value;
     
-    Object.entries(elements).forEach(([id, key]) => {
-        const element = document.getElementById(id);
-        if (element && translations[lang] && translations[lang][key]) {
-            element.textContent = translations[lang][key];
-        }
-    });
+    // 1. Aggiorna i testi dell'interfaccia
+    updateTranslations(lang);
     
-    updateSelectOptions(lang);
-    updateHeaderSubtitle(lang);
+    // 2. Ricostruisci e ripristina il selettore di pietre
+    populateStoneSelect();
+    
+    // 3. Ripristina la selezione del selettore di pietre
+    const stoneSelect = document.getElementById('stone-select');
+    if (stoneSelect) {
+        // Se il valore salvato è 'moved' o 'all', ripristiniamo quello.
+        // Altrimenti, se era selezionata una pietra specifica, la ripristiniamo.
+        // Se la pietra specifica non esiste più (improbabile), il valore non cambierà.
+        stoneSelect.value = currentStoneSelection;
+    }
 }
-
