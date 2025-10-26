@@ -239,7 +239,8 @@ function updateInterfaceText() {
     if (typeof currentMarkers !== 'undefined') {
         currentMarkers.eachLayer(layer => {
             if (layer.getPopup()) {
-                // Accedi a layer.stoneData\n                const stoneData = layer.stoneData;
+                // Accedi a layer.stoneData
+                const stoneData = layer.stoneData;
                 if (stoneData) {
                     const newContent = createPopupContent(stoneData); // Funzione da script.js
                     layer.setPopupContent(newContent);
@@ -285,4 +286,3 @@ function getLanguageName(langCode) {
 function getTranslationFunction(lang) {
     return (key) => translations[lang][key] || key;
 }
-
