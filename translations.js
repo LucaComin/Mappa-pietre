@@ -1048,11 +1048,6 @@ function changeLanguage(lang) {
     currentLanguage = lang;
     localStorage.setItem('selectedLanguage', lang);
     updatePageTexts();
-
-    // Aggiorna le opzioni del selettore delle pietre con la nuova lingua
-    if (typeof populateStoneSelect === 'function') {
-        populateStoneSelect();
-    }
     
     if (typeof tutorialGuide !== 'undefined' && tutorialGuide) {
         tutorialGuide.updateLanguage(lang);

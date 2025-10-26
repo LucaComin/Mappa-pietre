@@ -272,7 +272,7 @@ function loadSampleData() {
 }
 
 // Funzione per popolare il menu a tendina delle pietre
-window.populateStoneSelect = function populateStoneSelect() {
+function populateStoneSelect() {
     const select = document.getElementById('stone-select');
     const currentSelection = select.value;
 
