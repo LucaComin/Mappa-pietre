@@ -201,7 +201,8 @@ function processSheetData(rows) {
     }
 
     populateStoneSelect();
-    displayStonesOnMap('all');
+    // Imposta il filtro iniziale su 'moved' come richiesto dall'utente
+    displayStonesOnMap('moved');
 }
 
 // Funzione per caricare dati di esempio per test
@@ -266,20 +267,33 @@ function loadSampleData() {
 
     allStonesData = sampleData;
     populateStoneSelect();
-    displayStonesOnMap('all');
+    // Imposta il filtro iniziale su 'moved' come richiesto dall'utente
+    displayStonesOnMap('moved');
 }
 
 // Funzione per popolare il menu a tendina delle pietre
 function populateStoneSelect() {
     const select = document.getElementById('stone-select');
-    select.innerHTML = '<option value="all">Mostra tutte</option>';
+
+    // Aggiungiamo le opzioni speciali all'inizio
+    select.innerHTML = `
+        <option value="moved">${typeof t === 'function' ? t('movedStones') : 'Pietre con spostamenti'}</option>
+        <option value="all">${typeof t === 'function' ? t('showAll') : 'Mostra tutte'}</option>
+    `;
 
     for (const stoneName in allStonesData) {
-        const option = document.createElement('option');
-        option.value = stoneName;
-        option.textContent = stoneName.replace(/_/g, ' ');
-        select.appendChild(option);
+        const positions = allStonesData[stoneName];
+        // Aggiungiamo solo le pietre che hanno almeno una posizione (dovrebbero averne tutte)
+        if (positions && positions.length > 0) {
+            const option = document.createElement('option');
+            option.value = stoneName;
+            option.textContent = stoneName.replace(/_/g, ' ');
+            select.appendChild(option);
+        }
     }
+
+    // L'opzione 'moved' è già selezionata di default in index.html
+    // select.value = 'moved'; // Non necessario se è già impostato in HTML
 
     select.addEventListener('change', (event) => {
         displayStonesOnMap(event.target.value);
@@ -296,7 +310,20 @@ function displayStonesOnMap(filterStoneName = 'all') {
     let colorIndex = 0;
 
     for (const stoneName in allStonesData) {
-        if (filterStoneName === 'all' || filterStoneName === stoneName) {
+        // Logica per il nuovo filtro "Pietre con spostamenti"
+        if (filterStoneName === 'moved') {
+            const positions = allStonesData[stoneName];
+            // Una pietra si è "spostata" se ha più di una posizione registrata
+            if (positions.length <= 1) {
+                continue; // Salta le pietre che non si sono spostate
+            }
+        }
+
+        // Se non è stata saltata dal filtro 'moved', allora la visualizziamo se:
+        // 1. Il filtro è 'all'
+        // 2. Il filtro è il nome della pietra (filterStoneName === stoneName)
+        // 3. Il filtro è 'moved' (e non è stata saltata prima)
+        if (filterStoneName === 'all' || filterStoneName === stoneName || filterStoneName === 'moved') {
             const positions = allStonesData[stoneName];
             if (positions.length > 0) {
                 const stoneColor = STONE_COLORS[colorIndex % STONE_COLORS.length];
