@@ -872,7 +872,7 @@ function t(key) {
 }
 
 // Funzione per cambiare lingua
-function changeLanguage(lang) {
+window.changeLanguage = function changeLanguage(lang) {
     if (translations[lang]) {
         currentLanguage = lang;
         localStorage.setItem('selectedLanguage', lang);
@@ -1044,10 +1044,15 @@ window.availableLanguages = availableLanguages;
 window.currentLanguage = currentLanguage;
 
 // Funzione per cambiare lingua
-function changeLanguage(lang) {
+window.changeLanguage = function changeLanguage(lang) {
     currentLanguage = lang;
     localStorage.setItem('selectedLanguage', lang);
     updatePageTexts();
+
+    // Aggiorna le opzioni del selettore delle pietre con la nuova lingua
+    if (typeof populateStoneSelect === 'function') {
+        populateStoneSelect();
+    }
     
     if (typeof tutorialGuide !== 'undefined' && tutorialGuide) {
         tutorialGuide.updateLanguage(lang);
