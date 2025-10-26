@@ -201,8 +201,7 @@ function processSheetData(rows) {
     }
 
     populateStoneSelect();
-    // Imposta il filtro iniziale su 'moved' come richiesto dall'utente
-    displayStonesOnMap('moved');
+    displayStonesOnMap('all');
 }
 
 // Funzione per caricare dati di esempio per test
@@ -267,61 +266,24 @@ function loadSampleData() {
 
     allStonesData = sampleData;
     populateStoneSelect();
-    // Imposta il filtro iniziale su 'moved' come richiesto dall'utente
-    displayStonesOnMap('moved');
+    displayStonesOnMap('all');
 }
 
 // Funzione per popolare il menu a tendina delle pietre
-window.populateStoneSelect = function populateStoneSelect() {
+function populateStoneSelect() {
     const select = document.getElementById('stone-select');
-    const currentSelection = select.value;
-
-    // Rimuoviamo il contenuto esistente
-    select.innerHTML = '';
-
-    // Aggiungiamo le opzioni speciali all'inizio
-    const movedOption = document.createElement('option');
-    movedOption.value = 'moved';movedOption.textContent = typeof t === 'function' ? t('movedStones') : 'con movimenti'; select.appendChild(movedOption);
-
-    const allOption = document.createElement('option');
-    allOption.value = 'all';
-    allOption.textContent = typeof t === 'function' ? t('showAll') : 'Mostra tutte';
-    select.appendChild(allOption);
+    select.innerHTML = '<option value="all">Mostra tutte</option>';
 
     for (const stoneName in allStonesData) {
-        const positions = allStonesData[stoneName];
-        // Aggiungiamo solo le pietre che hanno almeno una posizione (dovrebbero averne tutte)
-        if (positions && positions.length > 0) {
-            const option = document.createElement('option');
-            option.value = stoneName;
-            option.textContent = stoneName.replace(/_/g, ' ');
-            select.appendChild(option);
-        }
+        const option = document.createElement('option');
+        option.value = stoneName;
+        option.textContent = stoneName.replace(/_/g, ' ');
+        select.appendChild(option);
     }
 
-    // Ripristiniamo la selezione precedente
-    if (select.querySelector(`option[value="${currentSelection}"]`)) {
-        select.value = currentSelection;
-    } else {
-        // Se la selezione precedente non è più valida, selezioniamo 'moved' di default
-        select.value = 'moved';
-    }
-
-    // Funzione handler per l'evento change, per poterla rimuovere
-    function handleStoneSelectChange(event) {
+    select.addEventListener('change', (event) => {
         displayStonesOnMap(event.target.value);
-    }
-    
-    // Rimuoviamo l'event listener precedente se esiste, poi lo riaggiungiamo.
-    // Per rimuovere un listener anonimo, dobbiamo usare una funzione con nome.
-    // Il listener originale era anonimo, quindi non può essere rimosso direttamente.
-    // Per il momento, lasciamo l'aggiunta e la rimozione del listener con la funzione con nome.
-    // Il problema di duplicazione del listener si risolve solo se l'event listener è sempre lo stesso.
-    // In questo caso, la funzione populateStoneSelect viene chiamata una sola volta all'inizio
-    // e poi solo in changeLanguage, quindi il listener non dovrebbe essere duplicato.
-    // Però, per sicurezza, usiamo la funzione con nome.
-    select.removeEventListener('change', handleStoneSelectChange);
-    select.addEventListener('change', handleStoneSelectChange);
+    });
 }
 
 // Funzione principale per visualizzare le pietre sulla mappa
@@ -334,20 +296,7 @@ function displayStonesOnMap(filterStoneName = 'all') {
     let colorIndex = 0;
 
     for (const stoneName in allStonesData) {
-        // Logica per il nuovo filtro "Pietre con spostamenti"
-        if (filterStoneName === 'moved') {
-            const positions = allStonesData[stoneName];
-            // Una pietra si è "spostata" se ha più di una posizione registrata
-            if (positions.length <= 1) {
-                continue; // Salta le pietre che non si sono spostate
-            }
-        }
-
-        // Se non è stata saltata dal filtro 'moved', allora la visualizziamo se:
-        // 1. Il filtro è 'all'
-        // 2. Il filtro è il nome della pietra (filterStoneName === stoneName)
-        // 3. Il filtro è 'moved' (e non è stata saltata prima)
-        if (filterStoneName === 'all' || filterStoneName === stoneName || filterStoneName === 'moved') {
+        if (filterStoneName === 'all' || filterStoneName === stoneName) {
             const positions = allStonesData[stoneName];
             if (positions.length > 0) {
                 const stoneColor = STONE_COLORS[colorIndex % STONE_COLORS.length];
@@ -369,14 +318,15 @@ function displayStonesOnMap(filterStoneName = 'all') {
                 }).addTo(currentMarkers);
                 
                 // Formatta la data per il popup
-                const formattedDate = lastPosition.dateObj.toLocaleDateString('it-IT', {
-                    year: 'numeric', month: 'long', day: 'numeric'
+                const formattedDate = lastPosition.dateObj.toLocaleString('it-IT', {
+                    year: 'numeric', month: 'long', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
                 });
 
                 // Contenuto del popup migliorato
                 let popupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
                 popupContent += `<h3 style="margin: 0 0 10px 0; color: ${stoneColor}; font-weight: 600;">${stoneName.replace(/_/g, ' ')}</h3>`;
-                popupContent += `<p style="margin: 5px 0; color: #64748b;"><strong>${typeof t === 'function' ? t('lastPosition') : 'Ultima posizione'}:</strong> ${formattedDate}</p>`;
+                popupContent += `<p style="margin: 5px 0; color: #64748b;"><strong>${typeof t === 'function' ? t('lastPosition') : 'Ultima posizione:'}:</strong><br>${formattedDate}</p>`;
                 
                 if (lastPosition.imageUrl) {
                     popupContent += `<img src="${lastPosition.imageUrl}" style="max-width:200px; max-height:150px; border-radius: 8px; margin: 10px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">`;
@@ -453,8 +403,9 @@ function addSingleImageMarker(position, stoneName, stoneColor, index) {
 
     const imageMarker = L.marker([position.lat, position.lon], { icon: imageIcon });
     
-    const formattedDate = position.dateObj.toLocaleDateString('it-IT', {
-        year: 'numeric', month: 'long', day: 'numeric'
+    const formattedDate = position.dateObj.toLocaleString('it-IT', {
+        year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
     });
 
     let imagePopupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
@@ -614,8 +565,9 @@ function updateHistoryPanel() {
     }
     
     // Aggiorna la caption
-    const formattedDate = currentPos.dateObj.toLocaleDateString('it-IT', {
-        year: 'numeric', month: 'long', day: 'numeric'
+    const formattedDate = currentPos.dateObj.toLocaleString('it-IT', {
+        year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
     });
     document.getElementById('history-image-caption').textContent = formattedDate;
     
@@ -1114,70 +1066,3 @@ function resetTutorial() {
     }
 }
 
-
-
-
-function updateTranslations(lang) {
-    const currentTranslations = translations[lang];
-    if (!currentTranslations) return;
-
-    // Aggiorna titolo e sottotitolo
-    // Aggiorna titolo e sottotitolo
-    document.querySelector('h1 .header-text').textContent = currentTranslations.title;
-    document.querySelector('.header-subtitle').textContent = currentTranslations.subtitle;
-
-    // Aggiorna i label dei controlli
-    document.querySelector('label[for="language-select"] .control-text').textContent = currentTranslations.selectLanguage;
-    document.querySelector('label[for="stone-select"] .control-text').textContent = currentTranslations.selectStone;
-    document.querySelector('label[for="image-display-select"] .control-text').textContent = currentTranslations.showImages;
-
-    // Aggiorna le opzioni del selettore immagini
-    const imageSelect = document.getElementById('image-display-select');
-    if (imageSelect) {
-        imageSelect.querySelector('option[value="last"]').textContent = currentTranslations.lastImage;
-        imageSelect.querySelector('option[value="none"]').textContent = currentTranslations.noImages;
-        imageSelect.querySelector('option[value="all"]').textContent = currentTranslations.allImages;
-    }
-
-    // Aggiorna il testo del loading overlay
-    document.querySelector('#loading-overlay p').textContent = currentTranslations.loadingMap;
-
-    // Aggiorna il pannello storia
-    document.getElementById('history-title').textContent = currentTranslations.historyOf;
-    document.getElementById('close-history').setAttribute('title', currentTranslations.close);
-    document.querySelector('.mini-map-title').textContent = currentTranslations.historicalPath;
-    document.querySelector('.map-legend .current').nextElementSibling.textContent = currentTranslations.currentPosition;
-    document.querySelector('.map-legend .path').nextElementSibling.textContent = currentTranslations.historicalRoute;
-    document.querySelector('.timeline-title').textContent = currentTranslations.timelineMovements;
-    document.querySelector('.timeline-start').textContent = currentTranslations.start;
-    document.querySelector('.timeline-current').textContent = currentTranslations.currentDate;
-    document.querySelector('.timeline-end').textContent = currentTranslations.end;
-    document.querySelector('#play-pause-btn .btn-text').textContent = currentTranslations.play;
-    document.querySelector('#prev-button .btn-text').textContent = currentTranslations.previous;
-    document.querySelector('#next-button .btn-text').textContent = currentTranslations.next;
-
-    // Aggiorna il tutorial
-    if (typeof tutorialGuide !== 'undefined') {
-        tutorialGuide.updateLanguage(lang);
-    }
-}
-
-function changeLanguage(lang) {
-    // Salviamo la selezione corrente prima di aggiornare le traduzioni
-    const currentStoneSelection = document.getElementById('stone-select').value;
-    
-    // 1. Aggiorna i testi dell'interfaccia
-    updateTranslations(lang);
-    
-    // 2. Ricostruisci e ripristina il selettore di pietre
-    populateStoneSelect();
-    
-    // 3. Ripristina la selezione del selettore di pietre
-    const stoneSelect = document.getElementById('stone-select');
-    if (stoneSelect) {
-        // Se il valore salvato è 'moved' o 'all', ripristiniamo quello.
-        // Altrimenti, se era selezionata una pietra specifica, la ripristiniamo.
-        // Se la pietra specifica non esiste più (improbabile), il valore non cambierà.
-        stoneSelect.value = currentStoneSelection;
-    }
-}
