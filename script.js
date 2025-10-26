@@ -271,6 +271,9 @@ function loadSampleData() {
     displayStonesOnMap('moved');
 }
 
+// Espone la funzione globalmente per essere chiamata da translations.js
+window.displayStonesOnMap = displayStonesOnMap;
+
 // Funzione per popolare il menu a tendina delle pietre
 function populateStoneSelect() {
     const select = document.getElementById('stone-select');
