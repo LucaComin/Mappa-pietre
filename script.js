@@ -281,9 +281,7 @@ function populateStoneSelect() {
 
     // Aggiungiamo le opzioni speciali all'inizio
     const movedOption = document.createElement('option');
-    movedOption.value = 'moved';
-    movedOption.textContent = typeof t === 'function' ? t('movedStones') : 'Pietre con spostamenti';
-    select.appendChild(movedOption);
+    movedOption.value = 'moved';movedOption.textContent = typeof t === 'function' ? t('movedStones') : 'con movimenti'; select.appendChild(movedOption);
 
     const allOption = document.createElement('option');
     allOption.value = 'all';
@@ -371,9 +369,8 @@ function displayStonesOnMap(filterStoneName = 'all') {
                 }).addTo(currentMarkers);
                 
                 // Formatta la data per il popup
-                const formattedDate = lastPosition.dateObj.toLocaleString('it-IT', {
-                    year: 'numeric', month: 'long', day: 'numeric',
-                    
+                const formattedDate = lastPosition.dateObj.toLocaleDateString('it-IT', {
+                    year: 'numeric', month: 'long', day: 'numeric'
                 });
 
                 // Contenuto del popup migliorato
@@ -456,9 +453,8 @@ function addSingleImageMarker(position, stoneName, stoneColor, index) {
 
     const imageMarker = L.marker([position.lat, position.lon], { icon: imageIcon });
     
-    const formattedDate = position.dateObj.toLocaleString('it-IT', {
-        year: 'numeric', month: 'long', day: 'numeric',
-        
+    const formattedDate = position.dateObj.toLocaleDateString('it-IT', {
+        year: 'numeric', month: 'long', day: 'numeric'
     });
 
     let imagePopupContent = `<div style="text-align: center; font-family: 'Inter', sans-serif;">`;
@@ -618,9 +614,8 @@ function updateHistoryPanel() {
     }
     
     // Aggiorna la caption
-    const formattedDate = currentPos.dateObj.toLocaleString('it-IT', {
-        year: 'numeric', month: 'long', day: 'numeric',
-        
+    const formattedDate = currentPos.dateObj.toLocaleDateString('it-IT', {
+        year: 'numeric', month: 'long', day: 'numeric'
     });
     document.getElementById('history-image-caption').textContent = formattedDate;
     
