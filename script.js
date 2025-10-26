@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     
     // La logica di inizializzazione della lingua (inclusa la selezione della lingua del browser/salvata)
-    // è gestita in `translations.js` che viene caricato prima.
+    // è gestita in `translations.js` che viene caricato prima e si auto-esegue.
     // Non è necessaria una chiamata esplicita qui.
     // La funzione `updatePageTexts()` viene chiamata all'interno di `translations.js`.
     

@@ -1075,3 +1075,6 @@ window.currentLanguage = currentLanguage;
 
 // Funzione per cambiare lingua (definizione completa)
 // La funzione è definita sopra (riga 865) e non deve essere duplicata qui.
+
+// Inizializza il selettore di lingua al caricamento del file
+initializeLanguageSelector();
