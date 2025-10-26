@@ -1017,15 +1017,29 @@ function initializeLanguageSelector() {
     // Imposta il valore del selettore
     const languageSelect = document.getElementById('language-select');
     if (languageSelect) {
+        languageSelect.addEventListener('change', (event) => {
+            changeLanguage(event.target.value);
+        });
         languageSelect.value = currentLanguage;
     }
 }
 
 // Esporta le funzioni per uso globale
 window.t = t;
-window.changeLanguage = changeLanguage;
+
 window.updatePageTexts = updatePageTexts;
 window.initializeLanguageSelector = initializeLanguageSelector;
+
 window.availableLanguages = availableLanguages;
 window.currentLanguage = currentLanguage;
 
+// Funzione per cambiare lingua
+function changeLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('selectedLanguage', lang);
+    updatePageTexts();
+    
+    if (typeof tutorialGuide !== 'undefined' && tutorialGuide) {
+        tutorialGuide.updateLanguage(lang);
+    }
+}
