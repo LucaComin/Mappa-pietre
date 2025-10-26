@@ -7,6 +7,7 @@ const translations = {
         
         // Controls
         selectStone: "Seleziona una pietra:",
+        movedStones: "con movimenti",
         showAll: "Mostra tutte",
         showImages: "Mostra immagini:",
         lastImage: "Ultima",
@@ -34,7 +35,7 @@ const translations = {
         next: "Successiva",
         
         // Popup
-        lastPosition: "Ultima posizione:",
+        lastPosition: "Ultima posizione",
         seeHistory: "Vedi la storia",
         
         // Counter
@@ -85,6 +86,7 @@ const translations = {
         
         // Controls
         selectStone: "Select a stone:",
+        movedStones: "with movements",
         showAll: "Show all",
         showImages: "Show images:",
         lastImage: "Last",
@@ -112,7 +114,7 @@ const translations = {
         next: "Next",
         
         // Popup
-        lastPosition: "Last position:",
+        lastPosition: "Last position",
         seeHistory: "See history",
         
         // Counter
@@ -163,6 +165,7 @@ const translations = {
         
         // Controls
         selectStone: "选择石头：",
+        movedStones: "有移动",
         showAll: "显示全部",
         showImages: "显示图片：",
         lastImage: "最后",
@@ -190,8 +193,7 @@ const translations = {
         next: "下一个",
         
         // Popup
-        lastPosition: "最后位置：",
-        seeHistory: "查看历史",
+        lastPosition: "最終位置",        seeHistory: "查看历史",
         
         // Counter
         of: "的",
@@ -241,6 +243,7 @@ const translations = {
         
         // Controls
         selectStone: "Sélectionnez une pierre :",
+        movedStones: "avec mouvements",
         showAll: "Afficher toutes",
         showImages: "Afficher les images :",
         lastImage: "Dernière",
@@ -268,7 +271,7 @@ const translations = {
         next: "Suivant",
         
         // Popup
-        lastPosition: "Dernière position :",
+        lastPosition: "Dernière position",
         seeHistory: "Voir l'histoire",
         
         // Counter
@@ -319,6 +322,7 @@ const translations = {
         
         // Controls
         selectStone: "Выберите камень:",
+        movedStones: "с движениями",
         showAll: "Показать все",
         showImages: "Показать изображения:",
         lastImage: "Последнее",
@@ -346,7 +350,7 @@ const translations = {
         next: "Следующий",
         
         // Popup
-        lastPosition: "Последняя позиция:",
+        lastPosition: "Последняя позиция",
         seeHistory: "Посмотреть историю",
         
         // Counter
@@ -397,7 +401,8 @@ const translations = {
         
         // Controls
         selectStone: "اختر حجراً:",
-        showAll: "إظهار الكل",
+        movedStones: "مع حركات",
+        showAll: "عرض الكل",",
         showImages: "إظهار الصور:",
         lastImage: "الأخيرة",
         noImages: "لا شيء",
@@ -424,7 +429,7 @@ const translations = {
         next: "التالي",
         
         // Popup
-        lastPosition: "الموقع الأخير:",
+        lastPosition: "الموقع الأخير",
         seeHistory: "رؤية التاريخ",
         
         // Counter
@@ -475,6 +480,7 @@ const translations = {
         
         // Controls
         selectStone: "Stein auswählen:",
+        movedStones: "mit Bewegungen",
         showAll: "Alle anzeigen",
         showImages: "Bilder anzeigen:",
         lastImage: "Letztes",
@@ -502,7 +508,7 @@ const translations = {
         next: "Nächste",
         
         // Popup
-        lastPosition: "Letzte Position:",
+        lastPosition: "Letzte Position",
         seeHistory: "Geschichte ansehen",
         
         // Counter
@@ -553,6 +559,7 @@ const translations = {
         
         // Controls
         selectStone: "Selecciona una piedra:",
+        movedStones: "con movimientos",
         showAll: "Mostrar todas",
         showImages: "Mostrar imágenes:",
         lastImage: "Última",
@@ -580,7 +587,7 @@ const translations = {
         next: "Siguiente",
         
         // Popup
-        lastPosition: "Última posición:",
+        lastPosition: "Última posición",
         seeHistory: "Ver historia",
         
         // Counter
@@ -631,6 +638,7 @@ const translations = {
         
         // Controls
         selectStone: "Wybierz kamień:",
+        movedStones: "z ruchami",
         showAll: "Pokaż wszystkie",
         showImages: "Pokaż obrazy:",
         lastImage: "Ostatni",
@@ -658,7 +666,7 @@ const translations = {
         next: "Następny",
         
         // Popup
-        lastPosition: "Ostatnia pozycja:",
+        lastPosition: "Ostatnia pozycja",
         seeHistory: "Zobacz historię",
         
         // Counter
@@ -702,13 +710,14 @@ const translations = {
         tutorialHelp: "Przewodnik"
     },
     
-    pt: {
+pt: {
         // Header
-        title: "Mapa das Pedras",
+        title: "Mapa de Pedras",
         subtitle: "Explore a história através do tempo",
         
         // Controls
         selectStone: "Selecione uma pedra:",
+        movedStones: "com movimentos",
         showAll: "Mostrar todas",
         showImages: "Mostrar imagens:",
         lastImage: "Última",
@@ -736,7 +745,7 @@ const translations = {
         next: "Próximo",
         
         // Popup
-        lastPosition: "Última posição:",
+        lastPosition: "Última posição",
         seeHistory: "Ver história",
         
         // Counter
@@ -787,6 +796,7 @@ const translations = {
         
         // Controls
         selectStone: "石を選択:",
+        movedStones: "動きあり",
         showAll: "すべて表示",
         showImages: "画像を表示:",
         lastImage: "最後",
@@ -1017,15 +1027,29 @@ function initializeLanguageSelector() {
     // Imposta il valore del selettore
     const languageSelect = document.getElementById('language-select');
     if (languageSelect) {
+        languageSelect.addEventListener('change', (event) => {
+            changeLanguage(event.target.value);
+        });
         languageSelect.value = currentLanguage;
     }
 }
 
 // Esporta le funzioni per uso globale
 window.t = t;
-window.changeLanguage = changeLanguage;
+
 window.updatePageTexts = updatePageTexts;
 window.initializeLanguageSelector = initializeLanguageSelector;
+
 window.availableLanguages = availableLanguages;
 window.currentLanguage = currentLanguage;
 
+// Funzione per cambiare lingua
+function changeLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('selectedLanguage', lang);
+    updatePageTexts();
+    
+    if (typeof tutorialGuide !== 'undefined' && tutorialGuide) {
+        tutorialGuide.updateLanguage(lang);
+    }
+}
