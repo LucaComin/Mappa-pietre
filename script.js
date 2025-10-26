@@ -34,10 +34,10 @@ document.addEventListener('DOMContentLoaded', function() {
     loadData();
     setupEventListeners();
     
-    // La logica di inizializzazione della lingua (inclusa la selezione della lingua del browser/salvata)
-    // è gestita in `translations.js` che viene caricato prima e si auto-esegue.
-    // Non è necessaria una chiamata esplicita qui.
-    // La funzione `updatePageTexts()` viene chiamata all'interno di `translations.js`.
+    // Inizializza il sistema di traduzione
+    if (typeof initializeLanguageSelector === 'function') {
+        initializeLanguageSelector();
+    }
     
     // Inizializza la guida interattiva
     tutorialGuide = new TutorialGuide();
@@ -271,27 +271,15 @@ function loadSampleData() {
     displayStonesOnMap('moved');
 }
 
-// Espone la funzione globalmente per essere chiamata da translations.js
-window.displayStonesOnMap = displayStonesOnMap;
-
 // Funzione per popolare il menu a tendina delle pietre
 function populateStoneSelect() {
     const select = document.getElementById('stone-select');
-    const currentSelection = select.value;
-
-    // Rimuoviamo il contenuto esistente
-    select.innerHTML = '';
 
     // Aggiungiamo le opzioni speciali all'inizio
-    const movedOption = document.createElement('option');
-    movedOption.value = 'moved';
-    movedOption.textContent = typeof t === 'function' ? t('movedStones') : 'Pietre con spostamenti';
-    select.appendChild(movedOption);
-
-    const allOption = document.createElement('option');
-    allOption.value = 'all';
-    allOption.textContent = typeof t === 'function' ? t('showAll') : 'Mostra tutte';
-    select.appendChild(allOption);
+    select.innerHTML = `
+        <option value="moved">${typeof t === 'function' ? t('movedStones') : 'Pietre con spostamenti'}</option>
+        <option value="all">${typeof t === 'function' ? t('showAll') : 'Mostra tutte'}</option>
+    `;
 
     for (const stoneName in allStonesData) {
         const positions = allStonesData[stoneName];
@@ -304,29 +292,12 @@ function populateStoneSelect() {
         }
     }
 
-    // Ripristiniamo la selezione precedente
-    if (select.querySelector(`option[value="${currentSelection}"]`)) {
-        select.value = currentSelection;
-    } else {
-        // Se la selezione precedente non è più valida, selezioniamo 'moved' di default
-        select.value = 'moved';
-    }
+    // L'opzione 'moved' è già selezionata di default in index.html
+    // select.value = 'moved'; // Non necessario se è già impostato in HTML
 
-    // Funzione handler per l'evento change, per poterla rimuovere
-    function handleStoneSelectChange(event) {
+    select.addEventListener('change', (event) => {
         displayStonesOnMap(event.target.value);
-    }
-    
-    // Rimuoviamo l'event listener precedente se esiste, poi lo riaggiungiamo.
-    // Per rimuovere un listener anonimo, dobbiamo usare una funzione con nome.
-    // Il listener originale era anonimo, quindi non può essere rimosso direttamente.
-    // Per il momento, lasciamo l'aggiunta e la rimozione del listener con la funzione con nome.
-    // Il problema di duplicazione del listener si risolve solo se l'event listener è sempre lo stesso.
-    // In questo caso, la funzione populateStoneSelect viene chiamata una sola volta all'inizio
-    // e poi solo in changeLanguage, quindi il listener non dovrebbe essere duplicato.
-    // Però, per sicurezza, usiamo la funzione con nome.
-    select.removeEventListener('change', handleStoneSelectChange);
-    select.addEventListener('change', handleStoneSelectChange);
+    });
 }
 
 // Funzione principale per visualizzare le pietre sulla mappa
@@ -1122,70 +1093,3 @@ function resetTutorial() {
     }
 }
 
-
-
-
-function updateTranslations(lang) {
-    const currentTranslations = translations[lang];
-    if (!currentTranslations) return;
-
-    // Aggiorna titolo e sottotitolo
-    // Aggiorna titolo e sottotitolo
-    document.querySelector('h1 .header-text').textContent = currentTranslations.title;
-    document.querySelector('.header-subtitle').textContent = currentTranslations.subtitle;
-
-    // Aggiorna i label dei controlli
-    document.querySelector('label[for="language-select"] .control-text').textContent = currentTranslations.selectLanguage;
-    document.querySelector('label[for="stone-select"] .control-text').textContent = currentTranslations.selectStone;
-    document.querySelector('label[for="image-display-select"] .control-text').textContent = currentTranslations.showImages;
-
-    // Aggiorna le opzioni del selettore immagini
-    const imageSelect = document.getElementById('image-display-select');
-    if (imageSelect) {
-        imageSelect.querySelector('option[value="last"]').textContent = currentTranslations.lastImage;
-        imageSelect.querySelector('option[value="none"]').textContent = currentTranslations.noImages;
-        imageSelect.querySelector('option[value="all"]').textContent = currentTranslations.allImages;
-    }
-
-    // Aggiorna il testo del loading overlay
-    document.querySelector('#loading-overlay p').textContent = currentTranslations.loadingMap;
-
-    // Aggiorna il pannello storia
-    document.getElementById('history-title').textContent = currentTranslations.historyOf;
-    document.getElementById('close-history').setAttribute('title', currentTranslations.close);
-    document.querySelector('.mini-map-title').textContent = currentTranslations.historicalPath;
-    document.querySelector('.map-legend .current').nextElementSibling.textContent = currentTranslations.currentPosition;
-    document.querySelector('.map-legend .path').nextElementSibling.textContent = currentTranslations.historicalRoute;
-    document.querySelector('.timeline-title').textContent = currentTranslations.timelineMovements;
-    document.querySelector('.timeline-start').textContent = currentTranslations.start;
-    document.querySelector('.timeline-current').textContent = currentTranslations.currentDate;
-    document.querySelector('.timeline-end').textContent = currentTranslations.end;
-    document.querySelector('#play-pause-btn .btn-text').textContent = currentTranslations.play;
-    document.querySelector('#prev-button .btn-text').textContent = currentTranslations.previous;
-    document.querySelector('#next-button .btn-text').textContent = currentTranslations.next;
-
-    // Aggiorna il tutorial
-    if (typeof tutorialGuide !== 'undefined') {
-        tutorialGuide.updateLanguage(lang);
-    }
-}
-
-function changeLanguage(lang) {
-    // Salviamo la selezione corrente prima di aggiornare le traduzioni
-    const currentStoneSelection = document.getElementById('stone-select').value;
-    
-    // 1. Aggiorna i testi dell'interfaccia
-    updateTranslations(lang);
-    
-    // 2. Ricostruisci e ripristina il selettore di pietre
-    populateStoneSelect();
-    
-    // 3. Ripristina la selezione del selettore di pietre
-    const stoneSelect = document.getElementById('stone-select');
-    if (stoneSelect) {
-        // Se il valore salvato è 'moved' o 'all', ripristiniamo quello.
-        // Altrimenti, se era selezionata una pietra specifica, la ripristiniamo.
-        // Se la pietra specifica non esiste più (improbabile), il valore non cambierà.
-        stoneSelect.value = currentStoneSelection;
-    }
-}

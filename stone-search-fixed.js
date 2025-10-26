@@ -445,4 +445,103 @@ class StoneSearchManager {
         ];
         
         for (const variant of stoneVariants) {
-(Content truncated due to size limit. Use page ranges or line ranges to read remaining content)
+            console.log('Provando variante:', variant);
+            
+            if (window.allStonesData[variant] && Array.isArray(window.allStonesData[variant]) && window.allStonesData[variant].length > 0) {
+                const stoneData = window.allStonesData[variant];
+                console.log('Dati pietra trovati:', stoneData);
+                
+                // Cerca la prima immagine disponibile nelle posizioni della pietra
+                for (const position of stoneData) {
+                    if (position && position.imageUrl && position.imageUrl.trim() !== '') {
+                        console.log(`Immagine trovata per ${stoneName} (variante: ${variant}):`, position.imageUrl);
+                        return position.imageUrl;
+                    }
+                }
+                
+                console.log(`Pietra ${variant} trovata ma senza immagini valide`);
+            }
+        }
+        
+        console.warn(`Nessuna immagine trovata per la pietra: ${stoneName}`);
+        return null;
+    }
+    
+    async getStoneFirstImage(stoneName) {
+        // Questa funzione deve recuperare la prima immagine della pietra dal sistema
+        // Accede ai dati globali delle pietre se disponibili
+        if (typeof window.allStonesData !== 'undefined') {
+            // Prova diverse varianti del nome della pietra
+            const stoneVariants = [
+                stoneName,
+                stoneName.replace(/ /g, '_'),
+                stoneName.replace(/_/g, ' '),
+                stoneName.replace(/ST/g, 'ST'),
+                'ST' + stoneName.replace(/ST/g, ''),
+                stoneName.toLowerCase(),
+                stoneName.toUpperCase()
+            ];
+            
+            for (const variant of stoneVariants) {
+                if (window.allStonesData[variant] && window.allStonesData[variant].length > 0) {
+                    const stoneData = window.allStonesData[variant];
+                    // Prova diversi nomi di campo per l'immagine
+                    const imageUrl = stoneData[0].imageUrl || stoneData[0].image || stoneData[0].img || null;
+                    if (imageUrl) {
+                        return imageUrl;
+                    }
+                }
+            }
+        }
+        
+        // Fallback: ritorna null
+        return null;
+    }
+    
+    viewStoneOnMap() {
+        if (!this.selectedStone) return;
+        
+        // Chiudi il modale
+        this.closeModal();
+        
+        // Seleziona la pietra nel selettore principale
+        const stoneSelect = document.getElementById('stone-select');
+        if (stoneSelect) {
+            // Cerca il valore corretto nel select (potrebbe avere underscore)
+            const options = Array.from(stoneSelect.options);
+            const matchingOption = options.find(opt => 
+                opt.value === this.selectedStone.name || 
+                opt.value.replace(/_/g, ' ') === this.selectedStone.name ||
+                opt.value === this.selectedStone.name.replace(/ /g, '_')
+            );
+            
+            if (matchingOption) {
+                stoneSelect.value = matchingOption.value;
+                
+                // Trigger change event per aggiornare la mappa
+                const event = new Event('change', { bubbles: true });
+                stoneSelect.dispatchEvent(event);
+                
+                // Attendi un momento per permettere alla mappa di aggiornarsi
+                setTimeout(() => {
+                    // Se esiste una funzione per visualizzare la storia, chiamala
+                    if (typeof window.showStoneHistory === 'function') {
+                        window.showStoneHistory(matchingOption.value);
+                    }
+                }, 300);
+            } else {
+                console.warn('Pietra non trovata nel selettore:', this.selectedStone.name);
+                // Prova comunque a chiamare showStoneHistory
+                if (typeof window.showStoneHistory === 'function') {
+                    window.showStoneHistory(this.selectedStone.name);
+                }
+            }
+        }
+    }
+}
+
+// Inizializza il manager quando il modulo viene caricato
+const stoneSearchManager = new StoneSearchManager();
+
+// Esporta per uso globale se necessario
+window.stoneSearchManager = stoneSearchManager;

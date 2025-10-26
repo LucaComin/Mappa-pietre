@@ -8,7 +8,6 @@ const translations = {
         // Controls
         selectStone: "Seleziona una pietra:",
         showAll: "Mostra tutte",
-        movedStones: "Pietre con spostamenti",
         showImages: "Mostra immagini:",
         lastImage: "Ultima",
         noImages: "Nessuna",
@@ -87,7 +86,6 @@ const translations = {
         // Controls
         selectStone: "Select a stone:",
         showAll: "Show all",
-        movedStones: "Moved stones",
         showImages: "Show images:",
         lastImage: "Last",
         noImages: "None",
@@ -166,7 +164,6 @@ const translations = {
         // Controls
         selectStone: "选择石头：",
         showAll: "显示全部",
-        movedStones: "移动的石头",
         showImages: "显示图片：",
         lastImage: "最后",
         noImages: "无",
@@ -245,7 +242,6 @@ const translations = {
         // Controls
         selectStone: "Sélectionnez une pierre :",
         showAll: "Afficher toutes",
-        movedStones: "Pierres déplacées",
         showImages: "Afficher les images :",
         lastImage: "Dernière",
         noImages: "Aucune",
@@ -324,7 +320,6 @@ const translations = {
         // Controls
         selectStone: "Выберите камень:",
         showAll: "Показать все",
-        movedStones: "Перемещенные камни",
         showImages: "Показать изображения:",
         lastImage: "Последнее",
         noImages: "Нет",
@@ -401,9 +396,8 @@ const translations = {
         subtitle: "استكشف التاريخ عبر الزمن",
         
         // Controls
-            selectStone: "حدد حجر:",
-        showAll: "عرض الكل",
-        movedStones: "الأحجار المنقولة",,
+        selectStone: "اختر حجراً:",
+        showAll: "إظهار الكل",
         showImages: "إظهار الصور:",
         lastImage: "الأخيرة",
         noImages: "لا شيء",
@@ -479,9 +473,10 @@ const translations = {
         title: "Steinkarte",
         subtitle: "Erkunden Sie die Geschichte durch die Zeit",
         
-        // Contro        selectStone: "Wählen Sie einen Stein:",
+        // Controls
+        selectStone: "Stein auswählen:",
         showAll: "Alle anzeigen",
-        movedStones: "Verschobene Steine",     showImages: "Bilder anzeigen:",
+        showImages: "Bilder anzeigen:",
         lastImage: "Letztes",
         noImages: "Keine",
         allImages: "Alle",
@@ -559,7 +554,6 @@ const translations = {
         // Controls
         selectStone: "Selecciona una piedra:",
         showAll: "Mostrar todas",
-        movedStones: "Piedras movidas",
         showImages: "Mostrar imágenes:",
         lastImage: "Última",
         noImages: "Ninguna",
@@ -638,7 +632,6 @@ const translations = {
         // Controls
         selectStone: "Wybierz kamień:",
         showAll: "Pokaż wszystkie",
-        movedStones: "Przeniesione kamienie",
         showImages: "Pokaż obrazy:",
         lastImage: "Ostatni",
         noImages: "Żaden",
@@ -717,7 +710,6 @@ const translations = {
         // Controls
         selectStone: "Selecione uma pedra:",
         showAll: "Mostrar todas",
-        movedStones: "Pedras movidas",
         showImages: "Mostrar imagens:",
         lastImage: "Última",
         noImages: "Nenhuma",
@@ -796,7 +788,6 @@ const translations = {
         // Controls
         selectStone: "石を選択:",
         showAll: "すべて表示",
-        movedStones: "移動した石",
         showImages: "画像を表示:",
         lastImage: "最後",
         noImages: "なし",
@@ -875,13 +866,6 @@ function changeLanguage(lang) {
     if (translations[lang]) {
         currentLanguage = lang;
         localStorage.setItem('selectedLanguage', lang);
-        
-        // Aggiorna il valore del selettore di lingua
-        const languageSelect = document.getElementById('language-select');
-        if (languageSelect) {
-            languageSelect.value = lang;
-        }
-        
         updatePageTexts();
         
         // Aggiorna la guida se è attiva
@@ -891,10 +875,7 @@ function changeLanguage(lang) {
         
         // Aggiorna anche la mappa se necessario
         const selectedStone = document.getElementById('stone-select').value;
-        // La funzione displayStonesOnMap è definita in script.js, quindi dobbiamo assicurarci che sia globale
-        if (typeof window.displayStonesOnMap === 'function') {
-            window.displayStonesOnMap(selectedStone);
-        }
+        displayStonesOnMap(selectedStone);
     }
 }
 
@@ -926,7 +907,13 @@ function updatePageTexts() {
     if (languageLabel) {
         languageLabel.innerHTML = `<span class="control-icon">🌐</span>${t('selectLanguage')}`;
     }
-
+    
+    // Select options
+    const stoneSelect = document.getElementById('stone-select');
+    if (stoneSelect && stoneSelect.options[0]) {
+        stoneSelect.options[0].textContent = t('showAll');
+    }
+    
     const imageSelect = document.getElementById('image-display-select');
     if (imageSelect) {
         imageSelect.options[0].textContent = t('lastImage');
@@ -1018,17 +1005,10 @@ function initializeLanguageSelector() {
     const savedLanguage = localStorage.getItem('selectedLanguage');
     const browserLanguage = navigator.language.split('-')[0];
     
-    // 1. Priorità alla lingua salvata
     if (savedLanguage && translations[savedLanguage]) {
         currentLanguage = savedLanguage;
-    } 
-    // 2. Seconda priorità alla lingua del browser se supportata
-    else if (translations[browserLanguage]) {
+    } else if (translations[browserLanguage]) {
         currentLanguage = browserLanguage;
-    }
-    // 3. Altrimenti, usa l'italiano come default
-    else {
-        currentLanguage = 'it';
     }
     
     // Aggiorna i testi della pagina
@@ -1037,26 +1017,15 @@ function initializeLanguageSelector() {
     // Imposta il valore del selettore
     const languageSelect = document.getElementById('language-select');
     if (languageSelect) {
-        languageSelect.addEventListener('change', (event) => {
-            changeLanguage(event.target.value);
-        });
-        // Assicura che il selettore rifletta la lingua corrente
         languageSelect.value = currentLanguage;
     }
 }
 
 // Esporta le funzioni per uso globale
 window.t = t;
-
-window.updatePageTexts = updatePageTexts;
 window.changeLanguage = changeLanguage;
+window.updatePageTexts = updatePageTexts;
 window.initializeLanguageSelector = initializeLanguageSelector;
-
 window.availableLanguages = availableLanguages;
 window.currentLanguage = currentLanguage;
 
-// Funzione per cambiare lingua (definizione completa)
-// La funzione è definita sopra (riga 865) e non deve essere duplicata qui.
-
-// Inizializza il selettore di lingua al caricamento del file
-initializeLanguageSelector();
